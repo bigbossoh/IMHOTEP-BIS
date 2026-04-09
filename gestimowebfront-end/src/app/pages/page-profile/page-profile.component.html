@@ -1,0 +1,179 @@
+<section class="profile-page">
+  @if (user(); as currentUser) {
+    <div class="profile-hero">
+      <div class="profile-hero__copy">
+        <button type="button" class="btn btn-outline-primary back-button" (click)="goToDashboard()">
+          <i class="fas fa-arrow-left"></i>
+          Retour au tableau de bord
+        </button>
+
+        <span class="profile-hero__eyebrow">Profil utilisateur</span>
+        <h2>{{ fullName() }}</h2>
+        <p>
+          Consultez votre identite, vos droits applicatifs, votre agence de rattachement et
+          votre etablissement par defaut depuis un seul ecran.
+        </p>
+      </div>
+
+      <div class="profile-highlight">
+        <span class="profile-highlight__avatar">{{ initials() }}</span>
+        <div>
+          <strong>{{ roleLabel() }}</strong>
+          <small>{{ accountStateLabel() }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-4">
+        <article class="profile-card identity-card">
+          <div class="identity-card__top">
+            <span class="identity-card__avatar">{{ initials() }}</span>
+            <div>
+              <h3>{{ fullName() }}</h3>
+              <p>{{ currentUser.email || 'Adresse email non renseignee' }}</p>
+            </div>
+          </div>
+
+          <div class="identity-card__badges">
+            <span class="soft-badge">{{ roleLabel() }}</span>
+            <span class="soft-badge soft-badge--success">{{ accountStateLabel() }}</span>
+            <span class="soft-badge soft-badge--muted">
+              {{ currentUser.activated ? 'Acces active' : 'Acces a activer' }}
+            </span>
+          </div>
+
+          <div class="info-list">
+            @for (item of identityFields(); track item.label) {
+              <div class="info-row">
+                <span class="info-row__icon">
+                  <i [class]="item.icon" aria-hidden="true"></i>
+                </span>
+                <div>
+                  <small>{{ item.label }}</small>
+                  <strong>{{ item.value }}</strong>
+                </div>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+
+      <div class="col-12 col-xl-8">
+        <div class="row g-4">
+          @for (card of overviewCards(); track card.label) {
+            <div class="col-12 col-md-6">
+              <article class="overview-card">
+                <span>{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+                <small>{{ card.caption }}</small>
+              </article>
+            </div>
+          }
+
+          <div class="col-12">
+            <section class="detail-card">
+              <div class="section-head">
+                <div>
+                  <p>Habilitations</p>
+                  <h3>Droits utilisateur</h3>
+                </div>
+                <span class="section-status">{{ authorities().length }} droits</span>
+              </div>
+
+              @if (authorities().length) {
+                <div class="rights-grid">
+                  @for (authority of authorities(); track authority) {
+                    <span class="right-pill">
+                      <i class="fas fa-user-shield" aria-hidden="true"></i>
+                      {{ authority }}
+                    </span>
+                  }
+                </div>
+              } @else {
+                <p class="empty-note">Aucun droit detaille n'est disponible pour ce compte.</p>
+              }
+            </section>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <section class="detail-card">
+              <div class="section-head">
+                <div>
+                  <p>Rattachement</p>
+                  <h3>Agence</h3>
+                </div>
+                <span class="section-status" [class.section-status--warning]="!agence()">
+                  {{ agence() ? 'Chargee' : 'Indisponible' }}
+                </span>
+              </div>
+
+              @if (agence()) {
+                <div class="info-list info-list--compact">
+                  @for (item of agencyFields(); track item.label) {
+                    <div class="info-row">
+                      <span class="info-row__icon">
+                        <i [class]="item.icon" aria-hidden="true"></i>
+                      </span>
+                      <div>
+                        <small>{{ item.label }}</small>
+                        <strong>{{ item.value }}</strong>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else if (agenceError()) {
+                <p class="empty-note">{{ agenceError() }}</p>
+              } @else {
+                <p class="empty-note">Aucune agence n'est associee a ce profil.</p>
+              }
+            </section>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <section class="detail-card">
+              <div class="section-head">
+                <div>
+                  <p>Point d'exploitation</p>
+                  <h3>Etablissement</h3>
+                </div>
+                <span class="section-status" [class.section-status--warning]="!etablissement()">
+                  {{ etablissement() ? 'Charge' : 'Indisponible' }}
+                </span>
+              </div>
+
+              @if (etablissement()) {
+                <div class="info-list info-list--compact">
+                  @for (item of establishmentFields(); track item.label) {
+                    <div class="info-row">
+                      <span class="info-row__icon">
+                        <i [class]="item.icon" aria-hidden="true"></i>
+                      </span>
+                      <div>
+                        <small>{{ item.label }}</small>
+                        <strong>{{ item.value }}</strong>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else if (etablissementError()) {
+                <p class="empty-note">{{ etablissementError() }}</p>
+              } @else {
+                <p class="empty-note">Aucun etablissement par defaut n'a ete defini.</p>
+              }
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <section class="empty-profile">
+      <i class="fas fa-user-slash empty-profile__icon" aria-hidden="true"></i>
+      <h2>Session utilisateur introuvable</h2>
+      <p>Reconnectez-vous pour afficher votre profil, vos droits et vos rattachements.</p>
+      <button type="button" class="btn btn-primary" (click)="goToLogin()">
+        Retour a la connexion
+      </button>
+    </section>
+  }
+</section>

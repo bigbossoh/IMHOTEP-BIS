@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="'Bail professionnel ' + ${view.bailCode}">
+      Bail professionnel
+    </title>
+    <style>
+      @page {
+        size: A4;
+        margin: 28px 32px 36px 32px;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #14213d;
+        font-size: 11px;
+        line-height: 1.55;
+      }
+
+      .page {
+        width: 100%;
+      }
+
+      .header {
+        width: 100%;
+        margin-bottom: 26px;
+      }
+
+      .header-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .header-table td {
+        vertical-align: top;
+        width: 50%;
+      }
+
+      .header-block {
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .header-block strong {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+
+      .title-box {
+        border: 2px solid #f0a04b;
+        border-radius: 14px;
+        padding: 14px 18px;
+        margin-bottom: 22px;
+      }
+
+      .title-box h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 20px;
+        letter-spacing: 0.04em;
+        color: #b45309;
+      }
+
+      .title-box p {
+        margin: 8px 0 0;
+        text-align: center;
+        color: #475569;
+      }
+
+      .summary-grid {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 10px;
+        margin: 0 -10px 18px;
+      }
+
+      .summary-grid td {
+        width: 33.33%;
+      }
+
+      .summary-card {
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #f8fbff;
+      }
+
+      .summary-card span {
+        display: block;
+        text-transform: uppercase;
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-bottom: 6px;
+      }
+
+      .summary-card strong {
+        font-size: 12px;
+      }
+
+      .section {
+        margin-bottom: 16px;
+      }
+
+      .section h2 {
+        margin: 0 0 8px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 13px;
+        color: #1d4ed8;
+        text-transform: uppercase;
+      }
+
+      .article-title {
+        margin: 16px 0 8px;
+        font-size: 12px;
+        color: #0f172a;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
+      .parties {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 12px;
+        margin: 0 -12px;
+      }
+
+      .parties td {
+        width: 50%;
+      }
+
+      .party-card {
+        border: 1px solid #dbe4f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #ffffff;
+      }
+
+      .party-card h3 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: #b45309;
+        text-transform: uppercase;
+      }
+
+      .party-row {
+        margin-bottom: 4px;
+      }
+
+      .party-row strong {
+        color: #334155;
+      }
+
+      .highlight {
+        font-weight: bold;
+        color: #0f172a;
+      }
+
+      .note {
+        color: #475569;
+      }
+
+      ul {
+        margin: 6px 0 8px 18px;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 4px;
+      }
+
+      .signature-area {
+        margin-top: 28px;
+      }
+
+      .signature-grid {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 16px 0;
+      }
+
+      .signature-grid td {
+        width: 50%;
+        vertical-align: top;
+      }
+
+      .signature-box {
+        border-top: 1px solid #94a3b8;
+        padding-top: 10px;
+        min-height: 90px;
+      }
+
+      .footer {
+        margin-top: 18px;
+        text-align: center;
+        font-size: 10px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <table class="header-table">
+          <tr>
+            <td>
+              <div class="header-block">
+                <strong th:text="${view.agenceNom}">Agence Gestimo</strong>
+                <span th:text="${view.agenceAdresse}">Adresse agence</span><br />
+                <span th:text="${view.agenceTelephone}">Telephone</span><br />
+                <span th:text="${view.agenceEmail}">Email</span>
+              </div>
+            </td>
+            <td>
+              <div class="header-block">
+                <strong>REPUBLIQUE DE COTE D'IVOIRE</strong>
+                <span>Union - Discipline - Travail</span><br />
+                <span th:text="${view.agenceSigle}">SIGLE</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="title-box">
+        <h1>CONTRAT DE BAIL PROFESSIONNEL</h1>
+        <p>
+          Document genere automatiquement a partir du bail enregistre sous la
+          reference <span class="highlight" th:text="${view.bailCode}">BAIL-1</span>.
+        </p>
+      </div>
+
+      <table class="summary-grid">
+        <tr>
+          <td>
+            <div class="summary-card">
+              <span>Type de bien</span>
+              <strong th:text="${view.typeBien}">Appartement</strong>
+            </div>
+          </td>
+          <td>
+            <div class="summary-card">
+              <span>Loyer mensuel</span>
+              <strong th:text="${view.loyerMensuel}">200 000 FCFA</strong>
+            </div>
+          </td>
+          <td>
+            <div class="summary-card">
+              <span>Date de signature</span>
+              <strong th:text="${view.dateSignature}">22 mars 2026</strong>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="section">
+        <h2>Presentation des parties</h2>
+        <table class="parties">
+          <tr>
+            <td>
+              <div class="party-card">
+                <h3>Bailleur</h3>
+                <div class="party-row">
+                  <strong>Nom :</strong>
+                  <span th:text="${view.bailleurNom}">Nom bailleur</span>
+                </div>
+                <div class="party-row">
+                  <strong>Email :</strong>
+                  <span th:text="${view.bailleurEmail}">Email bailleur</span>
+                </div>
+                <div class="party-row">
+                  <strong>Telephone :</strong>
+                  <span th:text="${view.bailleurMobile}">Telephone bailleur</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="party-card">
+                <h3>Preneur</h3>
+                <div class="party-row">
+                  <strong>Nom :</strong>
+                  <span th:text="${view.locataireNom}">Nom locataire</span>
+                </div>
+                <div class="party-row">
+                  <strong>Email :</strong>
+                  <span th:text="${view.locataireEmail}">Email locataire</span>
+                </div>
+                <div class="party-row">
+                  <strong>Telephone :</strong>
+                  <span th:text="${view.locataireMobile}">Telephone locataire</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <p>
+          Il a ete convenu et arrete ce qui suit concernant le bail
+          <span class="highlight" th:text="${view.designationBail}">Designation</span>,
+          portant sur le bien
+          <span class="highlight" th:text="${view.bienCode}">Code bien</span>.
+        </p>
+
+        <div class="article-title">Article 1 : Textes de reference</div>
+        <p>
+          Le present contrat est etabli conformement aux usages en matiere de
+          bail professionnel, au Code civil applicable en Cote d'Ivoire ainsi
+          qu'aux engagements mutuels librement consentis entre les parties.
+        </p>
+
+        <div class="article-title">Article 2 : Objet</div>
+        <p>
+          Le Bailleur donne a bail au Preneur, qui accepte, le bien a usage
+          professionnel decrit au present contrat, sous les charges et
+          conditions definies ci-apres.
+        </p>
+
+        <div class="article-title">Article 3 : Designation</div>
+        <p>
+          Le bien loue correspond a
+          <span class="highlight" th:text="${view.bienNom}">Nom bien</span>,
+          reference
+          <span class="highlight" th:text="${view.bienCode}">Code bien</span>,
+          situe a
+          <span class="highlight" th:text="${view.bienAdresse}">Adresse</span>.
+        </p>
+        <p class="note" th:text="${view.bienDescription}">
+          Description detaillee du bien.
+        </p>
+
+        <div class="article-title">Article 4 : Duree</div>
+        <p>
+          Le present bail est conclu pour une duree de
+          <span class="highlight" th:text="${view.dureeLabel}">24 mois</span>,
+          allant du
+          <span class="highlight" th:text="${view.dateDebut}">01 janvier 2026</span>
+          au
+          <span class="highlight" th:text="${view.dateFin}">31 decembre 2027</span>.
+        </p>
+
+        <div class="article-title">Article 5 : Renouvellement</div>
+        <p>
+          Le bail est renouvelable par tacite reconduction sauf resiliation
+          notifiee par l'une des parties avec un preavis ecrit de trois (3)
+          mois avant son echeance.
+        </p>
+
+        <div class="article-title">
+          Article 6 : Loyer et modalites de reglement
+        </div>
+        <p>
+          Le present bail est consenti et accepte moyennant un loyer
+          <span th:text="${view.periodicitePaiement}">mensuel</span>
+          de
+          <span class="highlight" th:text="${view.loyerMensuel}">200 000 FCFA</span>,
+          soit un montant annuel indicatif de
+          <span class="highlight" th:text="${view.loyerAnnuel}">2 400 000 FCFA</span>.
+        </p>
+        <p>
+          Le reglement s'effectue a terme convenu par virement, cheque, espece
+          ou tout autre mode de paiement accepte par les parties.
+        </p>
+
+        <div class="article-title">Article 7 : Revision du loyer</div>
+        <p>
+          Les parties conviennent que le loyer pourra etre revise selon
+          l'evolution du contrat, de la duree d'occupation, de l'etat du bien,
+          de sa situation geographique et des loyers pratiques pour des locaux
+          comparables.
+        </p>
+
+        <div class="article-title">Article 8 : Caution</div>
+        <p>
+          Au moment de la signature du present bail, le Preneur verse une
+          caution correspondant a
+          <span class="highlight" th:text="${view.cautionMonths}">3</span>
+          mois de loyer, soit
+          <span class="highlight" th:text="${view.cautionAmount}">600 000 FCFA</span>.
+        </p>
+        <p>
+          La caution est restituee a l'expiration du bail sous reserve du
+          paiement integral des sommes dues, de la restitution des cles et de
+          la remise en bon etat des lieux loues.
+        </p>
+
+        <div class="article-title">Article 9 : Charges diverses</div>
+        <p>
+          Le Preneur prend en charge ses consommations et abonnements lies a
+          l'exploitation du bien, notamment eau, electricite, telephone,
+          internet et autres services utilises pendant l'occupation.
+        </p>
+
+        <div class="article-title">
+          Article 10 : Etat des lieux et remise en etat
+        </div>
+        <p>
+          Un etat des lieux contradictoire peut etre etabli a l'entree dans les
+          lieux et a la sortie. A l'expiration du bail, le Preneur s'engage a
+          remettre les locaux dans un etat conforme a une utilisation normale,
+          sous reserve de l'usure ordinaire.
+        </p>
+
+        <div class="article-title">
+          Article 11 : Entretiens, reparations et usage des lieux
+        </div>
+        <p>
+          Le Preneur s'engage a user paisiblement des lieux, a les entretenir
+          en bon pere de famille et a effectuer les reparations locatives
+          courantes. Le Bailleur demeure tenu des grosses reparations relevant
+          de sa responsabilite.
+        </p>
+        <ul>
+          <li>
+            Le Bailleur garantit la jouissance paisible du bien au Preneur.
+          </li>
+          <li>
+            Le Preneur s'engage a affecter les lieux a un usage exclusivement
+            professionnel.
+          </li>
+          <li>
+            Toute transformation importante des locaux requiert l'accord prealable
+            et ecrit du Bailleur.
+          </li>
+        </ul>
+
+        <div class="article-title">
+          Article 12 : Resiliation et reglement des differends
+        </div>
+        <p>
+          En cas d'inexecution grave des obligations contractuelles, la partie
+          la plus diligente pourra demander la resiliation du present contrat
+          apres mise en demeure restee infructueuse.
+        </p>
+        <p>
+          Tout differend relatif a l'interpretation ou a l'execution du present
+          bail fera d'abord l'objet d'une tentative de reglement amiable. A
+          defaut, il sera porte devant la juridiction competente.
+        </p>
+      </div>
+
+      <div class="signature-area">
+        <p>
+          Fait a
+          <span class="highlight" th:text="${view.signatureVille}">Abidjan</span>,
+          le
+          <span class="highlight" th:text="${view.dateSignature}">22 mars 2026</span>.
+        </p>
+
+        <table class="signature-grid">
+          <tr>
+            <td>
+              <div class="signature-box">
+                <strong>Pour le Bailleur</strong><br />
+                <span th:text="${view.bailleurNom}">Nom bailleur</span><br />
+                <span class="note">(Faire preceder de la mention "Lu et approuve")</span>
+              </div>
+            </td>
+            <td>
+              <div class="signature-box">
+                <strong>Pour le Preneur</strong><br />
+                <span th:text="${view.locataireNom}">Nom locataire</span><br />
+                <span class="note">(Faire preceder de la mention "Lu et approuve")</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="footer">
+        Bail n°
+        <span th:text="${view.bailId}">1</span>
+        -
+        <span th:text="${view.bailCode}">BAIL-1</span>
+        - Document produit par Gestimo.
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+@if (formGroup) {
+  <div class="rent-dialog">
+    <div class="rent-dialog__header">
+      <div>
+        <p class="rent-dialog__eyebrow">Revision de bail</p>
+        <h2>Modifier le loyer</h2>
+        <p class="rent-dialog__subtitle">
+          Mettez a jour le montant du bail dans une interface alignee avec le
+          reste du site, sans popup Material etroite ni champs tronques.
+        </p>
+      </div>
+
+      <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+        Fermer
+      </button>
+    </div>
+
+    <div class="rent-dialog__content">
+      <section class="rent-hero">
+        <div class="rent-hero__copy">
+          <span class="rent-chip">{{ contractLabel }}</span>
+          <strong>{{ v_bien }}</strong>
+          <p>
+            Revisez le loyer, la caution et les dates de reference sans perdre
+            la lecture globale du contrat.
+          </p>
+        </div>
+
+        <div class="rent-hero__metrics">
+          <article class="hero-metric">
+            <span>Loyer actuel</span>
+            <strong>{{ formatAmount(currentRent) }} FCFA</strong>
+          </article>
+
+          <article class="hero-metric">
+            <span>Nouveau loyer</span>
+            <strong>{{ formatAmount(nextRent) }} FCFA</strong>
+          </article>
+
+          <article
+            class="hero-metric"
+            [class.hero-metric--positive]="rentDelta > 0"
+            [class.hero-metric--negative]="rentDelta < 0"
+          >
+            <span>Variation</span>
+            <strong>{{ rentDelta >= 0 ? '+' : '' }}{{ formatAmount(rentDelta) }} FCFA</strong>
+          </article>
+        </div>
+      </section>
+
+      <div class="rent-dialog__grid">
+        <aside class="rent-sidebar">
+          <article class="rent-card rent-card--highlight">
+            <span class="rent-card__eyebrow">Apercu</span>
+            <h3>Impact de la revision</h3>
+
+            <div class="summary-list">
+              <div class="summary-item">
+                <span>Mois de caution</span>
+                <strong>{{ cautionMonths }}</strong>
+                <small>Valeur qui servira au recalcul de la caution.</small>
+              </div>
+
+              <div class="summary-item">
+                <span>Debut du bail</span>
+                <strong>{{ formGroup.get('dateDebuBail')?.value | date: 'dd/MM/yyyy' }}</strong>
+                <small>Point de depart actuel du contrat.</small>
+              </div>
+
+              <div class="summary-item">
+                <span>Fin du bail</span>
+                <strong>{{ formGroup.get('dateFin')?.value | date: 'dd/MM/yyyy' }}</strong>
+                <small>Echeance de fin modifiable si necessaire.</small>
+              </div>
+
+              <div class="summary-item">
+                <span>Prise en compte</span>
+                <strong>
+                  {{
+                    formGroup.get('dateDePriseEncompte')?.value
+                      ? (formGroup.get('dateDePriseEncompte')?.value | date: 'dd/MM/yyyy')
+                      : 'A renseigner'
+                  }}
+                </strong>
+                <small>Date d'application du nouveau montant.</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="rent-card">
+            <span class="rent-card__eyebrow">Controle</span>
+            <h3>Points a verifier</h3>
+            <ul class="checklist">
+              <li>Saisir le nouveau loyer avant validation.</li>
+              <li>Verifier la date de prise en compte si la revision n'est pas immediate.</li>
+              <li>Confirmer la duree restante du bail avant de modifier la date de fin.</li>
+            </ul>
+          </article>
+        </aside>
+
+        <form
+          id="rentUpdateForm"
+          [formGroup]="formGroup"
+          (ngSubmit)="onSaveForm()"
+          class="rent-card rent-card--form"
+          novalidate
+        >
+          <section class="form-section">
+            <div class="form-section__header">
+              <div>
+                <span class="rent-card__eyebrow">Montants</span>
+                <h3>Conditions financieres</h3>
+                <p>Modifiez les valeurs principales du bail sans quitter la page.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field-block">
+                <label class="form-label" for="date-prise-en-compte">
+                  Date de prise en compte
+                </label>
+                <input
+                  id="date-prise-en-compte"
+                  class="form-control"
+                  type="date"
+                  formControlName="dateDePriseEncompte"
+                />
+                <small class="field-hint">
+                  Laissez vide seulement si la logique metier le permet.
+                </small>
+              </div>
+
+              <div class="field-block">
+                <label class="form-label" for="nouveau-loyer">
+                  Nouveau montant du loyer*
+                </label>
+                <input
+                  id="nouveau-loyer"
+                  class="form-control"
+                  [class.is-invalid]="isControlInvalid('nouveauMontantLoyer')"
+                  type="number"
+                  min="0"
+                  formControlName="nouveauMontantLoyer"
+                  placeholder="Saisissez le nouveau loyer"
+                />
+                @if (isControlInvalid('nouveauMontantLoyer')) {
+                  <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+                }
+              </div>
+
+              <div class="field-block">
+                <label class="form-label" for="mois-caution">
+                  Nombre de mois de caution
+                </label>
+                <input
+                  id="mois-caution"
+                  class="form-control"
+                  type="number"
+                  min="0"
+                  formControlName="nombreMoisCaution"
+                  placeholder="Nombre de mois"
+                />
+              </div>
+
+              <div class="field-block">
+                <label class="form-label" for="ancien-loyer">Ancien loyer</label>
+                <input
+                  id="ancien-loyer"
+                  class="form-control"
+                  type="number"
+                  formControlName="ancienMontantLoyer"
+                  readonly
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__header">
+              <div>
+                <span class="rent-card__eyebrow">Dates</span>
+                <h3>Cadre du contrat</h3>
+                <p>Retrouvez toutes les dates du bail dans une grille lisible.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field-block">
+                <label class="form-label" for="date-debut-bail">Debut du bail</label>
+                <input
+                  id="date-debut-bail"
+                  class="form-control"
+                  type="date"
+                  formControlName="dateDebuBail"
+                />
+              </div>
+
+              <div class="field-block">
+                <label class="form-label" for="date-fin-bail">Fin du bail</label>
+                <input
+                  id="date-fin-bail"
+                  class="form-control"
+                  type="date"
+                  formControlName="dateFin"
+                />
+              </div>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+
+    <div class="rent-dialog__actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+        Annuler
+      </button>
+      <button type="submit" form="rentUpdateForm" class="btn btn-primary">
+        Enregistrer la modification
+      </button>
+    </div>
+  </div>
+}

@@ -1,0 +1,299 @@
+<div class="reglement-groupe-page container-fluid">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Règlement groupé</h1>
+      <p>
+        Encaissez plusieurs loyers impayés sur une même période depuis une vue unique,
+        priorisez les lignes déverrouillées et pilotez votre lot d'encaissement sans quitter l'écran.
+      </p>
+    </div>
+    <div class="page-actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoadingPeriodes || isLoadingLocataires || isSubmitting"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="paiementGrouper()"
+        [disabled]="selectedCount === 0 || isSubmitting"
+      >
+        {{ isSubmitting ? 'Encaissement en cours...' : 'Encaisser la sélection' }}
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger state-card state-card--error">{{ errorMessage }}</div>
+  }
+
+  <!-- Filtres -->
+  <div class="card section-card">
+    <div class="card-body">
+      <div class="section-header">
+        <div>
+          <h2>Période et mode de règlement</h2>
+          <p>
+            Choisissez la période d'impayés à traiter, définissez le mode de règlement
+            du lot puis sélectionnez les lignes à encaisser.
+          </p>
+        </div>
+        <span class="count-pill">{{ periodes.length }} période(s) disponible(s)</span>
+      </div>
+
+      <div class="filter-grid">
+        <div class="form-group">
+          <label class="form-label" for="periodeSelect">Période</label>
+          <div class="select-wrap">
+            <select
+              id="periodeSelect"
+              [value]="periode"
+              (change)="onPeriodChangeFromSelect($event)"
+              [disabled]="isLoadingPeriodes || isSubmitting"
+            >
+              @for (period of periodes; track period.periodeAppelLoyer) {
+                <option [value]="period.periodeAppelLoyer">
+                  {{ period.periodeLettre }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modeSelect">Mode de règlement</label>
+          <div class="select-wrap">
+            <select
+              id="modeSelect"
+              [value]="modePaiement"
+              (change)="onModePaiementChange($event)"
+              [disabled]="isSubmitting"
+            >
+              @for (mode of paymentModes; track mode.value) {
+                <option [value]="mode.value">{{ mode.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="searchReglement">Recherche</label>
+          <input
+            id="searchReglement"
+            type="search"
+            class="form-control"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Locataire, bail, période..."
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <article class="stat-card stat-card--default">
+      <span class="stat-label">Lignes impayées</span>
+      <strong>{{ locatairesImpayer.length }}</strong>
+      <small>{{ selectedPeriodLabel }}</small>
+    </article>
+    <article class="stat-card stat-card--info">
+      <span class="stat-label">Montant à recouvrer</span>
+      <strong>{{ formatCurrency(totalPendingAmount) }}</strong>
+      <small>Solde total de la période</small>
+    </article>
+    <article class="stat-card stat-card--success">
+      <span class="stat-label">Lignes sélectionnées</span>
+      <strong>{{ selectedCount }}</strong>
+      <small>{{ formatCurrency(selectedTotal) }} à encaisser</small>
+    </article>
+    <article class="stat-card stat-card--warning">
+      <span class="stat-label">Lignes verrouillées</span>
+      <strong>{{ lockedCount }}</strong>
+      <small>{{ availableCount }} ligne(s) prêtes</small>
+    </article>
+  </div>
+
+  <!-- Table + résumé -->
+  <div class="content-grid">
+    <div class="card section-card table-card">
+      <div class="card-body">
+        <div class="section-header">
+          <div>
+            <h2>Liste des loyers impayés</h2>
+            <p>Seules les lignes déverrouillées peuvent être sélectionnées dans le lot d'encaissement.</p>
+          </div>
+          <div class="table-toolbar">
+            <span class="count-pill">{{ filteredLocataires.length }} ligne(s)</span>
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="clearSelection()"
+              [disabled]="selectedCount === 0"
+            >
+              Vider la sélection
+            </button>
+          </div>
+        </div>
+
+        @if (isLoadingLocataires) {
+          <div class="state-card state-card--inline">
+            Chargement des loyers impayés de la période...
+          </div>
+        } @else if (!filteredLocataires.length) {
+          <div class="state-card state-card--inline">
+            Aucun loyer impayé ne correspond à cette période ou à la recherche.
+          </div>
+        } @else {
+          <div class="table-shell">
+            <table class="group-table">
+              <thead>
+                <tr>
+                  <th class="checkbox-column">
+                    <input
+                      type="checkbox"
+                      class="native-check"
+                      [checked]="isAllSelected()"
+                      [indeterminate]="selectedCount > 0 && !isAllSelected()"
+                      [disabled]="!selectableRows.length || isSubmitting"
+                      (change)="masterToggle()"
+                    />
+                  </th>
+                  <th>Locataire / Bail</th>
+                  <th>Période</th>
+                  <th>Loyer</th>
+                  <th>Solde</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of filteredLocataires; track trackByLocataire($index, row)) {
+                  <tr
+                    [class.row-disabled]="!isRowSelectable(row)"
+                    [class.row-selectable]="isRowSelectable(row)"
+                    (click)="toggleRow(row)"
+                  >
+                    <td class="checkbox-column">
+                      <input
+                        type="checkbox"
+                        class="native-check"
+                        (click)="$event.stopPropagation()"
+                        (change)="toggleRow(row)"
+                        [checked]="selection.isSelected(row)"
+                        [disabled]="!isRowSelectable(row) || isSubmitting"
+                      />
+                    </td>
+                    <td>
+                      <div class="cell-stack">
+                        <strong>{{ row.codeDescBail }}</strong>
+                        <span>{{ row.username || 'Aucun identifiant' }}</span>
+                      </div>
+                    </td>
+                    <td>{{ row.moisEnLettre || row.mois || '-' }}</td>
+                    <td>{{ formatCurrency(row.montantloyer) }}</td>
+                    <td>{{ formatCurrency(row.soldeAppelLoyer) }}</td>
+                    <td>
+                      <span [class]="getStatusClass(row)">
+                        {{ getStatusLabel(row) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <aside class="card section-card summary-card">
+      <div class="card-body">
+        <div class="section-header">
+          <div>
+            <h2>Résumé opérationnel</h2>
+            <p>Vérifiez la sélection courante avant de lancer le règlement groupé.</p>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-chip">
+            <span>Période</span>
+            <strong>{{ selectedPeriodLabel }}</strong>
+          </div>
+          <div class="summary-chip">
+            <span>Mode</span>
+            <strong>{{ selectedModeLabel }}</strong>
+          </div>
+          <div class="summary-chip">
+            <span>Date de traitement</span>
+            <strong>{{ processingDateLabel }}</strong>
+          </div>
+          <div class="summary-chip">
+            <span>Dernière actualisation</span>
+            <strong>{{ lastRefreshAt ? (lastRefreshAt | date: 'short') : 'Non chargée' }}</strong>
+          </div>
+        </div>
+
+        <div class="selection-card">
+          <span class="selection-card__label">Sélection active</span>
+          <strong>{{ formatCurrency(selectedTotal) }}</strong>
+          <small>{{ selectedCount }} ligne(s) retenue(s)</small>
+        </div>
+
+        <div class="summary-note">
+          <span class="summary-note__label">Point de contrôle</span>
+          <span>
+            Le montant moyen par ligne impayée est de
+            <strong>{{ formatCurrency(averagePendingAmount) }}</strong>.
+          </span>
+        </div>
+
+        <div class="summary-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="paiementGrouper()"
+            [disabled]="selectedCount === 0 || isSubmitting"
+          >
+            {{ isSubmitting ? 'Traitement...' : 'Valider le lot' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="clearSelection()"
+            [disabled]="selectedCount === 0 || isSubmitting"
+          >
+            Réinitialiser
+          </button>
+        </div>
+
+        <div class="preview-panel">
+          <div class="preview-panel__header">
+            <span>Aperçu sélection</span>
+            <strong>{{ selectedCount }}</strong>
+          </div>
+          @if (selectedPreviewRows.length) {
+            <div class="preview-list">
+              @for (row of selectedPreviewRows; track trackByLocataire($index, row)) {
+                <div class="preview-item">
+                  <strong>{{ row.codeDescBail }}</strong>
+                  <span>{{ formatCurrency(row.soldeAppelLoyer) }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-preview">Aucune ligne n'est encore sélectionnée.</div>
+          }
+        </div>
+      </div>
+    </aside>
+  </div>
+
+</div>

@@ -1,0 +1,299 @@
+@if (user(); as currentUser) {
+  <section class="stats-shell">
+    <header class="stats-shell__hero">
+      <div>
+        <p class="stats-shell__eyebrow">Pilotage financier</p>
+        <h3>Statistiques journalieres</h3>
+        <p class="stats-shell__intro">
+          Lecture instantanee des loyers encaisses, impayes et encaissements du jour.
+        </p>
+      </div>
+
+      <div class="stats-shell__hero-badges">
+        <span class="stats-badge">
+          <i class="fas fa-building" aria-hidden="true"></i>
+          {{ scopeLabel() }}
+        </span>
+        <span class="stats-badge stats-badge--soft">
+          <i class="fas fa-calendar-day" aria-hidden="true"></i>
+          {{ selectedDateLabel() }}
+        </span>
+      </div>
+    </header>
+
+    <div class="row g-3">
+      <div class="col-12 col-xl-4">
+        <section class="stats-card stats-card--filters">
+          <div class="stats-card__heading">
+            <div>
+              <span class="stats-card__kicker">Filtres</span>
+              <h4>Periode d'analyse</h4>
+            </div>
+            @if (isReferenceLoading()) {
+              <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+            }
+          </div>
+
+          @if (hasReferenceError()) {
+            <div class="alert alert-warning stats-alert" role="alert">
+              Certaines listes de reference n'ont pas pu etre chargees.
+            </div>
+          }
+
+          <div class="stats-card__form-grid">
+            <div class="stats-field">
+              <label for="stats-period">Periode</label>
+              <select
+                id="stats-period"
+                class="form-select"
+                [ngModel]="selectedPeriod()"
+                (ngModelChange)="onPeriodChange($event)"
+              >
+                @for (periode of periodOptions(); track trackPeriod($index, periode)) {
+                  <option [ngValue]="periode.periodeAppelLoyer">
+                    {{ periode.periodeLettre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="stats-field">
+              <label for="stats-year">Annee</label>
+              <select
+                id="stats-year"
+                class="form-select"
+                [ngModel]="selectedYear()"
+                (ngModelChange)="onYearChange($event)"
+              >
+                @for (annee of yearOptions(); track annee) {
+                  <option [ngValue]="annee">{{ annee }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="stats-field">
+              <label for="stats-date">Date de caisse</label>
+              <input
+                id="stats-date"
+                type="date"
+                class="form-control"
+                [ngModel]="selectedDateInputValue()"
+                (ngModelChange)="onDateInputChange($event)"
+              />
+            </div>
+          </div>
+
+          <div class="stats-card__actions">
+            <button type="button" class="btn btn-outline-primary" (click)="resetToCurrentPeriod()">
+              Revenir a aujourd'hui
+            </button>
+            <div class="stats-card__context">
+              <span>Portee</span>
+              <strong>Agence {{ currentUser.idAgence }}</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12 col-xl-8">
+        <div class="row g-3">
+          @for (tile of summaryTiles(); track tile.id) {
+            <div class="col-12 col-md-6">
+              <article class="summary-tile" [attr.data-tone]="tile.tone">
+                <div class="summary-tile__icon">
+                  <i [class]="tile.icon" aria-hidden="true"></i>
+                </div>
+                <div class="summary-tile__body">
+                  <span class="summary-tile__label">{{ tile.title }}</span>
+                  <strong class="summary-tile__value">
+                    @if (tile.type === 'currency') {
+                      {{ tile.value | number }} F CFA
+                    } @else {
+                      {{ tile.value | number: '1.0-1' }}%
+                    }
+                  </strong>
+                  <small class="summary-tile__caption">{{ tile.caption }}</small>
+                </div>
+              </article>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <section class="stats-card analytics-card">
+          <div class="stats-card__heading">
+            <div>
+              <span class="stats-card__kicker">Mensuel</span>
+              <h4>{{ monthSummary().label }}</h4>
+            </div>
+            <span class="analytics-card__chip">Total {{ monthSummary().total | number }} F CFA</span>
+          </div>
+
+          @if (monthSummary().hasData) {
+            <div class="analytics-card__body">
+              <div class="donut-card">
+                <div
+                  class="donut-card__chart"
+                  [style.background]="monthDonutBackground()"
+                >
+                  <div class="donut-card__center">
+                    <strong>{{ monthSummary().recoveryRate | number: '1.0-1' }}%</strong>
+                    <span>recouvrement</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytics-card__legend">
+                @for (item of monthBreakdown(); track item.id) {
+                  <div class="legend-row">
+                    <div class="legend-row__header">
+                      <div class="legend-row__title">
+                        <span class="legend-row__dot" [attr.data-tone]="item.tone"></span>
+                        <div>
+                          <strong>{{ item.label }}</strong>
+                          <small>{{ item.helper }}</small>
+                        </div>
+                      </div>
+                      <span>{{ item.value | number }} F CFA</span>
+                    </div>
+                    <div class="progress legend-row__progress">
+                      <div
+                        class="progress-bar"
+                        role="progressbar"
+                        [style.width.%]="item.share"
+                        [class.bg-success]="item.tone === 'success'"
+                        [class.bg-danger]="item.tone === 'danger'"
+                      ></div>
+                    </div>
+                    <small class="legend-row__share">{{ item.share | number: '1.0-1' }}% du total</small>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="fas fa-chart-area" aria-hidden="true"></i>
+              <div>
+                <strong>Aucune donnee sur cette periode</strong>
+                <p>Choisissez une autre periode pour charger des statistiques.</p>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <section class="stats-card analytics-card">
+          <div class="stats-card__heading">
+            <div>
+              <span class="stats-card__kicker">Annuel</span>
+              <h4>{{ yearSummary().label }}</h4>
+            </div>
+            <span class="analytics-card__chip">Total {{ yearSummary().total | number }} F CFA</span>
+          </div>
+
+          @if (yearSummary().hasData) {
+            <div class="analytics-card__body">
+              <div class="donut-card">
+                <div
+                  class="donut-card__chart"
+                  [style.background]="yearDonutBackground()"
+                >
+                  <div class="donut-card__center">
+                    <strong>{{ yearSummary().recoveryRate | number: '1.0-1' }}%</strong>
+                    <span>recouvrement</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytics-card__legend">
+                @for (item of yearBreakdown(); track item.id) {
+                  <div class="legend-row">
+                    <div class="legend-row__header">
+                      <div class="legend-row__title">
+                        <span class="legend-row__dot" [attr.data-tone]="item.tone"></span>
+                        <div>
+                          <strong>{{ item.label }}</strong>
+                          <small>{{ item.helper }}</small>
+                        </div>
+                      </div>
+                      <span>{{ item.value | number }} F CFA</span>
+                    </div>
+                    <div class="progress legend-row__progress">
+                      <div
+                        class="progress-bar"
+                        role="progressbar"
+                        [style.width.%]="item.share"
+                        [class.bg-success]="item.tone === 'success'"
+                        [class.bg-danger]="item.tone === 'danger'"
+                      ></div>
+                    </div>
+                    <small class="legend-row__share">{{ item.share | number: '1.0-1' }}% du total</small>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+              <div>
+                <strong>Aucune donnee sur cette annee</strong>
+                <p>La repartition annuelle apparaitra des que des montants seront disponibles.</p>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+    </div>
+
+    <section class="stats-card cash-card">
+      <div class="stats-card__heading">
+        <div>
+          <span class="stats-card__kicker">Tresorerie</span>
+          <h4>Lecture journaliere</h4>
+        </div>
+        <span class="analytics-card__chip analytics-card__chip--dark">
+          {{ selectedDateLabel() }}
+        </span>
+      </div>
+
+      <div class="cash-card__body">
+        <div class="cash-card__headline">
+          <span class="cash-card__label">Encaissements confirmes</span>
+          <strong>{{ dailySummary().collected | number }} F CFA</strong>
+          <p>Le solde journalier reprend les encaissements remontes par l'ecran de reglement.</p>
+        </div>
+
+        <div class="cash-card__grid">
+          <article class="cash-metric" data-tone="success">
+            <span>Entrees du jour</span>
+            <strong>{{ dailySummary().collected | number }} F CFA</strong>
+          </article>
+
+          <article class="cash-metric" data-tone="warning">
+            <span>Sorties suivies</span>
+            <strong>{{ dailySummary().outflow | number }} F CFA</strong>
+          </article>
+
+          <article class="cash-metric" data-tone="primary">
+            <span>Solde provisoire</span>
+            <strong>{{ dailySummary().balance | number }} F CFA</strong>
+          </article>
+        </div>
+      </div>
+    </section>
+  </section>
+} @else {
+  <section class="stats-card">
+    <div class="empty-state">
+      <i class="fas fa-user-lock" aria-hidden="true"></i>
+      <div>
+        <strong>Session utilisateur introuvable</strong>
+        <p>Reconnectez-vous pour charger les statistiques journalieres.</p>
+      </div>
+    </div>
+  </section>
+}

@@ -1,0 +1,327 @@
+<section class="reservation-page">
+  <div class="reservation-shell">
+    <section class="reservation-hero">
+      <div class="reservation-hero__content">
+        <p class="reservation-eyebrow">Résidence</p>
+        <h1>Réserver une chambre, encaisser le séjour et suivre les arrivées.</h1>
+        <p class="reservation-lead">
+          Cette page devient le poste de pilotage des réservations de chambre:
+          tu crées un séjour, tu finalises le client, tu suis le paiement et tu
+          retrouves chaque réservation en quelques secondes.
+        </p>
+
+        <div class="reservation-hero__actions">
+          <button
+            type="button"
+            mat-raised-button
+            color="primary"
+            class="hero-action hero-action--primary"
+            (click)="creerUneReservation()"
+          >
+            <mat-icon>bed</mat-icon>
+            <span>Nouvelle réservation</span>
+          </button>
+
+          <button
+            type="button"
+            mat-stroked-button
+            class="hero-action hero-action--secondary"
+            (click)="refreshReservations()"
+          >
+            <mat-icon>refresh</mat-icon>
+            <span>Actualiser la liste</span>
+          </button>
+        </div>
+      </div>
+
+      <aside class="reservation-hero__aside">
+        <p class="reservation-aside__label">Parcours conseillé</p>
+
+        <div class="workflow-step">
+          <span class="workflow-step__index">1</span>
+          <div>
+            <strong>Choisir la chambre</strong>
+            <p>Sélectionne une chambre meublée et la période du séjour.</p>
+          </div>
+        </div>
+
+        <div class="workflow-step">
+          <span class="workflow-step__index">2</span>
+          <div>
+            <strong>Renseigner le voyageur</strong>
+            <p>Associe un client ou laisse une pré-réservation à compléter.</p>
+          </div>
+        </div>
+
+        <div class="workflow-step">
+          <span class="workflow-step__index">3</span>
+          <div>
+            <strong>Encaisser et éditer le reçu</strong>
+            <p>Enregistre l’acompte puis imprime le reçu en un clic.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="reservation-kpis">
+      <article class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--amber">
+          <mat-icon>hotel</mat-icon>
+        </div>
+        <div class="kpi-card__content">
+          <p>Réservations suivies</p>
+          <strong>{{ totalReservations }}</strong>
+          <span>{{ reservationsToFinalize }} à finaliser</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--teal">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="kpi-card__content">
+          <p>Encaissements</p>
+          <strong>{{ totalRevenue | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+          <span>Montants déjà perçus</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--coral">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <div class="kpi-card__content">
+          <p>Solde à encaisser</p>
+          <strong>{{ outstandingAmount | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+          <span>Restant dû sur les séjours</span>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <div class="kpi-card__icon kpi-card__icon--navy">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="kpi-card__content">
+          <p>Séjour moyen</p>
+          <strong>{{ averageStay | number : "1.0-1" }} nuit<span *ngIf="averageStay > 1">s</span></strong>
+          <span>Durée moyenne constatée</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="reservation-toolbar">
+      <div class="reservation-toolbar__copy">
+        <p class="reservation-eyebrow">Pilotage</p>
+        <h2>Filtrer les réservations de chambre</h2>
+        <p>
+          Concentre-toi sur les pré-réservations à confirmer, les séjours avec
+          acompte et les réservations déjà soldées.
+        </p>
+      </div>
+
+      <div class="reservation-toolbar__search">
+        <mat-form-field appearance="outline">
+          <mat-label>Rechercher un client, une chambre ou un séjour</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            #input
+            (keyup)="applyFilterAppel($event)"
+            placeholder="Ex. chambre 204, client, réservation..."
+          />
+        </mat-form-field>
+      </div>
+    </section>
+
+    <div class="reservation-filter-pills">
+      <button
+        *ngFor="let filter of reservationFilters"
+        type="button"
+        class="filter-pill"
+        [class.filter-pill--active]="isReservationFilterActive(filter.value)"
+        (click)="setReservationFilter(filter.value)"
+      >
+        <span class="filter-pill__label">{{ filter.label }}</span>
+        <span class="filter-pill__hint">{{ filter.hint }}</span>
+        <strong class="filter-pill__count">{{ getFilterCount(filter.value) }}</strong>
+      </button>
+    </div>
+
+    <section class="reservation-board">
+      <div class="reservation-board__header">
+        <div>
+          <p class="reservation-eyebrow">Liste opérationnelle</p>
+          <h2>Demandes de réservation et séjours en cours</h2>
+        </div>
+
+        <div class="reservation-board__meta">
+          <strong>{{ totalRecords }}</strong>
+          <span>résultat<span *ngIf="totalRecords > 1">s</span> affiché<span *ngIf="totalRecords > 1">s</span></span>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="reservation-state reservation-state--loading">
+          <mat-icon>hourglass_top</mat-icon>
+          <div>
+            <strong>Chargement des réservations</strong>
+            <p>Le tableau de réservation se met à jour…</p>
+          </div>
+        </div>
+      } @else if (dataSource.data.length > 0) {
+        <div class="reservation-table-wrapper">
+          <mat-table [dataSource]="dataSource" class="reservation-table">
+            <ng-container matColumnDef="reservation">
+              <mat-header-cell *matHeaderCellDef>Réservation</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="cell-stack">
+                  <span class="reservation-code">{{ getReservationCode(row) }}</span>
+                  <span class="reservation-sub">
+                    Créée le {{ row.creationDate | date : "dd/MM/yyyy" }}
+                  </span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="guest">
+              <mat-header-cell *matHeaderCellDef>Client</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="cell-stack">
+                  <strong>{{ getGuestName(row) }}</strong>
+                  <span class="reservation-sub">{{ getGuestPartyLabel(row) }}</span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="room">
+              <mat-header-cell *matHeaderCellDef>Chambre</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="cell-stack">
+                  <strong>{{ getRoomName(row) }}</strong>
+                  <span class="reservation-sub">{{ getRoomMeta(row) }}</span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="stay">
+              <mat-header-cell *matHeaderCellDef>Séjour</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="cell-stack">
+                  <strong>
+                    {{ row.dateDebut | date : "dd/MM/yyyy" }} au
+                    {{ row.dateFin | date : "dd/MM/yyyy" }}
+                  </strong>
+                  <span class="reservation-sub">
+                    {{ getStayLength(row) }} nuit<span *ngIf="getStayLength(row) > 1">s</span>
+                  </span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="payment">
+              <mat-header-cell *matHeaderCellDef>Paiement</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="payment-card">
+                  <strong>{{ getTotalAmount(row) | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+                  <span class="reservation-sub">
+                    {{ getPaidAmount(row) | currency : "XOF" : "symbol" : "1.0-0" }}
+                    encaissés
+                  </span>
+                  <div class="payment-progress">
+                    <span [style.width.%]="getPaymentProgress(row)"></span>
+                  </div>
+                  <span class="reservation-sub payment-card__balance">
+                    Solde:
+                    {{ getBalanceAmount(row) | currency : "XOF" : "symbol" : "1.0-0" }}
+                  </span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <mat-header-cell *matHeaderCellDef>Statut</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="cell-stack">
+                  <span [class]="getReservationStatusClass(row)">
+                    {{ getReservationStatusLabel(row) }}
+                  </span>
+                  <span class="reservation-sub">{{ getReservationStatusNote(row) }}</span>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+              <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+              <mat-cell *matCellDef="let row">
+                <div class="action-group">
+                  @if (shouldShowCheckIn(row)) {
+                    <button
+                      type="button"
+                      class="action-chip action-chip--primary"
+                      (click)="entrerEnChambre(row)"
+                    >
+                      <mat-icon>login</mat-icon>
+                      <span>Finaliser</span>
+                    </button>
+                  }
+
+                  <button
+                    type="button"
+                    class="action-chip action-chip--success"
+                    (click)="encaissementReservation(row)"
+                  >
+                    <mat-icon>payments</mat-icon>
+                    <span>Encaisser</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="action-chip action-chip--neutral"
+                    (click)="printRecuPaiementReservation(row.id)"
+                  >
+                    <mat-icon>print</mat-icon>
+                    <span>Reçu</span>
+                  </button>
+                </div>
+              </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+          </mat-table>
+        </div>
+
+        <mat-paginator
+          #paginator
+          showFirstLastButtons
+          [length]="totalRecords"
+          [pageSizeOptions]="pageSizeAppel"
+          aria-label="Pagination des réservations"
+        >
+        </mat-paginator>
+      } @else {
+        <div class="reservation-state reservation-state--empty">
+          <div class="reservation-state__icon">
+            <mat-icon>event_busy</mat-icon>
+          </div>
+
+          <strong>Aucune réservation trouvée</strong>
+          <p *ngIf="!errorMessage">
+            Aucun séjour ne correspond aux filtres actuels. Lance une nouvelle
+            réservation de chambre ou élargis ta recherche.
+          </p>
+          <p *ngIf="errorMessage">{{ errorMessage }}</p>
+
+          <button
+            type="button"
+            mat-raised-button
+            color="primary"
+            (click)="creerUneReservation()"
+          >
+            Créer une réservation
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+</section>

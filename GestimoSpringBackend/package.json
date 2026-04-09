@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "@angular/cli": "^13.3.5"
+  },
+  "name": "gestimospringbackend",
+  "description": "[![forthebadge](https://forthebadge.com/images/badges/cc-0.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/uses-brains.svg)](https://forthebadge.com)[![forthebadge](https://forthebadge.com/images/badges/made-with-java.svg)](https://forthebadge.com)\r # Description du project Gestimo \r On souhaite créer une application web qui permet de gérer des locations des bien immobiliers.\r Un propriétaire possède un ou plusieurs biens immobiliers (Villa, immeuble, appartement, studio)\r Un locataire peut louer un bien immobilier sur une période donnée et paie un loyer qui est susceptible d’évoluer dans le temps. \r Chaque bien immobilier possède une adresse.\r Une agence immobilier est chargé de mettre en relation les bien du propriétaire et un locataire créant ainsi un contrat de bail\r Chaque client est défini par son code et son nom et son numéro de téléphone\r Chaque mois le système effectue un appel de loyers dans le quelle chaque locataire reçoit une forme de quittance\r ## Exigences fonctionnelles\r L’application doit permettre de :\r 1. Gérer les Locataires :\r - Ajouter un Locataire\r - Consulter tous les Locataires\r - Consulter les Locataires par nom, code ou id.\r 2. Gérer les Biens Immobiliers :\r - Ajouter un bien\r - Consulter un bien\r -Lister tous les bien immobilier par adresse\r 3. Gérer les baux :\r - Ajouter des baux\r - Modifier le montant du loyer\r - Effectuer des appels de loyers\r - Effectuer un paiement de loyer\r - Consulter les paiements de loyers par locataires, immeuble, adresse\r -Modifier \r ## Authors",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigbossoh/GestimoSpringBackend.git"
+  },
+  "author": "zrango",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bigbossoh/GestimoSpringBackend/issues"
+  },
+  "homepage": "https://github.com/bigbossoh/GestimoSpringBackend#readme"
+}

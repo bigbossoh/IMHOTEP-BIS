@@ -1,0 +1,357 @@
+<div class="immeubles-page container-fluid">
+  <div class="immeubles-page__header">
+    <div>
+      <h1>Liste des immeubles</h1>
+      <p>
+        Gérer les immeubles de votre agence, leur site, leur propriétaire et le
+        nombre d'étages générés.
+      </p>
+    </div>
+
+    <div class="immeubles-page__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoadingImmeubles || isLoadingSites || isLoadingProprietaires"
+      >
+        Actualiser
+      </button>
+      <button type="button" class="btn btn-primary" (click)="startCreate()">
+        Nouvel immeuble
+      </button>
+    </div>
+  </div>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <div class="immeubles-layout">
+    <section class="card immeuble-form-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">
+              {{ isEditMode ? 'Modification' : 'Création' }}
+            </span>
+            <h2>
+              {{ isEditMode ? "Modifier l'immeuble" : 'Créer un immeuble' }}
+            </h2>
+          </div>
+
+          @if (isEditMode || immeubleForm.dirty) {
+            <button
+              type="button"
+              class="btn btn-link btn-reset"
+              (click)="startCreate()"
+            >
+              Réinitialiser
+            </button>
+          }
+        </div>
+
+        <p class="immeuble-form-card__intro">
+          Le code et le nom complet de l'immeuble sont calculés automatiquement
+          à partir du site sélectionné.
+        </p>
+
+        @if (formErrorMessage) {
+          <div class="alert alert-warning form-alert">
+            {{ formErrorMessage }}
+          </div>
+        }
+
+        <form [formGroup]="immeubleForm" (ngSubmit)="saveImmeuble()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="idSite">Site</label>
+              <div class="select-wrap">
+                <select
+                  id="idSite"
+                  formControlName="idSite"
+                  [disabled]="isLoadingSites || isSaving"
+                >
+                  <option value="">Sélectionner un site</option>
+                  @for (site of sites; track site.id ?? $index) {
+                    <option [value]="site.id">{{ site.nomSite || site.abrSite }}</option>
+                  }
+                </select>
+              </div>
+              @if (immeubleForm.get('idSite')?.touched && immeubleForm.get('idSite')?.invalid) {
+                <small class="text-danger">Le site est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="idUtilisateur">Propriétaire</label>
+              <div class="select-wrap">
+                <select
+                  id="idUtilisateur"
+                  formControlName="idUtilisateur"
+                  [disabled]="isLoadingProprietaires || isSaving"
+                >
+                  <option value="">Sélectionner un propriétaire</option>
+                  @for (proprietaire of proprietaires; track proprietaire.id ?? $index) {
+                    <option [value]="proprietaire.id">
+                      {{ proprietaire.nom }} {{ proprietaire.prenom }}
+                    </option>
+                  }
+                </select>
+              </div>
+              @if (
+                immeubleForm.get('idUtilisateur')?.touched &&
+                immeubleForm.get('idUtilisateur')?.invalid
+              ) {
+                <small class="text-danger">Le propriétaire est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="nomBaptiserImmeuble">Nom usuel</label>
+              <input
+                id="nomBaptiserImmeuble"
+                type="text"
+                class="form-control"
+                formControlName="nomBaptiserImmeuble"
+                placeholder="Nom affiché en interne"
+              />
+            </div>
+
+            <div class="form-group form-group--full">
+              <label for="descriptionImmeuble">Description</label>
+              <textarea
+                id="descriptionImmeuble"
+                rows="3"
+                class="form-control"
+                formControlName="descriptionImmeuble"
+                placeholder="Description ou repère de l'immeuble"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="nbrEtage">Nombre d'étages</label>
+              <input
+                id="nbrEtage"
+                type="number"
+                min="1"
+                class="form-control"
+                formControlName="nbrEtage"
+              />
+              @if (immeubleForm.get('nbrEtage')?.touched && immeubleForm.get('nbrEtage')?.invalid) {
+                <small class="text-danger">Le nombre d'étages doit être au moins 1.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="nbrePiecesDansImmeuble">Nombre de pièces</label>
+              <input
+                id="nbrePiecesDansImmeuble"
+                type="number"
+                min="0"
+                class="form-control"
+                formControlName="nbrePiecesDansImmeuble"
+              />
+            </div>
+          </div>
+
+          <div class="form-switches">
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" formControlName="garrage" />
+              <span>Garage disponible</span>
+            </label>
+          </div>
+
+          <div class="immeuble-preview" [class.immeuble-preview--empty]="selectedSiteName === '-'">
+            <span class="immeuble-preview__label">Contexte de génération</span>
+            <strong>{{ selectedSiteName === '-' ? 'Choisissez un site' : selectedSiteName }}</strong>
+            <small>
+              Propriétaire :
+              {{ selectedOwnerName === '-' ? 'à sélectionner' : selectedOwnerName }}.
+            </small>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="startCreate()"
+              [disabled]="isSaving"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="immeubleForm.invalid || isSaving"
+            >
+              {{
+                isSaving
+                  ? 'Enregistrement...'
+                  : (isEditMode ? 'Mettre à jour' : 'Enregistrer')
+              }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card immeuble-list-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>Immeubles enregistrés</h2>
+          </div>
+          <span class="immeuble-count">{{ filteredImmeubles.length }} immeuble(s)</span>
+        </div>
+
+        <div class="immeuble-toolbar">
+          <div class="search-box">
+            <label for="immeubleSearch">Recherche</label>
+            <input
+              id="immeubleSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm"
+              (input)="onSearch($event)"
+              placeholder="Code, nom, site, propriétaire..."
+            />
+          </div>
+        </div>
+
+        @if (isLoadingImmeubles) {
+          <div class="state-card">Chargement des immeubles...</div>
+        }
+
+        @if (!isLoadingImmeubles && immeubles.length === 0) {
+          <div class="state-card">Aucun immeuble n'est encore enregistré.</div>
+        }
+
+        @if (!isLoadingImmeubles && immeubles.length > 0 && filteredImmeubles.length === 0) {
+          <div class="state-card">Aucun immeuble ne correspond à votre recherche.</div>
+        }
+
+        @if (!isLoadingImmeubles && filteredImmeubles.length > 0) {
+          <div class="table-responsive">
+            <table class="table align-middle immeuble-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Code</th>
+                  <th>Immeuble</th>
+                  <th>Site</th>
+                  <th>Propriétaire</th>
+                  <th>Étages</th>
+                  <th>Pièces</th>
+                  <th class="actions-column">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (immeuble of filteredImmeubles; track trackByImmeuble($index, immeuble)) {
+                  <tr
+                    [class.row-selected]="selectedImmeubleId === immeuble.id"
+                    (click)="selectImmeuble(immeuble)"
+                  >
+                    <td>{{ immeuble.id || '-' }}</td>
+                    <td>
+                      <span class="immeuble-badge">
+                        {{ immeuble.codeNomAbrvImmeuble || '-' }}
+                      </span>
+                    </td>
+                    <td>
+                      <strong>
+                        {{ immeuble.nomBaptiserImmeuble || immeuble.nomCompletImmeuble || '-' }}
+                      </strong>
+                      <div class="row-helper">
+                        {{ immeuble.descriptionImmeuble || immeuble.nomCompletImmeuble || '-' }}
+                      </div>
+                    </td>
+                    <td>{{ getSiteName(immeuble.idSite) }}</td>
+                    <td>{{ getOwnerLabel(immeuble) }}</td>
+                    <td>{{ immeuble.nbrEtage ?? 0 }}</td>
+                    <td>{{ immeuble.nbrePiecesDansImmeuble ?? 0 }}</td>
+                    <td class="actions-column" (click)="$event.stopPropagation()">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="editImmeuble(immeuble)"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="deleteImmeuble(immeuble)"
+                        [disabled]="deletingImmeubleId === immeuble.id"
+                      >
+                        {{
+                          deletingImmeubleId === immeuble.id
+                            ? 'Suppression...'
+                            : 'Supprimer'
+                        }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <section class="card etages-card">
+    <div class="card-body">
+      <div class="card-heading">
+        <div>
+          <span class="card-heading__eyebrow">Étages</span>
+          <h2>Détail des étages</h2>
+        </div>
+        @if (selectedImmeubleId) {
+          <span class="immeuble-count">Immeuble #{{ selectedImmeubleId }}</span>
+        }
+      </div>
+
+      @if (!selectedImmeubleId) {
+        <div class="state-card">Sélectionnez un immeuble pour afficher ses étages.</div>
+      }
+
+      @if (selectedImmeubleId && isLoadingEtages) {
+        <div class="state-card">Chargement des étages...</div>
+      }
+
+      @if (selectedImmeubleId && !isLoadingEtages && etages.length === 0) {
+        <div class="state-card">Aucun étage trouvé pour cet immeuble.</div>
+      }
+
+      @if (selectedImmeubleId && !isLoadingEtages && etages.length > 0) {
+        <div class="table-responsive">
+          <table class="table align-middle etage-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Code étage</th>
+                <th>Nom étage</th>
+                <th>Niveau</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (etage of etages; track trackByEtage($index, etage)) {
+                <tr>
+                  <td>{{ etage.id || '-' }}</td>
+                  <td>{{ etage.abrvEtage || '-' }}</td>
+                  <td>{{ etage.nomEtage || '-' }}</td>
+                  <td>{{ etage.numEtage ?? '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
+</div>

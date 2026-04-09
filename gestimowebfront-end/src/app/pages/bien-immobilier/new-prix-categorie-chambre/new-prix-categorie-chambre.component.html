@@ -1,0 +1,29 @@
+<p>
+  <mat-form-field appearance="outline">
+    <mat-label>Nombre de jours (ex: 0- 2 jour)</mat-label>
+    <input matInput [(ngModel)]="nombreDeJour" />
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field appearance="outline">
+    <mat-label>jours (en chiffres)</mat-label>
+    <input type="number" matInput [(ngModel)]="nbrDiffJour" />
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field appearance="outline">
+    <mat-label>Prix</mat-label>
+    <input type="number" matInput [(ngModel)]="prix" />
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field>
+    <mat-label>Description</mat-label>
+    <textarea matInput [(ngModel)]="descpition"></textarea>
+  </mat-form-field>
+</p>
+<div class="example-button-row">
+
+  <button mat-raised-button color="primary" (click)="onSaveForm()">Valider</button>
+
+</div>

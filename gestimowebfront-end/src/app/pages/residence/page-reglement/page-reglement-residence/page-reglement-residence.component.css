@@ -1,0 +1,21 @@
+.mat-select{
+  max-width: max-content !important;
+  min-width: 100%;
+}
+.mat-form-field{
+  width: 100%;
+}
+.widthForm{
+  width: 75%;
+}
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+}
+.example-full-width {
+  width: 100%;
+}
+.tail-50{
+  width: 50%;
+}

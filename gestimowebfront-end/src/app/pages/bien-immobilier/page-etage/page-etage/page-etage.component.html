@@ -1,0 +1,166 @@
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Liste des Etages</h1>
+    </div>
+    <div class="col-md-4 text-right">
+      <app-action-button-etage></app-action-button-etage>
+    </div>
+  </div>
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        <h5><i class="fas fa-asterisk blue-color"></i>&nbsp;Filtre</h5>
+      </div>
+    </div>
+    <hr style="margin-top: 0" />
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <ng-container
+          *ngIf="villeState$ | async as state"
+          [ngSwitch]="state.dataState"
+        >
+          <ng-container *ngSwitchCase="VilleStateEnum.ERROR">
+            <div class="p-2 invalid-feedback">Erreur est survenue</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="VilleStateEnum.LOADED">
+            <label>Ville</label>
+            <select
+              id="modele"
+              name="typeClim"
+              class="form-control"
+              (change)="findCommuneByPays($event)"
+            >
+              <option [value]="vil.id" *ngFor="let vil of state.villes">
+                {{ vil.nomVille }}
+              </option>
+            </select>
+          </ng-container>
+        </ng-container>
+      </div>
+      <div class="col-md-3">
+        <ng-container
+          *ngIf="commeState$ | async as state"
+          [ngSwitch]="state.dataState"
+        >
+          <ng-container *ngSwitchCase="CommunesStateEnum.ERROR">
+            <div class="p-2 invalid-feedback">Erreur est survenue</div>
+          </ng-container>
+          <ng-container *ngSwitchCase="CommunesStateEnum.LOADED">
+            <label>Commune</label>
+            <select id="modele" name="typeClim" class="form-control">
+              <option [value]="comm.id" *ngFor="let comm of state.communes">
+                {{ comm.nomCommune }}
+              </option>
+            </select>
+          </ng-container>
+        </ng-container>
+      </div>
+      <div class="col-md-3">
+        <!-- <label>Type de bien</label>
+        <select id="modele" name="typeClim" class="form-control">
+          <option value="0">selectionnez un type de bien</option>
+          <option value="Janvier 2022">Immeuble</option>
+          <option value="Février 2022">Villa</option>
+        </select> -->
+      </div>
+      <div class="col-md-3 mt-4">
+        <button type="button" class="mb-sm btn btn-primary mr-1">
+          Nouveau
+        </button>
+        <button type="button" class="mb-sm btn btn-success mr-1">
+          Rappel d'appel
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <h5>
+          <i class="fas fa-asterisk blue-color"></i>&nbsp;Liste des biens
+          immobiliers
+        </h5>
+      </div>
+    </div>
+    <hr style="margin-top: 0" />
+    <!-- main content -->
+
+    <ng-container
+      *ngIf="bienState$ | async as state"
+      [ngSwitch]="state.dataState"
+    >
+      <div class="tab-content" id="myTabContent">
+        <!-- user table -->
+        <div class="tab-pane fade show active" id="users">
+          <table class="table table-hover m-3 p-3">
+            <thead class="table-borderless">
+              <tr class="text-center mt-3">
+                <th>Id</th>
+                <th>Code</th>
+                <th>Propriétaire</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Les villas -->
+              <ng-container
+                *ngIf="etageState$ | async as etageState"
+                [ngSwitch]="etageState.dataState"
+              >
+                <ng-container
+                  *ngSwitchCase="EtagesStateEnum.LOADING"
+                >
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </ng-container>
+                <ng-container
+                  *ngSwitchCase="EtagesStateEnum.LOADED"
+                >
+                  <tr
+                    class="text-center"
+                    *ngFor="let etage of etageState.etages"
+                  >
+                    <td>{{ etage.id }}</td>
+                    <td>{{ etage.numEtage }}</td>
+                    <td>{{ etage.nomEtage }}</td>
+                    <td *ngIf="etage.abrvEtage" style="color: red">
+                      <i class="fa-solid fa-door-closed"></i>
+                    </td>
+                    <td class="">
+                      <div class="btn-group">
+                        <button
+                          class="btn btn-outline-info"
+                          (click)="onEditdele(etage.id)"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-danger">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <ng-container *ngSwitchCase="BienImmobilierStateEnum.LOADING">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+    <div class="row mb-3">
+      <div class="col-md-12 text-center">
+        <app-pagination></app-pagination>
+      </div>
+    </div>
+  </div>
+</div>

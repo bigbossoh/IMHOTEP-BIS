@@ -1,0 +1,329 @@
+<div class="reglement-page container-fluid">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Règlement individuel</h1>
+      <p>Encaissez un locataire bail par bail et retrouvez l'historique complet des règlements.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="reloadData()">
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="resetEncaissementForm()"
+        [disabled]="!hasSelectedLocataire"
+      >
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  @if (locataireState$ | async; as locataireState) {
+    @switch (locataireState.dataState) {
+
+      @case (UtilisteurStateEnum.LOADING) {
+        <div class="state-card">Chargement des locataires avec bail actif...</div>
+      }
+
+      @case (UtilisteurStateEnum.ERROR) {
+        <div class="alert alert-danger state-card">
+          Impossible de charger les locataires pour le règlement individuel.
+        </div>
+      }
+
+      @case (UtilisteurStateEnum.LOADED) {
+
+        <!-- Sélection du locataire -->
+        <div class="card section-card">
+          <div class="card-body">
+            <div class="section-header">
+              <div>
+                <h2>Locataire et bail</h2>
+                <p>Choisissez le locataire à encaisser pour charger son premier appel et l'historique associé.</p>
+              </div>
+              <span class="count-pill">{{ locataireState.locataireBail.length }} bail(x) actif(s)</span>
+            </div>
+
+            <div class="selector-grid">
+              <div class="form-group">
+                <label class="form-label" for="locataireSelect">Locataire / bail actif</label>
+                <div class="select-wrap">
+                  <select
+                    id="locataireSelect"
+                    (change)="onLocataireChange(locataireState.locataireBail[$any($event.target).selectedIndex - 1])"
+                  >
+                    <option value="">Sélectionner un locataire / bail</option>
+                    @for (locataire of locataireState.locataireBail; track locataire; let i = $index) {
+                      <option [value]="i" [selected]="locataire === leLocataire">
+                        {{ locataire.codeDescBail }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="summary-chips">
+                <div class="summary-chip">
+                  <span>Bail</span>
+                  <strong>{{ selectedLocataireLabel }}</strong>
+                </div>
+                <div class="summary-chip">
+                  <span>Bien</span>
+                  <strong>{{ selectedBienLabel }}</strong>
+                </div>
+                <div class="summary-chip">
+                  <span>Encaissements</span>
+                  <strong>{{ encaissementCount }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @if (locataireEncaissement$ | async; as locataireBailState) {
+
+          <!-- Statistiques -->
+          <div class="stats-grid">
+            <article class="stat-card stat-card--default">
+              <span class="stat-label">Premier impayé</span>
+              <strong>{{ locataireBailState.leLocataire?.moisEnLettre || 'Non disponible' }}</strong>
+              <small>Période prioritaire à encaisser</small>
+            </article>
+            <article class="stat-card stat-card--info">
+              <span class="stat-label">Montant du loyer</span>
+              <strong>{{ formatCurrency(locataireBailState.leLocataire?.montantloyer) }}</strong>
+              <small>Montant attendu pour l'appel en cours</small>
+            </article>
+            <article class="stat-card stat-card--success">
+              <span class="stat-label">Déjà encaissé</span>
+              <strong>{{ formatCurrency(totalEncaissements) }}</strong>
+              <small>{{ encaissementCount }} règlement(s) enregistré(s)</small>
+            </article>
+            <article class="stat-card stat-card--warning">
+              <span class="stat-label">N° appel actif</span>
+              <strong>{{ idDeAppel || '-' }}</strong>
+              <small>Référence utilisée pour l'encaissement</small>
+            </article>
+          </div>
+
+          <!-- Formulaire + résumé -->
+          <div class="content-grid">
+            <div class="card section-card">
+              <div class="card-body">
+                <div class="section-header">
+                  <div>
+                    <h2>Saisir un règlement</h2>
+                    <p>Renseignez le mode de paiement et le montant encaissé, puis validez.</p>
+                  </div>
+                </div>
+
+                @if (encaissementform) {
+                  <form [formGroup]="encaissementform" class="payment-form">
+                    <input formControlName="idAppelLoyer" type="hidden" />
+
+                    <div class="form-grid">
+                      <div class="form-group">
+                        <label class="form-label">Mode de règlement</label>
+                        <div class="select-wrap">
+                          <select formControlName="modePaiement">
+                            <option value="ESPESE_MAGISER">Espèce</option>
+                            <option value="MOBILE_MONEY_MAGISER">Mobile money</option>
+                            <option value="CHEQUE_ECOBANK_MAGISER">Chèque</option>
+                            <option value="VIREMENT_ECOBANK_MAGISER">Virement bancaire</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label">Montant encaissé</label>
+                        <input
+                          formControlName="montantEncaissement"
+                          type="number"
+                          class="form-control"
+                          placeholder="Ex: 250000"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="payment-note">
+                      <span class="payment-note__label">Rappel</span>
+                      <span>
+                        Le loyer de référence est de
+                        <strong>{{ formatCurrency(locataireBailState.leLocataire?.montantloyer) }}</strong>
+                        pour la période
+                        <strong>{{ locataireBailState.leLocataire?.moisEnLettre || '-' }}</strong>.
+                      </span>
+
+                      @if (isPaiementParAvance) {
+                        <span class="payment-note__hint">
+                          Le montant saisi sera ventilé automatiquement sur
+                          <strong>{{ nombrePeriodesCouvrables }}</strong>
+                          période(s) consécutive(s), à partir du premier impayé
+                          <strong>{{ locataireBailState.leLocataire?.moisEnLettre || '-' }}</strong>.
+                          @if (resteEstimeApresPeriodesCompletes > 0) {
+                            Un reliquat estimatif de
+                            <strong>{{ formatCurrency(resteEstimeApresPeriodesCompletes) }}</strong>
+                            sera imputé sur la période suivante.
+                          }
+                        </span>
+                      } @else if (montantEncaisseSaisi > 0) {
+                        <span class="payment-note__hint">
+                          Le règlement sera appliqué en priorité au premier mois impayé.
+                        </span>
+                      }
+                    </div>
+
+                    <div class="payment-actions">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        (click)="onSaveEncaissement()"
+                        [disabled]="encaissementform.invalid || !hasSelectedLocataire"
+                      >
+                        Encaisser
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="resetEncaissementForm()"
+                        [disabled]="!hasSelectedLocataire"
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </form>
+                }
+              </div>
+            </div>
+
+            <div class="card section-card spotlight-card">
+              <div class="card-body">
+                <h2>Résumé du bail</h2>
+                <div class="spotlight-panel">
+                  <span class="spotlight-badge">Encaissement individuel</span>
+                  <h3>{{ selectedLocataireLabel }}</h3>
+                  <p>{{ selectedBienLabel }}</p>
+                </div>
+                <div class="detail-list">
+                  <div class="detail-item">
+                    <span>Période du premier impayé</span>
+                    <strong>{{ locataireBailState.leLocataire?.moisEnLettre || 'Non disponible' }}</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Montant proposé</span>
+                    <strong>{{ formatCurrency(montantEncaisseSaisi) }}</strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Couverture estimée</span>
+                    <strong>
+                      @if (isPaiementParAvance) {
+                        {{ nombrePeriodesCouvrables }} période(s) complètes
+                      } @else {
+                        1 période prioritaire
+                      }
+                    </strong>
+                  </div>
+                  <div class="detail-item">
+                    <span>Historique chargé</span>
+                    <strong>{{ encaissementCount }} mouvement(s)</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Historique -->
+        <div class="card section-card history-card">
+          <div class="card-body">
+            <div class="section-header">
+              <div>
+                <h2>Liste des encaissements</h2>
+                <p>Recherchez un règlement, contrôlez le solde du mois et réimprimez le reçu.</p>
+              </div>
+              <span class="count-pill">{{ encaissementCount }} ligne(s)</span>
+            </div>
+
+            <div class="table-toolbar">
+              <div class="search-box">
+                <label for="reglementSearch">Recherche</label>
+                <input
+                  id="reglementSearch"
+                  type="search"
+                  class="form-control"
+                  (input)="onSearch($event)"
+                  placeholder="Date, période, mode, statut..."
+                />
+              </div>
+            </div>
+
+            @if (encaissementCount === 0) {
+              <div class="state-card">
+                Aucun encaissement n'est encore enregistré pour le bail sélectionné.
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Date de paiement</th>
+                      <th>Période</th>
+                      <th>Loyer</th>
+                      <th>Montant payé</th>
+                      <th>Mode</th>
+                      <th>Solde restant</th>
+                      <th>Statut</th>
+                      <th class="actions-column">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (filteredEncaissements.length === 0) {
+                      <tr>
+                        <td colspan="9" class="text-center text-muted py-3">
+                          Aucune donnée ne correspond à votre recherche.
+                        </td>
+                      </tr>
+                    }
+                    @for (row of filteredEncaissements; track row.id ?? $index) {
+                      <tr>
+                        <td><strong>#{{ row.id }}</strong></td>
+                        <td>
+                          <span class="cell-main">{{ row.creationDate | date:'dd/MM/yyyy' }}</span>
+                          <span class="cell-helper">{{ row.creationDate | date:'HH:mm' }}</span>
+                        </td>
+                        <td>{{ row.appelLoyersFactureDto?.periodeLettre || '-' }}</td>
+                        <td>{{ formatCurrency(row.appelLoyersFactureDto?.nouveauMontantLoyer) }}</td>
+                        <td>{{ formatCurrency(row.montantEncaissement) }}</td>
+                        <td>{{ getModePaiementLabel(row.modePaiement) }}</td>
+                        <td>{{ formatCurrency(row.soldeEncaissement) }}</td>
+                        <td>
+                          <span [class]="getStatusClass(row.appelLoyersFactureDto?.statusAppelLoyer)">
+                            {{ row.appelLoyersFactureDto?.statusAppelLoyer || '-' }}
+                          </span>
+                        </td>
+                        <td class="actions-column">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                            (click)="printRecu(row.id)"
+                          >
+                            Reçu
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+
+      }
+    }
+  }
+</div>

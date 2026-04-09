@@ -1,0 +1,475 @@
+<div class="cc-page container-fluid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       EN-TÊTE PAGE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="cc-page-header">
+    <div class="cc-page-header__copy">
+      <span class="cc-eyebrow">Comptabilité</span>
+      <h1>Compte locataire</h1>
+      <p>Appels de loyer, encaissements et historique des communications d'un locataire.</p>
+    </div>
+    <div class="cc-page-header__actions no-print">
+      <button type="button" class="cc-btn cc-btn--ghost" (click)="printPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimer
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SÉLECTEUR LOCATAIRE
+  ══════════════════════════════════════════════════════════ -->
+  @if (locatairesLoading) {
+    <div class="cc-skeleton-row">
+      <div class="cc-skeleton"></div>
+      <div class="cc-skeleton"></div>
+      <div class="cc-skeleton"></div>
+    </div>
+  } @else if (locatairesError) {
+    <div class="cc-empty-state cc-empty-state--error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>{{ locatairesError }}</p>
+    </div>
+  } @else if (locataires.length === 0) {
+    <div class="cc-empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <p>Aucun compte locataire disponible pour cette agence.</p>
+    </div>
+  } @else {
+
+      <!-- Tenant hero card -->
+      <div class="cc-tenant-hero">
+        <div class="cc-tenant-hero__left">
+          <div class="cc-avatar">{{ getInitials(locataire?.codeDescBail) }}</div>
+          <div class="cc-tenant-hero__meta">
+            <span class="cc-eyebrow">Compte locataire sélectionné</span>
+            <div class="cc-tenant-title-row">
+              <strong class="cc-tenant-name">{{ locataire?.codeDescBail || '—' }}</strong>
+              <span [class]="getBailStatusClass(locataire)">{{ getBailStatusLabel(locataire) }}</span>
+            </div>
+            <span class="cc-tenant-sub">
+              @if (locataire?.bailEnCours) {
+                Bail en cours de consultation.
+              } @else if (locataire?.dateClotureBail) {
+                Bail clôturé le {{ locataire?.dateClotureBail | date:'dd/MM/yyyy' }}.
+              } @else {
+                Bail clôturé disponible en consultation.
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="cc-tenant-hero__right no-print">
+          <div class="cc-select-wrap">
+            <select (change)="onLocataireChange($event)">
+              @for (loca of locataires; track loca.idBail ?? $index; let i = $index) {
+                <option [value]="i" [selected]="loca === locataire">{{ getLocataireOptionLabel(loca) }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="cc-kpi-row">
+        <div class="cc-kpi-card cc-kpi-card--blue">
+          <div class="cc-kpi-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <span class="cc-kpi-card__label">Loyers appelés</span>
+            <strong class="cc-kpi-card__value">{{ formatCurrency(totalLoyersAppeles) }}</strong>
+            <span class="cc-kpi-card__sub">{{ allAppelLoyers.length }} appel(s)</span>
+          </div>
+        </div>
+
+        <div class="cc-kpi-card cc-kpi-card--green">
+          <div class="cc-kpi-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22V12m0 0L7 7m5 5l5-5"/>
+              <circle cx="12" cy="5" r="3"/>
+            </svg>
+          </div>
+          <div>
+            <span class="cc-kpi-card__label">Total encaissé</span>
+            <strong class="cc-kpi-card__value">{{ formatCurrency(totalEncaisse) }}</strong>
+            <span class="cc-kpi-card__sub">{{ allEncaissements.length }} règlement(s)</span>
+          </div>
+        </div>
+
+        <div class="cc-kpi-card cc-kpi-card--orange">
+          <div class="cc-kpi-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <span class="cc-kpi-card__label">Solde en attente</span>
+            <strong class="cc-kpi-card__value">{{ formatCurrency(soldeEnAttente) }}</strong>
+            <span class="cc-kpi-card__sub">{{ countImpaye }} impayé(s)</span>
+          </div>
+        </div>
+
+        <div class="cc-kpi-card cc-kpi-card--teal">
+          <div class="cc-kpi-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <span class="cc-kpi-card__label">Taux de recouvrement</span>
+            <strong class="cc-kpi-card__value">{{ tauxRecouvrement }} %</strong>
+            <span class="cc-kpi-card__sub">loyer vs encaissement</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loyer mensuel en évidence -->
+      <div class="cc-loyer-banner">
+        <span class="cc-loyer-banner__label">Loyer mensuel</span>
+        <strong class="cc-loyer-banner__amount">{{ formatCurrency(locataire?.montantloyer) }}</strong>
+        <span class="cc-loyer-banner__bail">{{ locataire?.codeDescBail }}</span>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           ONGLETS
+      ══════════════════════════════════════════════════════ -->
+      <div class="cc-tabs no-print-tabs">
+        <button class="cc-tab" [class.cc-tab--active]="activeTab === 'appels'" (click)="setTab('appels')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Appels de loyer
+          <span class="cc-tab-badge">{{ allAppelLoyers.length }}</span>
+        </button>
+        <button class="cc-tab" [class.cc-tab--active]="activeTab === 'encaissements'" (click)="setTab('encaissements')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Encaissements
+          <span class="cc-tab-badge">{{ allEncaissements.length }}</span>
+        </button>
+        <button class="cc-tab" [class.cc-tab--active]="activeTab === 'sms'" (click)="setTab('sms')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Messages
+          <span class="cc-tab-badge">{{ allSms.length }}</span>
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           CONTENU ONGLET 1 — Appels de loyer
+      ══════════════════════════════════════════════════════ -->
+      @if (activeTab === 'appels') {
+        <div class="cc-table-panel">
+          <div class="cc-table-toolbar no-print">
+            <div class="cc-search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="search"
+                placeholder="Rechercher période, statut, montant..."
+                (input)="onSearchAppel($event)"
+              />
+            </div>
+            <div class="cc-toolbar-right">
+              <span class="cc-count-pill">{{ filteredAppelLoyers.length }} ligne(s)</span>
+              <button type="button" class="cc-btn cc-btn--outline" (click)="exportAppelsToExcel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Exporter Excel
+              </button>
+            </div>
+          </div>
+
+          @if (allAppelLoyers.length === 0) {
+            <div class="cc-empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <p>Aucun appel de loyer pour ce bail.</p>
+            </div>
+          } @else {
+            <div class="cc-table-shell">
+              <table class="cc-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Période</th>
+                    <th>Montant loyer</th>
+                    <th>Solde du mois</th>
+                    <th>Statut</th>
+                    <th class="cc-col-actions no-print">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (filteredAppelLoyers.length === 0) {
+                    <tr>
+                      <td colspan="6" class="cc-no-result">Aucun résultat pour cette recherche.</td>
+                    </tr>
+                  }
+                  @for (row of filteredAppelLoyers; track row.id ?? $index) {
+                    <tr>
+                      <td><span class="cc-id-badge">#{{ row.id }}</span></td>
+                      <td>
+                        <strong>{{ row.periodeAppelLoyer | date:'MMMM yyyy' }}</strong>
+                      </td>
+                      <td>{{ formatCurrency(row.montantBailLPeriode) }}</td>
+                      <td>
+                        <strong [class.cc-amount--danger]="(row.soldeAppelLoyer ?? 0) > 0">
+                          {{ formatCurrency(row.soldeAppelLoyer) }}
+                        </strong>
+                      </td>
+                      <td>
+                        <span [class]="getStatusBadgeClass(row.statusAppelLoyer)">
+                          {{ row.statusAppelLoyer || '—' }}
+                        </span>
+                      </td>
+                      <td class="cc-col-actions no-print">
+                        @if (row.statusAppelLoyer !== 'Impayé') {
+                          <button
+                            type="button"
+                            class="cc-btn cc-btn--danger-ghost cc-btn--sm"
+                            (click)="supprimerUnLoyer(row.id)"
+                          >
+                            Annuler
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ══════════════════════════════════════════════════════
+           CONTENU ONGLET 2 — Encaissements
+      ══════════════════════════════════════════════════════ -->
+      @if (activeTab === 'encaissements') {
+        <div class="cc-table-panel">
+          <div class="cc-table-toolbar no-print">
+            <div class="cc-search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="search"
+                placeholder="Rechercher date, mode, statut..."
+                (input)="onSearchEncaissement($event)"
+              />
+            </div>
+            <div class="cc-toolbar-right">
+              <span class="cc-count-pill">{{ filteredEncaissements.length }} ligne(s)</span>
+              <button type="button" class="cc-btn cc-btn--outline" (click)="exportEncaissementsToExcel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Exporter Excel
+              </button>
+            </div>
+          </div>
+
+          @if (allEncaissements.length === 0) {
+            <div class="cc-empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+              <p>Aucun encaissement pour ce locataire.</p>
+            </div>
+          } @else {
+            <div class="cc-table-shell">
+              <table class="cc-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Date de paiement</th>
+                    <th>Période</th>
+                    <th>Loyer</th>
+                    <th>Montant payé</th>
+                    <th>Mode</th>
+                    <th>Solde</th>
+                    <th>Statut</th>
+                    <th class="cc-col-actions no-print">Reçu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (filteredEncaissements.length === 0) {
+                    <tr>
+                      <td colspan="9" class="cc-no-result">Aucun résultat pour cette recherche.</td>
+                    </tr>
+                  }
+                  @for (row of filteredEncaissements; track row.id ?? $index) {
+                    <tr>
+                      <td><span class="cc-id-badge">#{{ row.id }}</span></td>
+                      <td>
+                        <span class="cc-cell-main">{{ row.creationDate | date:'dd/MM/yyyy' }}</span>
+                        <span class="cc-cell-sub">{{ row.creationDate | date:'HH:mm' }}</span>
+                      </td>
+                      <td>{{ row.appelLoyersFactureDto?.periodeLettre || '—' }}</td>
+                      <td>{{ formatCurrency(row.appelLoyersFactureDto?.nouveauMontantLoyer) }}</td>
+                      <td>
+                        <strong class="cc-amount--green">{{ formatCurrency(row.montantEncaissement) }}</strong>
+                      </td>
+                      <td>
+                        <span class="cc-mode-pill">{{ getModePaiementLabel(row.modePaiement) }}</span>
+                      </td>
+                      <td>{{ formatCurrency(row.soldeEncaissement) }}</td>
+                      <td>
+                        <span [class]="getStatusBadgeClass(row.appelLoyersFactureDto?.statusAppelLoyer)">
+                          {{ row.appelLoyersFactureDto?.statusAppelLoyer || '—' }}
+                        </span>
+                      </td>
+                      <td class="cc-col-actions no-print">
+                        <button
+                          type="button"
+                          class="cc-btn cc-btn--primary-ghost cc-btn--sm"
+                          (click)="printRecu(row.id)"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"/>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                            <rect x="6" y="14" width="12" height="8"/>
+                          </svg>
+                          Reçu
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ══════════════════════════════════════════════════════
+           CONTENU ONGLET 3 — Messages SMS
+      ══════════════════════════════════════════════════════ -->
+      @if (activeTab === 'sms') {
+        <div class="cc-table-panel">
+          <div class="cc-table-toolbar no-print">
+            <div class="cc-search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="search"
+                placeholder="Rechercher destinataire, message, type..."
+                (input)="onSearchSms($event)"
+              />
+            </div>
+            <div class="cc-toolbar-right">
+              <span class="cc-count-pill">{{ filteredSms.length }} message(s)</span>
+              <button type="button" class="cc-btn cc-btn--outline" (click)="exportSmsToExcel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Exporter Excel
+              </button>
+            </div>
+          </div>
+
+          @if (allSms.length === 0) {
+            <div class="cc-empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <p>Aucun message pour ce locataire.</p>
+            </div>
+          } @else {
+            <div class="cc-table-shell">
+              <table class="cc-table">
+                <thead>
+                  <tr>
+                    <th>Date d'envoi</th>
+                    <th>Destinataire</th>
+                    <th>Type</th>
+                    <th>Message</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (filteredSms.length === 0) {
+                    <tr>
+                      <td colspan="5" class="cc-no-result">Aucun résultat pour cette recherche.</td>
+                    </tr>
+                  }
+                  @for (row of filteredSms; track row.id ?? $index) {
+                    <tr>
+                      <td>{{ row.dateEnvoi || '—' }}</td>
+                      <td>
+                        <strong>{{ row.destinaireNomPrenom || row.nomDestinaire || '—' }}</strong>
+                      </td>
+                      <td>
+                        <span class="cc-type-pill">{{ row.typeMessage || '—' }}</span>
+                      </td>
+                      <td class="cc-message-cell">{{ row.textMessage || '—' }}</td>
+                      <td>
+                        @if (row.envoer === true) {
+                          <span class="status-badge status-badge--success">Envoyé</span>
+                        } @else {
+                          <span class="status-badge status-badge--danger">Échec</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+  }
+
+</div>

@@ -1,0 +1,403 @@
+.relance-page {
+  --relance-bg: linear-gradient(180deg, #f7fafc 0%, #edf4fb 100%);
+  --relance-card: #ffffff;
+  --relance-border: #d8e4f0;
+  --relance-text: #13263f;
+  --relance-muted: #62758b;
+  --relance-primary: #0f6cbd;
+  --relance-primary-soft: #e8f2fc;
+  --relance-success: #11865b;
+  --relance-success-soft: #ebf8f2;
+  --relance-warning: #c88b17;
+  --relance-warning-soft: #fff5df;
+  --relance-danger: #c64852;
+  --relance-danger-soft: #fbecef;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 100%;
+  padding: 1rem;
+  background: var(--relance-bg);
+}
+
+.relance-hero,
+.relance-card,
+.summary-card {
+  background: var(--relance-card);
+  border: 1px solid var(--relance-border);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(15, 35, 62, 0.08);
+}
+
+.relance-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top right, rgba(198, 72, 82, 0.14), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(15, 108, 189, 0.1), transparent 34%),
+    #ffffff;
+}
+
+.relance-eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.5rem;
+  color: var(--relance-danger);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.relance-hero h1 {
+  margin: 0;
+  color: var(--relance-text);
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+.relance-hero p {
+  margin: 0.65rem 0 0;
+  max-width: 60ch;
+  color: var(--relance-muted);
+  line-height: 1.6;
+}
+
+.relance-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.relance-alert {
+  margin: 0;
+  border-radius: 18px;
+}
+
+.relance-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  padding: 1rem 1.1rem;
+}
+
+.summary-card__label {
+  display: inline-flex;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+}
+
+.summary-card strong {
+  display: block;
+  color: var(--relance-text);
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.summary-card small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--relance-muted);
+  line-height: 1.45;
+}
+
+.summary-card[data-tone='danger'] {
+  background: linear-gradient(180deg, #ffffff 0%, #fff1f3 100%);
+}
+
+.summary-card[data-tone='danger'] .summary-card__label {
+  color: var(--relance-danger);
+}
+
+.summary-card[data-tone='warning'] {
+  background: linear-gradient(180deg, #ffffff 0%, #fff8eb 100%);
+}
+
+.summary-card[data-tone='warning'] .summary-card__label {
+  color: var(--relance-warning);
+}
+
+.summary-card[data-tone='success'] {
+  background: linear-gradient(180deg, #ffffff 0%, #effaf4 100%);
+}
+
+.summary-card[data-tone='success'] .summary-card__label {
+  color: var(--relance-success);
+}
+
+.summary-card[data-tone='neutral'] {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+}
+
+.summary-card[data-tone='neutral'] .summary-card__label {
+  color: var(--relance-muted);
+}
+
+.relance-card {
+  padding: 1.25rem;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-head h2 {
+  margin: 0.25rem 0 0;
+  color: var(--relance-text);
+  font-size: 1.2rem;
+}
+
+.section-head__kicker {
+  color: var(--relance-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.section-head__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: #f3f7fb;
+  color: var(--relance-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.relance-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+.relance-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.relance-field span {
+  color: var(--relance-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.relance-field .form-control,
+.relance-field .form-select {
+  min-height: 48px;
+  border-radius: 14px;
+  border-color: #c8d6e5;
+  box-shadow: none;
+}
+
+.relance-field .form-control:focus,
+.relance-field .form-select:focus {
+  border-color: rgba(15, 108, 189, 0.55);
+  box-shadow: 0 0 0 0.22rem rgba(15, 108, 189, 0.12);
+}
+
+.relance-field--search {
+  flex: 1 1 360px;
+}
+
+.relance-field--compact {
+  flex: 0 0 120px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  min-height: 220px;
+  border: 1px dashed #c9d6e4;
+  border-radius: 20px;
+  color: var(--relance-muted);
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 1.8rem;
+}
+
+.table-shell {
+  overflow-x: auto;
+  border: 1px solid #e2ebf3;
+  border-radius: 18px;
+}
+
+.relance-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+}
+
+.relance-table thead th {
+  padding: 0.95rem 1rem;
+  background: #f8fbfd;
+  border-bottom: 1px solid #e2ebf3;
+  color: var(--relance-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.relance-table tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid #edf2f7;
+  color: var(--relance-text);
+  vertical-align: top;
+}
+
+.relance-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.select-col {
+  width: 56px;
+  text-align: center;
+}
+
+.table-note {
+  display: inline-block;
+  margin-top: 0.3rem;
+  color: var(--relance-muted);
+  line-height: 1.4;
+}
+
+.text-strong {
+  font-weight: 700;
+}
+
+.text-end {
+  text-align: right;
+}
+
+.email-missing {
+  display: inline-flex;
+  padding: 0.32rem 0.6rem;
+  border-radius: 999px;
+  background: var(--relance-danger-soft);
+  color: var(--relance-danger);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.action-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.pagination-bar__meta {
+  color: var(--relance-muted);
+  font-size: 0.92rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.page-chip {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid #d6e1ec;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--relance-text);
+  font-weight: 700;
+}
+
+.page-chip--active {
+  border-color: var(--relance-primary);
+  background: var(--relance-primary);
+  color: #ffffff;
+}
+
+@media (max-width: 1200px) {
+  .relance-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .relance-page {
+    padding: 0.75rem;
+  }
+
+  .relance-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .relance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .relance-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .relance-field--search,
+  .relance-field--compact {
+    flex: 1 1 auto;
+  }
+
+  .relance-hero__actions {
+    width: 100%;
+  }
+
+  .relance-hero__actions .btn {
+    flex: 1 1 0;
+  }
+
+  .pagination-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .pagination-pages {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}

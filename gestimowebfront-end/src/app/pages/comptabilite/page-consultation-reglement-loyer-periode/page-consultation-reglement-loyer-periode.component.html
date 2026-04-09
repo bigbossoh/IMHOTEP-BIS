@@ -1,0 +1,301 @@
+<div class="rl-page container-fluid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       EN-TÊTE PAGE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="rl-page-header">
+    <div class="rl-page-header__copy">
+      <span class="rl-eyebrow">Comptabilité</span>
+      <h1>Règlements de loyer par période</h1>
+      <p>Consultez et exportez l'ensemble des encaissements sur une période donnée.</p>
+    </div>
+    <div class="rl-page-header__actions no-print">
+      <button type="button" class="rl-btn rl-btn--ghost" (click)="printPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimer
+      </button>
+      <button type="button" class="rl-btn rl-btn--primary" (click)="exportToExcel()" [disabled]="filteredRows.length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FILTRE PÉRIODE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="rl-filter-card no-print">
+    <div class="rl-filter-card__heading">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span>Sélection de la période</span>
+    </div>
+    <div class="rl-filter-row">
+      <div class="rl-form-group">
+        <label class="rl-form-label" for="debutInput">Date début</label>
+        <input
+          id="debutInput"
+          type="date"
+          class="rl-date-input"
+          [(ngModel)]="debutStr"
+        />
+      </div>
+      <div class="rl-form-group">
+        <label class="rl-form-label" for="finInput">Date fin</label>
+        <input
+          id="finInput"
+          type="date"
+          class="rl-date-input"
+          [(ngModel)]="finStr"
+        />
+      </div>
+      <div class="rl-form-group rl-form-group--action">
+        <button type="button" class="rl-btn rl-btn--primary rl-btn--search" (click)="loadAll()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Rechercher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       KPI CARDS
+  ══════════════════════════════════════════════════════════ -->
+  <div class="rl-kpi-row">
+    <div class="rl-kpi-card rl-kpi-card--blue">
+      <div class="rl-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <div>
+        <span class="rl-kpi-card__label">Loyers dus</span>
+        <strong class="rl-kpi-card__value">{{ formatCurrency(montantDue) }}</strong>
+        <span class="rl-kpi-card__sub">{{ allRows.length }} ligne(s) sur la période</span>
+      </div>
+    </div>
+
+    <div class="rl-kpi-card rl-kpi-card--green">
+      <div class="rl-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div>
+        <span class="rl-kpi-card__label">Total encaissé</span>
+        <strong class="rl-kpi-card__value">{{ formatCurrency(montantEncaisse) }}</strong>
+        <span class="rl-kpi-card__sub">{{ countSolde }} loyer(s) soldé(s)</span>
+      </div>
+    </div>
+
+    <div class="rl-kpi-card rl-kpi-card--teal">
+      <div class="rl-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div>
+        <span class="rl-kpi-card__label">Taux de recouvrement</span>
+        <strong class="rl-kpi-card__value">{{ tauxRecouvrement }} %</strong>
+        <span class="rl-kpi-card__sub">encaissé / dû</span>
+      </div>
+    </div>
+
+    <div class="rl-kpi-card rl-kpi-card--orange">
+      <div class="rl-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <span class="rl-kpi-card__label">Impayés / Partiels</span>
+        <strong class="rl-kpi-card__value">{{ countImpaye + countPartiel }}</strong>
+        <span class="rl-kpi-card__sub">{{ countImpaye }} impayé(s) · {{ countPartiel }} partiel(s)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TABLEAU PRINCIPAL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="rl-table-panel">
+
+    <!-- Toolbar -->
+    <div class="rl-table-toolbar no-print">
+      <!-- Recherche -->
+      <div class="rl-search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="search"
+          placeholder="Rechercher commune, locataire, bien, période..."
+          (input)="onSearchChange($event)"
+        />
+      </div>
+
+      <!-- Filtres statut -->
+      <div class="rl-status-filters">
+        <button
+          class="rl-status-btn"
+          [class.rl-status-btn--active]="statusFilter === ''"
+          (click)="setStatusFilter('')"
+        >
+          Tous <span class="rl-status-count">{{ allRows.length }}</span>
+        </button>
+        <button
+          class="rl-status-btn rl-status-btn--success"
+          [class.rl-status-btn--active]="statusFilter === 'soldé'"
+          (click)="setStatusFilter('soldé')"
+        >
+          Soldé <span class="rl-status-count">{{ countSolde }}</span>
+        </button>
+        <button
+          class="rl-status-btn rl-status-btn--warning"
+          [class.rl-status-btn--active]="statusFilter === 'partiellement payé'"
+          (click)="setStatusFilter('partiellement payé')"
+        >
+          Partiel <span class="rl-status-count">{{ countPartiel }}</span>
+        </button>
+        <button
+          class="rl-status-btn rl-status-btn--danger"
+          [class.rl-status-btn--active]="statusFilter === 'impayé'"
+          (click)="setStatusFilter('impayé')"
+        >
+          Impayé <span class="rl-status-count">{{ countImpaye }}</span>
+        </button>
+      </div>
+
+      <span class="rl-count-pill">{{ filteredRows.length }} ligne(s)</span>
+    </div>
+
+    <!-- Bannière période (visible à l'impression) -->
+    <div class="rl-period-banner print-only">
+      <strong>Période :</strong> {{ periodLabel }} &nbsp;|&nbsp;
+      <strong>Loyers dus :</strong> {{ formatCurrency(montantDue) }} &nbsp;|&nbsp;
+      <strong>Encaissé :</strong> {{ formatCurrency(montantEncaisse) }} &nbsp;|&nbsp;
+      <strong>Taux :</strong> {{ tauxRecouvrement }} %
+    </div>
+
+    <!-- État chargement -->
+    @if (isLoading) {
+      <div class="rl-state-loading">
+        <div class="rl-spinner"></div>
+        <span>Chargement des règlements...</span>
+      </div>
+    } @else if (allRows.length === 0) {
+      <div class="rl-empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <p>Aucun règlement sur cette période.</p>
+        <span>Modifiez les dates et cliquez sur <strong>Rechercher</strong>.</span>
+      </div>
+    } @else {
+      <div class="rl-table-shell">
+        <table class="rl-table">
+          <thead>
+            <tr>
+              <th>Commune</th>
+              <th>Bien</th>
+              <th>Période</th>
+              <th>Locataire / Bail</th>
+              <th>Loyer</th>
+              <th>Montant payé</th>
+              <th>Date encaissement</th>
+              <th>Type paiement</th>
+              <th>Solde</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredRows.length === 0) {
+              <tr>
+                <td colspan="10" class="rl-no-result">Aucun résultat pour ce filtre ou cette recherche.</td>
+              </tr>
+            }
+            @for (row of filteredRows; track row.id ?? $index) {
+              <tr>
+                <td>{{ row.commune || '—' }}</td>
+                <td>
+                  <span class="rl-bien-pill">{{ row.abrvBienimmobilier || '—' }}</span>
+                </td>
+                <td>
+                  <strong>{{ row.periodeLettre || '—' }}</strong>
+                </td>
+                <td>
+                  <span class="rl-cell-main">{{ row.nomLocataire }} {{ row.prenomLocataire }}</span>
+                  <span class="rl-cell-sub">{{ row.abrvBienimmobilier }}</span>
+                </td>
+                <td>{{ formatCurrency(row.montantLoyerBailLPeriode) }}</td>
+                <td>
+                  <strong class="rl-amount--green">{{ formatCurrency(row.montantPaye) }}</strong>
+                </td>
+                <td>
+                  <span class="rl-date">{{ row.dateEncaissement | date:'dd/MM/yyyy' }}</span>
+                </td>
+                <td>
+                  <span class="rl-mode-pill">{{ row.descAppelLoyer || '—' }}</span>
+                </td>
+                <td>
+                  <strong [class.rl-amount--danger]="(row.soldeAppelLoyer ?? 0) > 0">
+                    {{ formatCurrency(row.soldeAppelLoyer) }}
+                  </strong>
+                </td>
+                <td>
+                  <span [class]="getStatusBadgeClass(row.statusAppelLoyer)">
+                    {{ row.statusAppelLoyer || '—' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr class="rl-table-footer">
+              <td colspan="4"><strong>TOTAL ({{ filteredRows.length }} lignes)</strong></td>
+              <td>
+                <strong>{{ formatCurrency(totalLoyerFiltre) }}</strong>
+              </td>
+              <td>
+                <strong class="rl-amount--green">{{ formatCurrency(totalPayeFiltre) }}</strong>
+              </td>
+              <td colspan="2"></td>
+              <td>
+                <strong [class.rl-amount--danger]="totalSoldeFiltre > 0">
+                  {{ formatCurrency(totalSoldeFiltre) }}
+                </strong>
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

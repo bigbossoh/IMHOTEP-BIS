@@ -1,0 +1,838 @@
+<div class="container-xl px-4 mt-4">
+  <!-- Account page navigation-->
+
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-md-3">
+      <!-- Profile picture card-->
+      <div class="card mb-3 mb-xl-0">
+        <div class="card-header">Image d'illustration</div>
+        <div class="card-body text-center">
+          <!-- Profile picture image-->
+          <img
+            class="img-account-profile rounded-circle mb-2"
+            src="assets/bien-immobilier.png"
+            width="100px"
+            height="100px"
+            alt=""
+            />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <!-- Account details card-->
+        <div class="card mb-4">
+          @if (ngselecttypeBien != '10') {
+            <div class="card-header">
+              Informations sur
+              <div class="font-weight-bold">
+                {{ ngselecttypeBien }}
+              </div>
+            </div>
+          }
+          @if (ngselecttypeBien == '10') {
+            <div class="card-header">
+              Informations sur le Bien
+            </div>
+          }
+          <div class="card-body">
+            @if (formGroup && visiblForm == 0) {
+              <form [formGroup]="formGroup">
+                <div class="mb-3">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Type de biens*</mat-label>
+                    <mat-select
+                      formControlName="idTypeBien"
+                      placeholder="Type de biens"
+                      [(ngModel)]="ngselecttypeBien"
+                      name="idTypeBien"
+                      >
+                      <mat-option [value]="20000"
+                        >Sélectionnez un Type de Bien</mat-option
+                        >
+                        @for (biens of listTypeBiens; track biens) {
+                          <mat-option
+                            [value]="biens"
+                            >{{ biens }}</mat-option
+                            >
+                        }
+                      </mat-select>
+                      <mat-error>Ce champ est obligatoire.</mat-error>
+                    </mat-form-field>
+                  </div>
+                </form>
+              }
+
+              <!-- FORM POUR VILLA -->
+              @if (villaForm && ngselecttypeBien == 'Villa') {
+                <form
+                  [formGroup]="villaForm"
+                  >
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div>
+                        @if (utilisateurState$ | async; as state) {
+                          @switch (state.dataState) {
+                            @case (UtilisteurStateEnum.INITIAL) {
+                              <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                              </div>
+                            }
+                            @case (UtilisteurStateEnum.ERROR) {
+                              <div class="p-2 invalid-feedback">
+                                Une erreur est survenue
+                              </div>
+                            }
+                            @case (UtilisteurStateEnum.LOADED) {
+                              <mat-form-field appearance="outline">
+                                <mat-label>Propriétaire*</mat-label>
+                                <mat-select
+                                  formControlName="idUtilisateur"
+                                  placeholder="Propriétaire"
+                                  [(ngModel)]="userVilla"
+                                  name="Propriétaire"
+                                  >
+                                  <mat-option [value]=""
+                                    >Sélectionnez un Propriétaire</mat-option
+                                    >
+                                    @for (utilis of state.utilisateurs; track utilis) {
+                                      <mat-option
+                                        [value]="utilis.id"
+                                        >
+                                        {{ utilis.nom }} {{ utilis.prenom }}
+                                      </mat-option>
+                                    }
+                                  </mat-select>
+                                  <mat-error>Ce champ est obligatoire.</mat-error>
+                                </mat-form-field>
+                              }
+                            }
+                          }
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div>
+                          @if (siteState$ | async; as state) {
+                            @switch (state.dataState) {
+                              @case (SiteStateEnum.INITIAL) {
+                                <div class="spinner-border text-primary" role="status">
+                                  <span class="sr-only">Loading...</span>
+                                </div>
+                              }
+                              @case (SiteStateEnum.ERROR) {
+                                <div class="p-2 invalid-feedback">
+                                  Une Erreur est survenue
+                                </div>
+                              }
+                              @case (SiteStateEnum.LOADED) {
+                                <mat-form-field appearance="outline">
+                                  <mat-label>Site*</mat-label>
+                                  <mat-select
+                                    formControlName="idSite"
+                                    placeholder="idSite"
+                                    name="idSite"
+                                    >
+                                    <mat-option [value]=""
+                                      >Sélectionnez un Site</mat-option
+                                      >
+                                      @for (sit of state.sites; track sit) {
+                                        <mat-option
+                                          [value]="sit.id"
+                                          >
+                                          {{ sit.nomSite }}
+                                        </mat-option>
+                                      }
+                                    </mat-select>
+                                    <mat-error>Ce champ est obligatoire.</mat-error>
+                                  </mat-form-field>
+                                }
+                              }
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row gx-3 mb-2">
+                        <!-- Form Group (organization name)-->
+                        <div class="col-md-6">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Désignation*</mat-label>
+                            <input
+                              formControlName="nomBaptiserBienImmobilier"
+                              matInput
+                              placeholder="Désignation*"
+                              />
+                              <mat-error>Ce champ est obligatoire.</mat-error>
+                            </mat-form-field>
+                          </div>
+                          <div class="col-md-6">
+                            <mat-form-field class="example-full-width" appearance="outline">
+                              <mat-label>Description</mat-label>
+                              <textarea
+                                formControlName="description"
+                                matInput
+                                placeholder="Ex. Décrit la localisation..."
+                              ></textarea>
+                            </mat-form-field>
+                          </div>
+                          <!-- Form Group (location)-->
+                          <div class="col-md-6">
+                            <mat-form-field class="example-full-width" appearance="outline">
+                              <mat-label>Nombre de Pièces</mat-label>
+                              <input
+                                formControlName="nbrePiece"
+                                type="number"
+                                matInput
+                                placeholder="Ex. 100"
+                                />
+                              </mat-form-field>
+                            </div>
+                            <div class="col-md-6">
+                              <mat-form-field class="example-full-width" appearance="outline">
+                                <mat-label>Superficie</mat-label>
+                                <input
+                                  formControlName="superficieBien"
+                                  type="number"
+                                  matInput
+                                  placeholder="Ex. 900"
+                                  />
+                                </mat-form-field>
+                              </div>
+                              <div class="col-md-6">
+                                <mat-form-field class="example-full-width" appearance="outline">
+                                  <mat-label>Nombre de salons</mat-label>
+                                  <input
+                                    formControlName="nbrSalonVilla"
+                                    type="number"
+                                    matInput
+                                    placeholder="Ex. 100"
+                                    />
+                                  </mat-form-field>
+                                </div>
+                                <div class="col-md-6">
+                                  <mat-form-field class="example-full-width" appearance="outline">
+                                    <mat-label>Nombre de Chambre</mat-label>
+                                    <input
+                                      formControlName="nbrChambreVilla"
+                                      type="number"
+                                      matInput
+                                      placeholder="Ex. 100"
+                                      />
+                                    </mat-form-field>
+                                  </div>
+                                  <div class="col-md-6">
+                                    <mat-form-field class="example-full-width" appearance="outline">
+                                      <mat-label>Nombre de salle d'eau</mat-label>
+                                      <input
+                                        formControlName="nbrSalleEauVilla"
+                                        type="number"
+                                        matInput
+                                        placeholder="Ex. 100"
+                                        />
+                                      </mat-form-field>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <mat-form-field class="example-full-width" appearance="outline">
+                                        <mat-label>Combien de Voiture our le garage</mat-label>
+                                        <input
+                                          formControlName="nbreVoitureGarageVilla"
+                                          type="number"
+                                          matInput
+                                          placeholder="Ex. 100"
+                                          />
+                                        </mat-form-field>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-md-6">
+                                          <div class="custom-controls-stacked px-2">
+                                            <mat-checkbox
+                                              formControlName="bienMeublerResidence"
+                                              color="primary"
+                                              >Résidence Meublée ?
+                                            </mat-checkbox>
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6" style="text-align: right">
+                                          <div class="custom-controls-stacked px-2">
+                                            <mat-checkbox formControlName="archived" color="primary"
+                                              >Archivé ?</mat-checkbox
+                                              >
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col d-flex justify-content-end">
+                                          <button
+                                            type="button"
+                                            class="btn btn-danger mr-2"
+                                            data-dismiss="modal"
+                                            (click)="onClose()"
+                                            id="closeAgenceButton"
+                                            >
+                                            <i class="fas fa-ban"></i>
+                                            Close
+                                          </button>
+                                          <button
+                                            type="button"
+                                            class="btn btn-primary"
+                                            (click)="onSaveVilla()"
+                                            >
+                                            <i class="fas fa-save"></i>
+                                            Enregistrer
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </form>
+                                  }
+
+                                  <!-- FORM POUR MAGASIN -->
+                                  @if (magasinForm && ngselecttypeBien == 'Magasin') {
+                                    <form
+                                      [formGroup]="magasinForm"
+                                      >
+                                      <!-- <div class="mb-3"> -->
+                                      <div class="row">
+                                        <div class="col-md-6">
+                                          @if (utilisateurState$ | async; as state) {
+                                            @switch (state.dataState) {
+                                              @case (UtilisteurStateEnum.INITIAL) {
+                                                <i class="fas fa-sync fa-spin"></i>
+                                              }
+                                              @case (UtilisteurStateEnum.ERROR) {
+                                                <div class="p-2 invalid-feedback">
+                                                  Une erreur est survenue
+                                                </div>
+                                              }
+                                              @case (UtilisteurStateEnum.LOADED) {
+                                                <!-- <label class="small mb-1" for="inputUsername">Propriétaire</label>
+                                                <div class="form-group"> -->
+                                                  <!-- <select formControlName="idUtilisateur" name="idUtilisateur" id="username" class="form-control"
+                      [ngClass]="{
+                        'is-invalid':
+                          submitted && magasinForm.controls.idUtilisateur.errors
+                      }">
+                                                  <option [value]="0">Aucun Propriétaire</option>
+                                                  <option [value]="utilis.id" *ngFor="let utilis of state.utilisateurs">
+                                                    {{ utilis.nom }} {{ utilis.prenom }}
+                                                  </option>
+                                                </select>
+                    <div *ngIf="
+                        submitted && magasinForm.controls.idUtilisateur.errors
+                      " class="invalid-feedback">
+                      <div *ngIf="
+                          magasinForm.controls.idUtilisateur.errors.required
+                        ">
+                                                    * Veuillez saisir un Propriétaire
+                                                  </div>
+                                                </div> -->
+                                              <!-- </div> -->
+                                              <mat-form-field appearance="outline">
+                                                <mat-label>Propriétaire*</mat-label>
+                                                <mat-select
+                                                  formControlName="idUtilisateur"
+                                                  placeholder="Propriétaire"
+                                                  name="Propriétaire"
+                                                  >
+                                                  <mat-option [value]="0"
+                                                    >Séletionnez un propriétaire</mat-option
+                                                    >
+                                                    @for (utilis of state.utilisateurs; track utilis) {
+                                                      <mat-option
+                                                        [value]="utilis.id"
+                                                        >
+                                                        {{ utilis.nom }} {{ utilis.prenom }}
+                                                      </mat-option>
+                                                    }
+                                                  </mat-select>
+                                                  <mat-error>Ce champ est obligatoire.</mat-error>
+                                                </mat-form-field>
+                                              }
+                                            }
+                                          }
+                                        </div>
+                                      <!-- </div> -->
+                                      <div class="col-md-6">
+                                        @if (siteState$ | async; as state) {
+                                          @switch (state.dataState) {
+                                            @case (SiteStateEnum.LOADING) {
+                                              <i class="fas fa-sync fa-spin"></i>
+                                            }
+                                            @case (SiteStateEnum.ERROR) {
+                                              <div class="p-2 invalid-feedback">
+                                                Une Erreur est survenue
+                                              </div>
+                                            }
+                                            @case (SiteStateEnum.LOADED) {
+                                              <!-- <label class="small mb-1" for="inputUsername">Site</label>
+                                              <div class="form-group">
+                      <select formControlName="idSite" name="idSite" class="form-control" [ngClass]="{
+                        'is-invalid':
+                          submitted && magasinForm.controls.idSite.errors
+                      }">
+                                                  <option [value]="">Aucun Site</option>
+                                                  <option [value]="sit.id" *ngFor="let sit of state.sites">
+                                                    {{ sit.nomSite }}
+                                                  </option>
+                                                </select>
+                                                <div *ngIf="submitted && magasinForm.controls.idSite.errors" class="invalid-feedback">
+                                                  <div *ngIf="magasinForm.controls.idSite.errors.required">
+                                                    * Veuillez saisir Site
+                                                  </div>
+                                                </div>
+                                              </div> -->
+                                              <mat-form-field appearance="outline">
+                                                <mat-label>Site*</mat-label>
+                                                <mat-select
+                                                  formControlName="idSite"
+                                                  placeholder="Propriétaire"
+                                                  name="Propriétaire"
+                                                  >
+                                                  <mat-option [value]="">Sélectionnez un site</mat-option>
+                                                  @for (sit of state.sites; track sit) {
+                                                    <mat-option
+                                                      [value]="sit.id"
+                                                      >
+                                                      {{ sit.nomSite }}
+                                                    </mat-option>
+                                                  }
+                                                </mat-select>
+                                                <mat-error>Ce champ est obligatoire.</mat-error>
+                                              </mat-form-field>
+                                            }
+                                          }
+                                        }
+                                      </div>
+                                    </div>
+                                  <!-- </div> -->
+                                <!-- </div> -->
+                                <div class="row gx-3 mb-3">
+                                  <!-- Form Group (first name)-->
+                                  <div class="col-md-6">
+                                    @if (immeubleState$ | async; as state) {
+                                      @switch (state.dataState) {
+                                        @case (ImmeubleStateEnum.ERROR) {
+                                          <div class="p-2 invalid-feedback">
+                                            Une erreur est survenu
+                                          </div>
+                                        }
+                                        @case (ImmeubleStateEnum.LOADING) {
+                                          <i class="fas fa-sync fa-spin"></i>
+                                        }
+                                        @case (ImmeubleStateEnum.LOADED) {
+                                          <!-- <label class="small mb-1" for="inputFirstName">Immeuble</label>
+                                          <select (change)="findEtageByImmeuble($event)" name="idImmeuble" class="form-control">
+                                            <option [value]="0">Aucun Immeuble</option>
+                                            <option [value]="immeub.id" *ngFor="let immeub of state.immeubles">
+                                              {{ immeub.codeNomAbrvImmeuble }}
+                                            </option>
+                                            <option></option>
+                                          </select> -->
+                                          <mat-form-field appearance="outline">
+                                            <mat-label>Immeuble*</mat-label>
+                                            <mat-select
+                        (selectionChange)="
+                          findEtageByImmeuble(idImmeuglemag.value)
+                        "
+                                              placeholder="Immeuble"
+                                              name="Immeuble"
+                                              #idImmeuglemag
+                                              >
+                                              <mat-option [value]="0"
+                                                >Sélectionnez un immeuble</mat-option
+                                                >
+                                                @for (immeub of state.immeubles; track immeub) {
+                                                  <mat-option
+                                                    [value]="immeub.id"
+                                                    >
+                                                    {{ immeub.codeNomAbrvImmeuble }}
+                                                  </mat-option>
+                                                }
+                                              </mat-select>
+                                              <mat-error>Ce champ est obligatoire.</mat-error>
+                                            </mat-form-field>
+                                          }
+                                        }
+                                      }
+                                    </div>
+                                    <!-- Form Group (last name)-->
+                                    <div class="col-md-6">
+                                      @if (etageState$ | async; as state) {
+                                        @switch (state.dataState) {
+                                          @case (EtagesStateEnum.LOADING) {
+                                            <i class="fas fa-sync fa-spin"></i>
+                                          }
+                                          @case (EtagesStateEnum.ERROR) {
+                                            <div class="p-2">erreur : {{ state.errorMessage }}</div>
+                                          }
+                                          @case (EtagesStateEnum.LOADED) {
+                                            <!-- <label class="small mb-1" for="inputLastName">Etage</label>
+                                            <select formControlName="idEtage" name="idEtage" class="form-control">
+                                              <option [value]="0">Aucun Etage</option>
+                                              <option [value]="eta.id" *ngFor="let eta of state.etages">
+                                                {{ eta.abrvEtage }}
+                                              </option>
+                                              <option></option>
+                                            </select> -->
+                                            <mat-form-field appearance="outline">
+                                              <mat-label>Etage*</mat-label>
+                                              <mat-select
+                                                formControlName="idEtage"
+                                                placeholder="Immeuble"
+                                                name="Propriétaire"
+                                                >
+                                                <mat-option [value]="0"
+                                                  >Sélectionnez un etage</mat-option
+                                                  >
+                                                  @for (eta of state.etages; track eta) {
+                                                    <mat-option
+                                                      [value]="eta.id"
+                                                      >
+                                                      {{ eta.abrvEtage }}
+                                                    </mat-option>
+                                                  }
+                                                </mat-select>
+                                                <mat-error>Ce champ est obligatoire.</mat-error>
+                                              </mat-form-field>
+                                            }
+                                          }
+                                        }
+                                      </div>
+                                    </div>
+                                    <div class="row gx-3 mb-3">
+                                      <!-- Form Group (organization name)-->
+                                      <div class="col-md-6">
+                                        <mat-form-field appearance="outline">
+                                          <mat-label>Désignation*</mat-label>
+                                          <input
+                                            formControlName="nomBaptiserBienImmobilier"
+                                            matInput
+                                            placeholder="Désignation*"
+                                            />
+                                            <mat-error>Ce champ est obligatoire.</mat-error>
+                                          </mat-form-field>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <!-- <label class="small mb-1" for="inputOrgName">Description</label>
+                                          <textarea rows="3" formControlName="description" class="form-control" name="description"
+                                          type="text"></textarea> -->
+                                          <mat-form-field class="example-full-width" appearance="outline">
+                                            <mat-label>Description</mat-label>
+                                            <textarea
+                                              formControlName="description"
+                                              matInput
+                                              placeholder="Ex. Décrit la localisation..."
+                                            ></textarea>
+                                          </mat-form-field>
+                                        </div>
+                                        <!-- Form Group (location)-->
+                                        <div class="col-md-6">
+                                          <!-- <label class="small mb-1" for="inputLocation">Superficie</label>
+                                          <input formControlName="superficieBien" class="form-control" name="inputLocation" type="number" /> -->
+                                          <mat-form-field class="example-full-width" appearance="outline">
+                                            <mat-label>Nombre de pièces</mat-label>
+                                            <input
+                                              formControlName="nombrePieceMagasin"
+                                              type="number"
+                                              matInput
+                                              placeholder="Ex. 100"
+                                              />
+                                            </mat-form-field>
+                                          </div>
+                                          <div class="col-md-6">
+                                            <!-- <label class="small mb-1" for="inputLocation">Nombre de pièces</label>
+                                            <input formControlName="nombrePieceMagasin" class="form-control" name="inputLocation" type="number" /> -->
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                              <mat-label>Superficie</mat-label>
+                                              <input
+                                                formControlName="superficieBien"
+                                                type="number"
+                                                matInput
+                                                placeholder="Ex. 100"
+                                                />
+                                              </mat-form-field>
+                                            </div>
+                                            <div>
+                                              <div class="form-check form-check-inline">
+                                                <input
+                                                  mdbCheckbox
+                                                  class="form-check-input"
+                                                  type="checkbox"
+                                                  id="occupied"
+                                                  formControlName="occupied"
+                                                  />
+                                                  <label class="form-check-label" for="inlineCheckbox1"
+                                                    >Occupé</label
+                                                    >
+                                                  </div>
+                                                  <div class="form-check form-check-inline">
+                                                    <input
+                                                      mdbCheckbox
+                                                      class="form-check-input"
+                                                      type="checkbox"
+                                                      id="archived"
+                                                      formControlName="archived"
+                                                      />
+                                                      <label class="form-check-label" for="inlineCheckbox2"
+                                                        >Archivé</label
+                                                        >
+                                                      </div>
+                                                      <div class="form-check form-check-inline">
+                                                        <input
+                                                          mdbCheckbox
+                                                          class="form-check-input"
+                                                          type="checkbox"
+                                                          id="underBuildingMagasin"
+                                                          formControlName="underBuildingMagasin"
+                                                          />
+                                                          <label class="form-check-label" for="inlineCheckbox3"
+                                                            >Sous immeuble</label
+                                                            >
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                      <div class="row">
+                                                        <div class="col d-flex justify-content-end">
+                                                          <button
+                                                            type="button"
+                                                            class="btn btn-danger mr-2"
+                                                            data-dismiss="modal"
+                                                            (click)="onClose()"
+                                                            id="closeAgenceButton"
+                                                            >
+                                                            <i class="fas fa-ban"></i>
+                                                            Close
+                                                          </button>
+                                                          <button
+                                                            type="button"
+                                                            class="btn btn-primary"
+                                                            (click)="onSaveMagasin()"
+                                                            >
+                                                            <i class="fas fa-save"></i>
+                                                            Enregistrer
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    </form>
+                                                  }
+                                                  <!-- FORM POUR APPARTEMENT -->
+                                                  @if (appartementForm && ngselecttypeBien == 'Appartement') {
+                                                    <form
+                                                      [formGroup]="appartementForm"
+                                                      >
+                                                      <div class="row">
+                                                        <div class="col-md-6">
+                                                          @if (immeubleState$ | async; as state) {
+                                                            @switch (state.dataState) {
+                                                              @case (ImmeubleStateEnum.LOADING) {
+                                                                <i class="fas fa-sync fa-spin"></i>
+                                                              }
+                                                              @case (ImmeubleStateEnum.ERROR) {
+                                                                <div class="p-2">
+                                                                  Erreur: {{ state.errorMessage | json }}
+                                                                </div>
+                                                              }
+                                                              @case (ImmeubleStateEnum.LOADED) {
+                                                                <mat-form-field appearance="outline">
+                                                                  <mat-label>Immeuble*</mat-label>
+                                                                  <mat-select
+                        (selectionChange)="
+                          findEtageByImmeuble(idImmeubleSelectionner.value)
+                        "
+                                                                    formControlName="idImmeuble"
+                                                                    name="idImmeuble"
+                                                                    #idImmeubleSelectionner
+                                                                    >
+                                                                    <mat-option [value]="0"
+                                                                      >Séletionnez un immeuble</mat-option
+                                                                      >
+                                                                      @for (immeub of state.immeubles; track immeub) {
+                                                                        <mat-option
+                                                                          [value]="immeub.id"
+                                                                          >
+                                                                          {{ immeub.codeNomAbrvImmeuble }}
+                                                                        </mat-option>
+                                                                      }
+                                                                    </mat-select>
+                                                                    <mat-error>Ce champ est obligatoire.</mat-error>
+                                                                  </mat-form-field>
+                                                                }
+                                                              }
+                                                            }
+                                                          </div>
+                                                          <div class="col-md-6">
+                                                            @if (etageState$ | async; as etageAppartState) {
+                                                              @switch (etageAppartState.dataState) {
+                                                                @case (EtagesStateEnum.LOADING) {
+                                                                  <i class="fas fa-sync fa-spin"></i>
+                                                                }
+                                                                @case (EtagesStateEnum.ERROR) {
+                                                                  <div class="p-2">
+                                                                    Erreur : {{ etageAppartState.errorMessage }}
+                                                                  </div>
+                                                                }
+                                                                @case (EtagesStateEnum.LOADED) {
+                                                                  <!-- <label class="small mb-1" for="inputLastName">Etage</label>
+                    <select formControlName="idEtageAppartement" class="form-control form-control-lg w-auto" [ngClass]="{
+                        'is-invalid':
+                          submitted && appartementForm.controls.idEtage.errors
+                      }">
+                                                                    <option [value]="eta.id" *ngFor="let eta of etageAppartState.etages">
+                                                                      {{ eta.abrvEtage }}
+                                                                    </option>
+                                                                  </select> -->
+                                                                  <mat-form-field appearance="outline">
+                                                                    <mat-label>Etage*</mat-label>
+                                                                    <mat-select
+                                                                      formControlName="idEtageAppartement"
+                                                                      name="idEtageAppartement"
+                                                                      >
+                                                                      <mat-option [value]="0"
+                                                                        >Séletionnez un étage</mat-option
+                                                                        >
+                                                                        @for (eta of etageAppartState.etages; track eta) {
+                                                                          <mat-option
+                                                                            [value]="eta.id"
+                                                                            >
+                                                                            {{ eta.abrvEtage }}
+                                                                          </mat-option>
+                                                                        }
+                                                                      </mat-select>
+                                                                      <mat-error>Ce champ est obligatoire.</mat-error>
+                                                                    </mat-form-field>
+                    <!-- <div *ngIf="
+                        submitted && appartementForm.controls.idEtage.errors
+                      " class="invalid-feedback">
+                                                                    <div *ngIf="appartementForm.controls.idEtage.errors.required">
+                                                                      * Veuillez saisir un étage
+                                                                    </div>
+                                                                  </div> -->
+                                                                }
+                                                              }
+                                                            }
+                                                          </div>
+                                                          <!-- <div class="row"> -->
+                                                          <div class="col-md-6">
+                                                            <mat-form-field appearance="outline">
+                                                              <mat-label>Désignation*</mat-label>
+                                                              <input
+                                                                formControlName="nomBaptiserBienImmobilier"
+                                                                matInput
+                                                                placeholder="Désignation*"
+                                                                />
+                                                                <mat-error>Ce champ est obligatoire.</mat-error>
+                                                              </mat-form-field>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                              <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Nombre de Pièces</mat-label>
+                                                                <input
+                                                                  formControlName="nbrPieceApp"
+                                                                  type="number"
+                                                                  matInput
+                                                                  placeholder="Ex. 100"
+                                                                  />
+                                                                </mat-form-field>
+                                                              </div>
+                                                              <div class="col-md-6">
+                                                                <mat-form-field class="example-full-width" appearance="outline">
+                                                                  <mat-label>Nombre de Chambres</mat-label>
+                                                                  <input
+                                                                    formControlName="nbreChambreApp"
+                                                                    type="number"
+                                                                    matInput
+                                                                    placeholder="Ex. 10"
+                                                                    />
+                                                                  </mat-form-field>
+                                                                </div>
+                                                                <!-- <div class="col-md-6">
+                                                                <label class="small mb-1" for="inputLocation">Nombre de Chambres</label>
+                                                                <input formControlName="nbreChambreApp" class="form-control" name="inputLocation" type="number" />
+                                                              </div> -->
+                                                              <!-- <div class="col-md-6">
+                                                              <label class="small mb-1" for="inputLocation">Nombre de Salons</label>
+                                                              <input formControlName="nbrSalonApp" class="form-control" name="inputLocation" type="number" />
+                                                            </div> -->
+                                                            <div class="col-md-6">
+                                                              <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Nombre de salons</mat-label>
+                                                                <input
+                                                                  formControlName="nbrSalonApp"
+                                                                  type="number"
+                                                                  matInput
+                                                                  placeholder="Ex. 10"
+                                                                  />
+                                                                </mat-form-field>
+                                                              </div>
+                                                              <!-- <div class="col-md-6">
+                                                              <label class="small mb-1" for="inputLocation">Nombre de Salle d'eau</label>
+                                                              <input formControlName="nbreSalleEauApp" class="form-control" type="number" />
+                                                            </div> -->
+                                                            <div class="col-md-6">
+                                                              <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Nombre de salle d'eau</mat-label>
+                                                                <input
+                                                                  formControlName="nbreSalleEauApp"
+                                                                  type="number"
+                                                                  matInput
+                                                                  placeholder="Ex. 10"
+                                                                  />
+                                                                </mat-form-field>
+                                                              </div>
+                                                              <div class="col-md-6">
+                                                                <div class="form-check form-check-inline">
+                                                                  <input
+                                                                    mdbCheckbox
+                                                                    class="form-check-input"
+                                                                    type="checkbox"
+                                                                    id="bienMeublerResidence"
+                                                                    formControlName="bienMeublerResidence"
+                                                                    />
+                                                                    <label class="form-check-label" for="inlineCheckbox1"
+                                                                      >Meublé</label
+                                                                      >
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline">
+                                                                      <input
+                                                                        mdbCheckbox
+                                                                        class="form-check-input"
+                                                                        type="checkbox"
+                                                                        id="residence"
+                                                                        formControlName="residence"
+                                                                        />
+                                                                        <label class="form-check-label" for="inlineCheckbox2"
+                                                                          >Est une résidence</label
+                                                                          >
+                                                                        </div>
+                                                                      </div>
+                                                                    <!-- </div> -->
+                                                                  </div>
+                                                                  <div class="row">
+                                                                    <div class="col d-flex justify-content-end">
+                                                                      <button
+                                                                        type="button"
+                                                                        class="btn btn-danger mr-2"
+                                                                        data-dismiss="modal"
+                                                                        (click)="onClose()"
+                                                                        id="closeAgenceButton"
+                                                                        >
+                                                                        <i class="fas fa-ban"></i>
+                                                                        Close
+                                                                      </button>
+                                                                      <button
+                                                                        type="button"
+                                                                        class="btn btn-primary"
+                                                                        (click)="onSaveAppartement()"
+                                                                        >
+                                                                        <i class="fas fa-save"></i>
+                                                                        Enregistrer
+                                                                      </button>
+                                                                    </div>
+                                                                  </div>
+                                                                </form>
+                                                              }
+                                                              <!-- FORM POUR LES ETAGES -->
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>

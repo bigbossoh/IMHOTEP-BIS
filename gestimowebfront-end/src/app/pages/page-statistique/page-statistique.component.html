@@ -1,0 +1,369 @@
+<section class="monitor-shell">
+  <header class="monitor-hero">
+    <div>
+      <p class="monitor-eyebrow">Parametrage technique</p>
+      <h2>Supervision systeme</h2>
+      <p class="monitor-intro">
+        Suivez l etat du backend, la base courante, le journal d audit et les
+        ressources machine depuis une vue technique unique.
+      </p>
+    </div>
+
+    <div class="monitor-actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="onRefreshData()"
+        [disabled]="isRefreshing"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="exportTraces()"
+        [disabled]="!filteredTraceList.length"
+      >
+        Exporter CSV
+      </button>
+    </div>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert-warning monitor-alert" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <section class="health-grid">
+    <article class="health-card" data-tone="success">
+      <span class="health-card__label">Serveur allume depuis</span>
+      <strong>{{ processUpTime }}</strong>
+      <small>
+        Demarre le
+        {{ startedAt ? (startedAt | date: 'dd/MM/yyyy HH:mm:ss') : '--' }}
+      </small>
+    </article>
+
+    <article class="health-card" data-tone="info">
+      <span class="health-card__label">Taille de la base</span>
+      <strong>{{ databaseSizeLabel }}</strong>
+      <small>{{ databaseProductName }} courant : {{ databaseName }}</small>
+    </article>
+
+    <article class="health-card" data-tone="warning">
+      <span class="health-card__label">Temps de reponse moyen</span>
+      <strong>{{ averageAuditDurationLabel }}</strong>
+      <small>Moyenne issue du journal d audit</small>
+    </article>
+
+    <article class="health-card" data-tone="neutral">
+      <span class="health-card__label">Actions auditees</span>
+      <strong>{{ auditedActionsCount }}</strong>
+      <small>
+        Derniere action le
+        {{ lastAuditTimestamp ? (lastAuditTimestamp | date: 'dd/MM/yyyy HH:mm:ss') : '--' }}
+      </small>
+    </article>
+  </section>
+
+  <section class="system-chips">
+    <span class="system-chip">
+      <span class="system-chip__label">Etat systeme</span>
+      <strong>{{ healthStatus }}</strong>
+    </span>
+    <span class="system-chip">
+      <span class="system-chip__label">Etat base</span>
+      <strong>{{ databaseStatus }}</strong>
+    </span>
+    <span class="system-chip">
+      <span class="system-chip__label">Memoire libre systeme</span>
+      <strong>{{ systemMemoryFreeLabel }}</strong>
+    </span>
+    <span class="system-chip">
+      <span class="system-chip__label">Espace disque libre</span>
+      <strong>{{ diskFreeLabel }}</strong>
+    </span>
+  </section>
+
+  <section class="resource-grid">
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">Charge CPU systeme</span>
+        <strong>{{ systemCpuUsageLabel }}</strong>
+      </div>
+      <small>Machine hote</small>
+      <div class="usage-meter">
+        <span [style.width.%]="systemCpuUsagePercentValue"></span>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">Charge CPU application</span>
+        <strong>{{ processCpuUsageLabel }}</strong>
+      </div>
+      <small>Processus backend</small>
+      <div class="usage-meter">
+        <span [style.width.%]="processCpuUsagePercentValue"></span>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">JVM</span>
+        <strong>{{ jvmUsageLabel }}</strong>
+      </div>
+      <small>{{ jvmUsageHint }}</small>
+      <div class="usage-meter">
+        <span [style.width.%]="jvmMemoryUsagePercentValue"></span>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">Memoire systeme</span>
+        <strong>{{ systemMemoryUsageLabel }}</strong>
+      </div>
+      <small>{{ systemMemoryUsageHint }}</small>
+      <div class="usage-meter">
+        <span [style.width.%]="systemMemoryUsagePercentValue"></span>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">Stockage</span>
+        <strong>{{ diskUsageLabel }}</strong>
+      </div>
+      <small>{{ diskUsageHint }}</small>
+      <div class="usage-meter">
+        <span [style.width.%]="diskUsagePercentValue"></span>
+      </div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-card__top">
+        <span class="metric-card__label">Processeurs disponibles</span>
+        <strong>{{ availableProcessors }}</strong>
+      </div>
+      <small>{{ diskFreeLabel }} de disque libre</small>
+      <div class="usage-meter usage-meter--muted">
+        <span [style.width.%]="25"></span>
+      </div>
+    </article>
+  </section>
+
+  <section class="response-grid">
+    @for (card of statusCards; track card.title) {
+      <article class="response-card" [attr.data-tone]="card.tone">
+        <span class="response-card__title">{{ card.title }}</span>
+        <strong>{{ card.count }}</strong>
+        <small>{{ card.helper }}</small>
+      </article>
+    }
+  </section>
+
+  <section class="workspace">
+    <div class="workspace__main">
+      <section class="panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__kicker">Traces HTTP</span>
+            <h3>Echanges recents</h3>
+          </div>
+          <div class="panel__meta">
+            <span>{{ totalTraceCount }} requete(s)</span>
+            <span>Moyenne HTTP {{ formatResponseTime(averageResponseTimeMs) }}</span>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label class="filters__field">
+            <span>Statut</span>
+            <select
+              class="form-select"
+              [(ngModel)]="statusFilter"
+              (ngModelChange)="onFilterChange()"
+            >
+              @for (option of statusFilterOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="filters__field filters__field--search">
+            <span>Recherche</span>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onFilterChange()"
+              placeholder="URI, methode, IP, status..."
+            />
+          </label>
+
+          <label class="filters__field">
+            <span>Par page</span>
+            <select
+              class="form-select"
+              [(ngModel)]="pageSize"
+              (ngModelChange)="onFilterChange()"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        @if (loadingTraces) {
+          <div class="empty-state">
+            <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+            <p>Chargement des echanges HTTP...</p>
+          </div>
+        } @else if (!filteredTraceList.length) {
+          <div class="empty-state">
+            <i class="fas fa-wave-square" aria-hidden="true"></i>
+            <div>
+              <strong>Aucune trace ne correspond au filtre</strong>
+              <p>Essayez un autre statut ou une recherche plus large.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="trace-table">
+              <thead>
+                <tr>
+                  <th>Horodatage</th>
+                  <th>Methode</th>
+                  <th>Duree</th>
+                  <th>Statut</th>
+                  <th>URI</th>
+                  <th>Adresse</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  trace of filteredTraceList
+                    | paginate
+                      : {
+                          id: 'trace-list',
+                          itemsPerPage: pageSize,
+                          currentPage: page,
+                          totalItems: filteredTraceList.length
+                        };
+                  track trackTrace($index, trace)
+                ) {
+                  <tr>
+                    <td>{{ trace.timestamp | date: 'medium' }}</td>
+                    <td>{{ trace.request.method }}</td>
+                    <td>{{ formatResponseTime(trace.timeTakenMs) }}</td>
+                    <td>
+                      <span [class]="getStatusClass(trace.response.status)">
+                        {{ trace.response.status }}
+                      </span>
+                    </td>
+                    <td class="trace-table__uri">{{ trace.request.uri }}</td>
+                    <td>{{ trace.request.remoteAddress }}</td>
+                    <td class="trace-table__action">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="onSelectTrace(trace)"
+                      >
+                        Details
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <pagination-controls
+            class="trace-pagination"
+            id="trace-list"
+            (pageChange)="page = $event"
+          ></pagination-controls>
+        }
+      </section>
+    </div>
+
+    <aside class="workspace__side">
+      <section class="panel detail-panel">
+        <div class="panel__header">
+          <div>
+            <span class="panel__kicker">Detail</span>
+            <h3>Trace selectionnee</h3>
+          </div>
+          @if (selectedTrace) {
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="closeTraceDetails()"
+            >
+              Fermer
+            </button>
+          }
+        </div>
+
+        @if (selectedTrace) {
+          <div class="detail-panel__content">
+            <article class="detail-block">
+              <span class="detail-block__label">Horodatage</span>
+              <strong>{{ selectedTrace.timestamp | date: 'full' }}</strong>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Duree</span>
+              <strong>{{ formatResponseTime(selectedTrace.timeTakenMs) }}</strong>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Requete</span>
+              <strong>{{ selectedTrace.request.method }}</strong>
+              <small>{{ selectedTrace.request.uri }}</small>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Adresse distante</span>
+              <strong>{{ selectedTrace.request.remoteAddress }}</strong>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Statut retour</span>
+              <strong [class]="getStatusClass(selectedTrace.response.status)">
+                {{ selectedTrace.response.status }}
+              </strong>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Origin</span>
+              <strong>{{ selectedTraceOrigin }}</strong>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">User-Agent</span>
+              <small>{{ selectedTraceUserAgent }}</small>
+            </article>
+
+            <article class="detail-block">
+              <span class="detail-block__label">Content-Type</span>
+              <strong>{{ selectedTraceContentType }}</strong>
+            </article>
+          </div>
+        } @else {
+          <div class="empty-state empty-state--side">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <div>
+              <strong>Aucune trace selectionnee</strong>
+              <p>Choisissez une ligne dans la table pour afficher son detail.</p>
+            </div>
+          </div>
+        }
+      </section>
+    </aside>
+  </section>
+</section>

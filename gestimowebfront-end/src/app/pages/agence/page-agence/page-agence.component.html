@@ -1,0 +1,375 @@
+<div class="agency-page container-fluid">
+  <div class="page-header">
+    <div>
+      <h1>Agences</h1>
+      <p>Gérer les agences disponibles, leurs coordonnées et leurs mises à jour.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="refreshAgences()">
+        Actualiser
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openCreateForm()">
+        Nouvelle agence
+      </button>
+    </div>
+  </div>
+
+  <div class="agency-form-card card" *ngIf="isFormVisible">
+    <div class="card-body">
+      <div class="form-header">
+        <div>
+          <h2>{{ formTitle }}</h2>
+          <p *ngIf="!isEditionMode">
+            La création ajoute aussi le compte gérant lié à cette agence.
+          </p>
+          <p *ngIf="isEditionMode">
+            La modification met à jour uniquement les informations de l'agence.
+          </p>
+        </div>
+        <button type="button" class="btn btn-link" (click)="closeForm()">
+          Fermer
+        </button>
+      </div>
+
+      <form [formGroup]="agenceForm" (ngSubmit)="saveAgence()">
+        <div class="form-grid">
+          <div class="form-group form-group--full">
+            <label for="logoAgence">Logo de l'agence</label>
+            <div class="logo-uploader">
+              <div class="logo-preview" [class.logo-preview--empty]="!logoPreviewUrl">
+                <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Logo agence" />
+                <span *ngIf="!logoPreviewUrl">{{ getAgenceInitials() }}</span>
+              </div>
+              <div class="logo-uploader__controls">
+                <input
+                  id="logoAgence"
+                  type="file"
+                  class="form-control"
+                  [attr.accept]="acceptedLogoFormats"
+                  (change)="onLogoSelected($event)"
+                />
+                <small class="text-muted">
+                  Formats acceptés : PNG, JPG, SVG ou WEBP. Taille max : 512 Ko.
+                </small>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                  *ngIf="logoPreviewUrl || selectedLogoFile"
+                  (click)="clearSelectedLogo()"
+                >
+                  Retirer le logo sélectionné
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nomAgence">Nom de l'agence</label>
+            <input
+              id="nomAgence"
+              type="text"
+              class="form-control"
+              formControlName="nomAgence"
+              placeholder="Ex. Residence SEVE"
+            />
+            <small class="text-danger" *ngIf="nomAgenceControl?.touched && nomAgenceControl?.invalid">
+              Le nom de l'agence est obligatoire.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="sigleAgence">Sigle</label>
+            <input
+              id="sigleAgence"
+              type="text"
+              class="form-control"
+              formControlName="sigleAgence"
+              placeholder="Ex. SEVE"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="telAgence">Téléphone</label>
+            <input
+              id="telAgence"
+              type="text"
+              class="form-control"
+              formControlName="telAgence"
+              placeholder="Téléphone standard"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="emailAgence">Email</label>
+            <input
+              id="emailAgence"
+              type="email"
+              class="form-control"
+              formControlName="emailAgence"
+              placeholder="contact@agence.com"
+            />
+            <small class="text-danger" *ngIf="emailAgenceControl?.touched && emailAgenceControl?.hasError('required')">
+              L'email est obligatoire.
+            </small>
+            <small class="text-danger" *ngIf="emailAgenceControl?.touched && emailAgenceControl?.hasError('email')">
+              L'adresse email est invalide.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="mobileAgence">Portable 1</label>
+            <input
+              id="mobileAgence"
+              type="text"
+              class="form-control"
+              formControlName="mobileAgence"
+              placeholder="Numéro principal"
+            />
+            <small class="text-danger" *ngIf="mobileAgenceControl?.touched && mobileAgenceControl?.hasError('required')">
+              Le portable 1 est obligatoire.
+            </small>
+            <small class="text-danger" *ngIf="mobileAgenceControl?.touched && mobileAgenceControl?.hasError('minlength')">
+              Le portable 1 doit contenir au moins 8 caractères.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="mobileAgenceSecondaire">Portable 2</label>
+            <input
+              id="mobileAgenceSecondaire"
+              type="text"
+              class="form-control"
+              formControlName="mobileAgenceSecondaire"
+              placeholder="Numéro secondaire"
+            />
+            <small class="text-danger" *ngIf="mobileAgenceSecondaireControl?.touched && mobileAgenceSecondaireControl?.hasError('minlength')">
+              Le portable 2 doit contenir au moins 8 caractères.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="compteContribuable">NCC</label>
+            <input
+              id="compteContribuable"
+              type="text"
+              class="form-control"
+              formControlName="compteContribuable"
+              placeholder="Numéro de compte contribuable"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="boitePostaleAgence">Boîte postale</label>
+            <input
+              id="boitePostaleAgence"
+              type="text"
+              class="form-control"
+              formControlName="boitePostaleAgence"
+              placeholder="Ex. 01 BP 2345 Abidjan 01"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="adresseAgence">Adresse</label>
+            <input
+              id="adresseAgence"
+              type="text"
+              class="form-control"
+              formControlName="adresseAgence"
+              placeholder="Adresse de l'agence"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="regimeFiscaleAgence">Régime fiscal</label>
+            <input
+              id="regimeFiscaleAgence"
+              type="text"
+              class="form-control"
+              formControlName="regimeFiscaleAgence"
+              placeholder="Ex. Régime réel"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="capital">Capital</label>
+            <input
+              id="capital"
+              type="number"
+              class="form-control"
+              formControlName="capital"
+              placeholder="0"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="faxAgence">Fax</label>
+            <input
+              id="faxAgence"
+              type="text"
+              class="form-control"
+              formControlName="faxAgence"
+              placeholder="Fax"
+            />
+          </div>
+        </div>
+
+        <div class="manager-grid" *ngIf="!isEditionMode">
+          <div class="section-title">
+            <h3>Compte gérant</h3>
+            <p>Ces informations ne sont demandées qu'à la création.</p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nomPrenomGerant">Nom du gérant</label>
+              <input
+                id="nomPrenomGerant"
+                type="text"
+                class="form-control"
+                formControlName="nomPrenomGerant"
+                placeholder="Nom complet du gérant"
+              />
+              <small class="text-danger" *ngIf="nomPrenomGerantControl?.touched && nomPrenomGerantControl?.invalid">
+                Le nom du gérant est obligatoire.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="motdepasse">Mot de passe</label>
+              <input
+                id="motdepasse"
+                type="password"
+                class="form-control"
+                formControlName="motdepasse"
+                placeholder="Mot de passe initial"
+              />
+              <small class="text-danger" *ngIf="motdepasseControl?.touched && motdepasseControl?.hasError('required')">
+                Le mot de passe est obligatoire.
+              </small>
+              <small class="text-danger" *ngIf="motdepasseControl?.touched && motdepasseControl?.hasError('minlength')">
+                Le mot de passe doit contenir au moins 4 caractères.
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-check form-switch stay-connected">
+          <input
+            id="active"
+            class="form-check-input"
+            type="checkbox"
+            formControlName="active"
+          />
+          <label class="form-check-label" for="active">
+            Agence active
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Enregistrement...' : (isEditionMode ? 'Modifier' : 'Créer') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="agency-list-card card">
+    <div class="card-body">
+      <div class="list-header">
+        <div>
+          <h2>Liste des agences</h2>
+          <p>{{ filteredAgences.length }} agence(s) affichée(s)</p>
+        </div>
+        <div class="search-box">
+          <label for="searchAgence">Recherche</label>
+          <input
+            id="searchAgence"
+            type="search"
+            class="form-control"
+            [value]="searchTerm"
+            (input)="onSearch($event)"
+            placeholder="Nom, sigle, téléphone, email..."
+          />
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        Chargement des agences...
+      </div>
+
+      <div class="alert alert-danger load-error" *ngIf="!isLoading && loadErrorMessage">
+        {{ loadErrorMessage }}
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && !loadErrorMessage && filteredAgences.length === 0">
+        <h3>Aucune agence à afficher</h3>
+        <p>
+          Vérifie d'abord les données backend, puis crée une agence depuis ce formulaire si nécessaire.
+        </p>
+      </div>
+
+      <div class="table-responsive" *ngIf="!isLoading && filteredAgences.length > 0">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Logo</th>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Sigle</th>
+              <th>Portable 1</th>
+              <th>Portable 2</th>
+              <th>Email</th>
+              <th>NCC</th>
+              <th>Boîte postale</th>
+              <th>Adresse</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let agence of filteredAgences; trackBy: trackByAgence">
+              <td>
+                <div class="agency-logo" [class.agency-logo--empty]="!agence.profileAgenceUrl">
+                  <img *ngIf="agence.profileAgenceUrl" [src]="agence.profileAgenceUrl" [alt]="agence.nomAgence || 'Logo agence'" />
+                  <span *ngIf="!agence.profileAgenceUrl">{{ getAgenceInitials(agence) }}</span>
+                </div>
+              </td>
+              <td>{{ agence.idAgence || agence.id }}</td>
+              <td>
+                <strong>{{ agence.nomAgence || '-' }}</strong>
+              </td>
+              <td>{{ agence.sigleAgence || '-' }}</td>
+              <td>{{ agence.mobileAgence || agence.telAgence || '-' }}</td>
+              <td>{{ agence.mobileAgenceSecondaire || '-' }}</td>
+              <td>{{ agence.emailAgence || '-' }}</td>
+              <td>{{ agence.compteContribuable || '-' }}</td>
+              <td>{{ agence.boitePostaleAgence || '-' }}</td>
+              <td>{{ agence.adresseAgence || '-' }}</td>
+              <td class="actions-column">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="openEditForm(agence)"
+                >
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  [disabled]="deletingAgenceId === (agence.id || agence.idAgence || null)"
+                  (click)="deleteAgence(agence)"
+                >
+                  {{ deletingAgenceId === (agence.id || agence.idAgence || null) ? 'Suppression...' : 'Supprimer' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<div class="dashboard-shell">
+  <aside class="dashboard-shell__sidebar">
+    <div class="brand-block">
+      <img src="assets/logoGestimo.png" alt="Gestimo" />
+      <div>
+        <h1>Gestimo</h1>
+        <p>Pilotage immobilier intelligent</p>
+      </div>
+    </div>
+
+    <app-menu></app-menu>
+
+    <small class="sidebar-note">Plateforme immobiliere | Angular 21</small>
+  </aside>
+
+  <section class="dashboard-shell__main">
+    <header class="dashboard-shell__header">
+      <app-header></app-header>
+    </header>
+
+    <main class="dashboard-shell__content">
+      <app-loader></app-loader>
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="dashboard-shell__footer">
+      <app-footer></app-footer>
+    </footer>
+  </section>
+</div>

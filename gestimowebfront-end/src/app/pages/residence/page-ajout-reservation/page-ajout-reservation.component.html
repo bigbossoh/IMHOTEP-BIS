@@ -1,0 +1,352 @@
+<div class="reservation-dialog">
+  <div mat-dialog-title class="reservation-dialog__header">
+    <div>
+      <p class="reservation-dialog__eyebrow">Réservation de chambre</p>
+      <h2>{{ dialogTitle }}</h2>
+      <p class="reservation-dialog__subtitle">{{ dialogSubtitle }}</p>
+    </div>
+
+    <button
+      type="button"
+      mat-icon-button
+      class="reservation-dialog__close"
+      (click)="closeDialog()"
+      aria-label="Fermer"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="reservation-dialog__content">
+    <section class="reservation-dialog__hero">
+      <div class="hero-copy">
+        <strong>{{ selectedRoomName }}</strong>
+        <span>{{ selectedRoomCategory }}</span>
+        <p>{{ selectedModeDescription }}</p>
+      </div>
+
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <span>Nuits</span>
+          <strong>{{ stayNights }}</strong>
+        </div>
+        <div class="hero-metric">
+          <span>Total</span>
+          <strong>{{ totalAmountPreview | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+        </div>
+        <div class="hero-metric">
+          <span>Solde</span>
+          <strong>{{ balanceAmountPreview | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <div class="reservation-dialog__grid">
+      <mat-card class="reservation-card reservation-card--mode">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Mode</p>
+            <h3>Type d’enregistrement</h3>
+          </div>
+          <mat-icon>bookmark_added</mat-icon>
+        </div>
+
+        <mat-radio-group
+          class="mode-switch"
+          [(ngModel)]="client"
+          (ngModelChange)="onModeChange($event)"
+        >
+          @for (mode of reservationModes; track mode.value) {
+            <mat-radio-button class="mode-switch__item" [value]="mode.value">
+              <span class="mode-switch__title">{{ mode.title }}</span>
+              <span class="mode-switch__desc">{{ mode.description }}</span>
+            </mat-radio-button>
+          }
+        </mat-radio-group>
+      </mat-card>
+
+      <mat-card class="reservation-card reservation-card--summary">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Synthèse</p>
+            <h3>Résumé du séjour</h3>
+          </div>
+          <mat-icon>hotel</mat-icon>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-item">
+            <span>Client</span>
+            <strong>{{ selectedClientName }}</strong>
+            <small>{{ selectedClientHint }}</small>
+          </div>
+
+          <div class="summary-item">
+            <span>Chambre</span>
+            <strong>{{ selectedRoomName }}</strong>
+            <small>{{ selectedRoomCategory }}</small>
+          </div>
+
+          <div class="summary-item">
+            <span>Période</span>
+            <strong>
+              {{ dateDebutSejour | date : "dd/MM/yyyy" : undefined : "fr" }}
+              <ng-container *ngIf="dateDebutSejour && dateFinSejour">au</ng-container>
+              {{ dateFinSejour | date : "dd/MM/yyyy" : undefined : "fr" }}
+            </strong>
+            <small>
+              {{ stayNights }} nuit<span *ngIf="stayNights > 1">s</span> •
+              {{ nightlyPrice | currency : "XOF" : "symbol" : "1.0-0" }} / nuit
+            </small>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="reservation-card">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Client</p>
+            <h3>Voyageur</h3>
+          </div>
+          <mat-icon>person</mat-icon>
+        </div>
+
+        @if (isCheckInMode) {
+          @if (gerantState$ | async; as state) {
+            @switch (state.dataState) {
+              @case (GerantStateEnum.ERROR) {
+                <div class="inline-state inline-state--error">
+                  {{ state.errorMessage }}
+                </div>
+              }
+              @case (GerantStateEnum.LOADING) {
+                <div class="inline-state inline-state--loading">
+                  <mat-spinner diameter="28"></mat-spinner>
+                  <span>Chargement des clients…</span>
+                </div>
+              }
+              @default {
+                <div class="stack-fields">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Sélectionner un client</mat-label>
+                    <mat-select [(ngModel)]="selectedClient">
+                      <mat-option [value]="null">Choisir un client</mat-option>
+                      @for (client of state.clienthotel; track client.id ?? client.username) {
+                        <mat-option [value]="client">
+                          {{ client.nom }} {{ client.prenom }}
+                          <ng-container *ngIf="client.username">
+                            · {{ client.username }}
+                          </ng-container>
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <button
+                    type="button"
+                    mat-stroked-button
+                    class="add-client-button"
+                    (click)="ajoutClient()"
+                  >
+                    <mat-icon>person_add</mat-icon>
+                    <span>Créer un client</span>
+                  </button>
+                </div>
+              }
+            }
+          }
+        } @else {
+          <div class="info-panel">
+            <mat-icon>info</mat-icon>
+            <div>
+              <strong>Pré-réservation rapide</strong>
+              <p>
+                Le client peut être rattaché plus tard. Tu peux déjà bloquer la
+                chambre, définir les dates et enregistrer un acompte si besoin.
+              </p>
+            </div>
+          </div>
+        }
+
+        <div class="guest-stats">
+          <mat-form-field appearance="outline">
+            <mat-label>Adultes</mat-label>
+            <input matInput type="number" min="0" [(ngModel)]="nbrAdult" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Enfants</mat-label>
+            <input matInput type="number" min="0" [(ngModel)]="nbrEnfant" />
+          </mat-form-field>
+        </div>
+      </mat-card>
+
+      <mat-card class="reservation-card">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Chambre</p>
+            <h3>Choix de la résidence meublée</h3>
+          </div>
+          <mat-icon>king_bed</mat-icon>
+        </div>
+
+        @if (appartementState$ | async; as state) {
+          @switch (state.dataState) {
+            @case (AppartementStateEnum.ERROR) {
+              <div class="inline-state inline-state--error">
+                {{ state.errorMessage || 'Une erreur est survenue lors du chargement des chambres.' }}
+              </div>
+            }
+            @case (AppartementStateEnum.LOADING) {
+              <div class="inline-state inline-state--loading">
+                <mat-spinner diameter="28"></mat-spinner>
+                <span>Chargement des chambres disponibles…</span>
+              </div>
+            }
+            @default {
+              <mat-form-field appearance="outline">
+                <mat-label>Chambre / résidence meublée</mat-label>
+                <mat-select
+                  [(ngModel)]="residenceModel"
+                  (selectionChange)="onRoomSelection(residenceModel)"
+                >
+                  <mat-option [value]="null">Sélectionner une chambre</mat-option>
+                  @for (appart of state.appartements; track appart.id) {
+                    <mat-option [value]="appart">
+                      {{ appart.nomBaptiserBienImmobilier }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div class="room-preview">
+                <strong>{{ selectedRoomName }}</strong>
+                <span>{{ selectedRoomCategory }}</span>
+                <p>{{ selectedRoomDescription }}</p>
+              </div>
+
+              @if (selectedRoomRates.length) {
+                <div class="rates-grid">
+                  @for (prix of selectedRoomRates; track prix.id ?? prix.nombreDeJour) {
+                    <div class="rate-chip">
+                      <strong>{{ prix.prix | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+                      <span>jusqu’à {{ prix.nombreDeJour }} jour(s)</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          }
+        }
+      </mat-card>
+
+      <mat-card class="reservation-card reservation-card--wide">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Séjour</p>
+            <h3>Période et calcul des montants</h3>
+          </div>
+          <mat-icon>event_available</mat-icon>
+        </div>
+
+        <div class="stay-grid">
+          <mat-form-field appearance="outline" class="stay-grid__range">
+            <mat-label>Période du séjour</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+              <input
+                matStartDate
+                placeholder="Arrivée"
+                [(ngModel)]="dateDebutSejour"
+                (dateChange)="onStayChange()"
+              />
+              <input
+                matEndDate
+                placeholder="Départ"
+                [(ngModel)]="dateFinSejour"
+                (dateChange)="onStayChange()"
+              />
+            </mat-date-range-input>
+            <mat-hint>Arrivée - Départ</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+          </mat-form-field>
+
+          <div class="stay-metric">
+            <span>Durée</span>
+            <strong>{{ stayNights }} nuit<span *ngIf="stayNights > 1">s</span></strong>
+            <small>Calculée à partir de la période choisie</small>
+          </div>
+
+          <div class="stay-metric">
+            <span>Tarif appliqué</span>
+            <strong>{{ nightlyPrice | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+            <small>Montant retenu pour une nuit</small>
+          </div>
+        </div>
+
+        <div class="pricing-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Réduction (%)</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              [(ngModel)]="reduction"
+            />
+            <mat-icon matSuffix>percent</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Montant payé</mat-label>
+            <input
+              matInput
+              type="number"
+              min="0"
+              [(ngModel)]="montantPayer"
+            />
+            <span matTextSuffix>FCFA</span>
+          </mat-form-field>
+        </div>
+
+        <div class="pricing-summary">
+          <div class="pricing-summary__card">
+            <span>Sous-total</span>
+            <strong>{{ subtotalAmount | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+            <small>{{ nightlyPrice | currency : "XOF" : "symbol" : "1.0-0" }} x {{ stayNights }} nuit(s)</small>
+          </div>
+
+          <div class="pricing-summary__card">
+            <span>Réduction</span>
+            <strong>{{ reductionAmount | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+            <small>{{ reductionPercent }} % appliqués</small>
+          </div>
+
+          <div class="pricing-summary__card pricing-summary__card--strong">
+            <span>Total réservation</span>
+            <strong>{{ totalAmountPreview | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+            <small>Montant attendu pour le séjour</small>
+          </div>
+
+          <div class="pricing-summary__card pricing-summary__card--accent">
+            <span>Reste à payer</span>
+            <strong>{{ balanceAmountPreview | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+            <small>Après encaissement de {{ amountPaid | currency : "XOF" : "symbol" : "1.0-0" }}</small>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="reservation-dialog__actions">
+    <button type="button" mat-button (click)="closeDialog()">Annuler</button>
+    <button
+      type="button"
+      mat-flat-button
+      color="primary"
+      [disabled]="!canSubmit"
+      (click)="submitReservation()"
+    >
+      {{ submitButtonLabel }}
+    </button>
+  </mat-dialog-actions>
+</div>

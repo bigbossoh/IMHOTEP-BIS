@@ -1,0 +1,272 @@
+<div class="sites-page container-fluid">
+  <div class="sites-page__header">
+    <div>
+      <h1>Sites géographiques</h1>
+      <p>
+        Créer, modifier et supprimer les sites rattachés aux quartiers de votre
+        agence.
+      </p>
+    </div>
+
+    <div class="sites-page__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoadingSites || isLoadingVilles"
+      >
+        Actualiser
+      </button>
+      <button type="button" class="btn btn-primary" (click)="startCreate()">
+        Nouveau site
+      </button>
+    </div>
+  </div>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <div class="sites-layout">
+    <section class="card site-form-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">
+              {{ isEditMode ? 'Modification' : 'Création' }}
+            </span>
+            <h2>
+              {{ isEditMode ? 'Modifier un site' : 'Créer un site' }}
+            </h2>
+          </div>
+
+          @if (isEditMode || siteForm.dirty) {
+            <button
+              type="button"
+              class="btn btn-link btn-reset"
+              (click)="startCreate()"
+            >
+              Réinitialiser
+            </button>
+          }
+        </div>
+
+        <p class="site-form-card__intro">
+          Le code et le nom du site sont générés automatiquement par le backend
+          à partir du quartier choisi.
+        </p>
+
+        @if (formErrorMessage) {
+          <div class="alert alert-warning form-alert">
+            {{ formErrorMessage }}
+          </div>
+        }
+
+        <form [formGroup]="siteForm" (ngSubmit)="saveSite()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="villeId">Ville</label>
+              <select
+                id="villeId"
+                class="form-select"
+                formControlName="villeId"
+                (change)="onVilleChange($event)"
+                [disabled]="isLoadingVilles || isSaving"
+              >
+                <option value="">Sélectionner une ville</option>
+                @for (ville of villes; track ville.id ?? $index) {
+                  <option [value]="ville.id">{{ ville.nomVille }}</option>
+                }
+              </select>
+              @if (siteForm.get('villeId')?.touched && siteForm.get('villeId')?.invalid) {
+                <small class="text-danger">La ville est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="communeId">Commune</label>
+              <select
+                id="communeId"
+                class="form-select"
+                formControlName="communeId"
+                (change)="onCommuneChange($event)"
+                [disabled]="isLoadingCommunes || communes.length === 0 || isSaving"
+              >
+                <option value="">Sélectionner une commune</option>
+                @for (commune of communes; track commune.id ?? $index) {
+                  <option [value]="commune.id">{{ commune.nomCommune }}</option>
+                }
+              </select>
+              @if (siteForm.get('communeId')?.touched && siteForm.get('communeId')?.invalid) {
+                <small class="text-danger">La commune est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="idQuartier">Quartier</label>
+              <select
+                id="idQuartier"
+                class="form-select"
+                formControlName="idQuartier"
+                (change)="onQuartierChange($event)"
+                [disabled]="isLoadingQuartiers || quartiers.length === 0 || isSaving"
+              >
+                <option value="">Sélectionner un quartier</option>
+                @for (quartier of quartiers; track quartier.id ?? $index) {
+                  <option [value]="quartier.id">{{ quartier.nomQuartier }}</option>
+                }
+              </select>
+              @if (siteForm.get('idQuartier')?.touched && siteForm.get('idQuartier')?.invalid) {
+                <small class="text-danger">Le quartier est obligatoire.</small>
+              }
+            </div>
+          </div>
+
+          <div
+            class="site-preview"
+            [class.site-preview--empty]="!selectedQuartier"
+          >
+            <span class="site-preview__label">Aperçu de génération</span>
+            <strong>
+              {{ locationPreview || 'Choisissez un quartier pour générer le site' }}
+            </strong>
+            <small>
+              @if (selectedQuartier) {
+                Le backend générera un code basé sur
+                {{ selectedQuartier.abrvQuartier || selectedQuartier.nomQuartier }}.
+              } @else {
+                Le backend calcule automatiquement le code et le nom complet.
+              }
+            </small>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="startCreate()"
+              [disabled]="isSaving"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="siteForm.invalid || isSaving"
+            >
+              {{
+                isSaving
+                  ? 'Enregistrement...'
+                  : (isEditMode ? 'Mettre à jour' : 'Enregistrer')
+              }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card site-list-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>Liste des sites</h2>
+          </div>
+          <span class="site-count">{{ filteredSites.length }} site(s)</span>
+        </div>
+
+        <div class="site-toolbar">
+          <div class="search-box">
+            <label for="siteSearch">Recherche</label>
+            <input
+              id="siteSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm"
+              (input)="onSearch($event)"
+              placeholder="Nom du site, quartier, commune, ville..."
+            />
+          </div>
+        </div>
+
+        @if (isLoadingSites) {
+          <div class="state-card">Chargement des sites...</div>
+        }
+
+        @if (!isLoadingSites && sites.length === 0) {
+          <div class="state-card">
+            Aucun site n'est encore enregistré pour cette agence.
+          </div>
+        }
+
+        @if (!isLoadingSites && sites.length > 0 && filteredSites.length === 0) {
+          <div class="state-card">
+            Aucun site ne correspond à votre recherche.
+          </div>
+        }
+
+        @if (!isLoadingSites && filteredSites.length > 0) {
+          <div class="table-responsive">
+            <table class="table align-middle site-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Code</th>
+                  <th>Nom du site</th>
+                  <th>Quartier</th>
+                  <th>Commune</th>
+                  <th>Ville</th>
+                  <th class="actions-column">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (site of filteredSites; track trackBySite($index, site)) {
+                  <tr>
+                    <td>{{ site.id || '-' }}</td>
+                    <td>
+                      <span class="site-badge">{{ site.abrSite || '-' }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ site.nomSite || '-' }}</strong>
+                      <div class="row-helper">{{ getSiteLocation(site) }}</div>
+                    </td>
+                    <td>{{ site.quartierResponseDto?.nomQuartier || '-' }}</td>
+                    <td>
+                      {{ site.quartierResponseDto?.communeResponseDto?.nomCommune || '-' }}
+                    </td>
+                    <td>
+                      {{ site.quartierResponseDto?.communeResponseDto?.villeDto?.nomVille || '-' }}
+                    </td>
+                    <td class="actions-column">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="editSite(site)"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="deleteSite(site)"
+                        [disabled]="deletingSiteId === site.id"
+                      >
+                        {{
+                          deletingSiteId === site.id
+                            ? 'Suppression...'
+                            : 'Supprimer'
+                        }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

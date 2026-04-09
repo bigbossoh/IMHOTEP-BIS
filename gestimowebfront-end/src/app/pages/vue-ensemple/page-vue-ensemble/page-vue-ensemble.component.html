@@ -1,0 +1,41 @@
+<section class="overview-shell">
+  <header class="overview-header">
+    <div>
+      <p class="eyebrow">Tableau de bord immobilier</p>
+      <h2>Vue d'ensemble du portefeuille</h2>
+      <p class="overview-subtitle">
+        Suivi global des biens, locataires et baux actifs de l'agence.
+      </p>
+    </div>
+
+    <div class="overview-context">
+      <span class="overview-context__label">Portee</span>
+      <strong>Agence active</strong>
+      <small>Toutes les donnees du tableau de bord sont consolidees par agence.</small>
+    </div>
+  </header>
+
+  <div class="metric-grid">
+    <article class="metric-card metric-card--blue">
+      <h3>Biens occupes</h3>
+      <strong>{{ totalBiensOQp }}</strong>
+      <span>Sur {{ totalBiens }} biens de l'agence</span>
+    </article>
+
+    <article class="metric-card metric-card--green">
+      <h3>Locataires actifs</h3>
+      <strong>{{ totalLocatireActifParAgence }}</strong>
+      <span>Total locataires agence: {{ totalLocataireParAgence }}</span>
+    </article>
+
+    <article class="metric-card metric-card--orange">
+      <h3>Baux actifs</h3>
+      <strong>{{ totalBailActif }}</strong>
+      <span>Baux clotures agence: {{ totalBauxNonActif }}</span>
+    </article>
+  </div>
+
+  <section class="stats-panel">
+    <app-page-statistique-journalier></app-page-statistique-journalier>
+  </section>
+</section>

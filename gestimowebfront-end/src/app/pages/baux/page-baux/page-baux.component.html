@@ -1,0 +1,647 @@
+<div class="baux-page container-fluid">
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Pilotage locatif</span>
+      <h1>Gestion des baux</h1>
+      <p>
+        Centralisez les contrats de location, suivez les appels de loyer et
+        pilotez les operations de cloture ou de suppression depuis un seul
+        ecran.
+      </p>
+    </div>
+
+    <div class="hero-panel__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoadingBaux || isLoadingDetails"
+      >
+        Actualiser
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openCreateDialog()">
+        Nouveau bail
+      </button>
+    </div>
+  </section>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <section class="baux-stats">
+    <article class="stat-card">
+      <span class="stat-card__label">Total des baux</span>
+      <strong>{{ totalBaux }}</strong>
+      <small>Contrats charges sur l'agence</small>
+    </article>
+
+    <article class="stat-card stat-card--active">
+      <span class="stat-card__label">Baux en cours</span>
+      <strong>{{ totalBauxEncours }}</strong>
+      <small>Contrats actuellement actifs</small>
+    </article>
+
+    <article class="stat-card stat-card--closed">
+      <span class="stat-card__label">Baux clotures</span>
+      <strong>{{ totalBauxClotures }}</strong>
+      <small>Historique des contrats termines</small>
+    </article>
+  </section>
+
+  <div class="baux-layout">
+    <section class="surface-card baux-list-card">
+      <div class="surface-card__body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>Liste des baux</h2>
+            <p>Filtrez les contrats par locataire, bien ou statut.</p>
+          </div>
+          <span class="baux-count">{{ filteredBaux.length }} bail(x)</span>
+        </div>
+
+        <div class="baux-toolbar">
+          <div class="search-box">
+            <label for="bailSearch">Recherche</label>
+            <input
+              id="bailSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm"
+              (input)="onSearch($event)"
+              placeholder="Locataire, bien, code, designation..."
+            />
+          </div>
+
+          <div class="toolbar-controls">
+            <div class="segmented">
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="statusFilter === 'all'"
+                (click)="setStatusFilter('all')"
+              >
+                Tous
+              </button>
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="statusFilter === 'encours'"
+                (click)="setStatusFilter('encours')"
+              >
+                En cours
+              </button>
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="statusFilter === 'cloture'"
+                (click)="setStatusFilter('cloture')"
+              >
+                Clotures
+              </button>
+            </div>
+
+            <div class="toolbar-field">
+              <label for="bauxPageSize">Lignes</label>
+              <select
+                id="bauxPageSize"
+                class="toolbar-select"
+                [value]="bauxPageSize"
+                (change)="onBauxPageSizeChange($event)"
+              >
+                @for (size of bauxPageSizeOptions; track size) {
+                  <option [value]="size">{{ size }} / page</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        @if (isLoadingBaux) {
+          <div class="state-card">Chargement des baux...</div>
+        }
+
+        @if (!isLoadingBaux && baux.length === 0) {
+          <div class="state-card">
+            Aucun bail n'est encore enregistre pour cette agence.
+          </div>
+        }
+
+        @if (!isLoadingBaux && baux.length > 0 && filteredBaux.length === 0) {
+          <div class="state-card">
+            Aucun bail ne correspond a votre recherche ou au filtre choisi.
+          </div>
+        }
+
+        @if (!isLoadingBaux && filteredBaux.length > 0) {
+          <div class="table-shell">
+            <div class="table-responsive">
+              <table class="table align-middle bail-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Locataire</th>
+                    <th>Bien</th>
+                    <th>Periode</th>
+                    <th>Loyer</th>
+                    <th>Caution</th>
+                    <th>Statut</th>
+                    <th class="actions-column">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (bail of paginatedBaux; track trackByBail($index, bail)) {
+                    <tr
+                      [class.row-selected]="selectedBailId === bail.id"
+                      (click)="selectBail(bail)"
+                    >
+                      <td>
+                        <span class="bail-badge">{{ getBailCodeLabel(bail) }}</span>
+                        <div class="row-helper">{{ getBailTypeLabel(bail) }}</div>
+                      </td>
+
+                      <td>
+                        <strong>{{ getBailLocataireLabel(bail) }}</strong>
+                        <div class="row-helper">
+                          {{ bail.designationBail || 'Sans designation' }}
+                        </div>
+                      </td>
+
+                      <td>
+                        <strong>{{ getBailAssetCodeLabel(bail) }}</strong>
+                        <div class="row-helper">
+                          {{ bail.bienImmobilierOperation || '-' }}
+                        </div>
+                      </td>
+
+                      <td>
+                        <div>{{ bail.dateDebut | date: 'dd/MM/yyyy' }}</div>
+                        <div class="row-helper">
+                          au {{ bail.dateFin | date: 'dd/MM/yyyy' }}
+                        </div>
+                      </td>
+
+                      <td>{{ formatCurrency(bail.nouveauMontantLoyer) }}</td>
+                      <td>{{ formatCurrency(bail.montantCautionBail) }}</td>
+                      <td>
+                        <span [class]="getBailStatusClass(bail)">
+                          {{ getBailStatusLabel(bail) }}
+                        </span>
+                      </td>
+                      <td class="actions-column" (click)="$event.stopPropagation()">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-success"
+                          (click)="printBail(bail)"
+                          [disabled]="isPrinting(bail)"
+                        >
+                          {{ isPrinting(bail) ? 'Impression...' : 'Imprimer' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          (click)="openModifMontantDialog(bail)"
+                        >
+                          Loyer
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-warning"
+                          (click)="closeBail(bail)"
+                          [disabled]="isClosing(bail) || bail.enCoursBail === false"
+                        >
+                          {{ isClosing(bail) ? 'Cloture...' : 'Cloturer' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="deleteBail(bail)"
+                          [disabled]="isDeleting(bail)"
+                        >
+                          {{
+                            isDeleting(bail) ? 'Suppression...' : 'Supprimer'
+                          }}
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination-toolbar">
+            <p class="pagination-summary">
+              Affichage {{ bauxPaginationStart }} à {{ bauxPaginationEnd }} sur
+              {{ filteredBaux.length }} bail(x)
+            </p>
+
+            <div class="pagination-controls">
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentBauxPageNumber <= 1"
+                (click)="previousBauxPage()"
+              >
+                Precedent
+              </button>
+
+              @for (page of bauxVisiblePages; track page) {
+                <button
+                  type="button"
+                  class="page-btn"
+                  [class.is-active]="page === currentBauxPageNumber"
+                  (click)="goToBauxPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentBauxPageNumber >= bauxTotalPages"
+                (click)="nextBauxPage()"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <aside class="surface-card bail-detail-card">
+      <div class="surface-card__body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Detail</span>
+            <h2>Bail selectionne</h2>
+            <p>Consultez le contrat puis enchainez les actions utiles.</p>
+          </div>
+          @if (selectedBail) {
+            <span class="baux-count">#{{ selectedBail.id }}</span>
+          }
+        </div>
+
+        @if (!selectedBail) {
+          <div class="state-card">
+            Selectionnez un bail dans la liste pour afficher son detail et ses
+            appels de loyer.
+          </div>
+        }
+
+        @if (selectedBail) {
+          <div class="bail-preview">
+            <div class="bail-preview__header">
+              <div>
+                <span class="bail-preview__label">
+                  {{ getBailTypeLabel(selectedBail) }}
+                </span>
+                <strong>{{ getBailTitleLabel(selectedBail) }}</strong>
+                <small>{{ getBailTenantAssetLabel(selectedBail) }}</small>
+              </div>
+
+              <span [class]="getBailStatusClass(selectedBail)">
+                {{ getBailStatusLabel(selectedBail) }}
+              </span>
+            </div>
+
+            <div class="detail-actions">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-success"
+                (click)="printBail(selectedBail)"
+                [disabled]="isPrinting(selectedBail)"
+              >
+                {{ isPrinting(selectedBail) ? 'Impression...' : 'Imprimer le bail' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="openModifMontantDialog(selectedBail)"
+              >
+                Modifier le loyer
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-warning"
+                (click)="closeBail(selectedBail)"
+                [disabled]="isClosing(selectedBail) || selectedBail.enCoursBail === false"
+              >
+                {{ isClosing(selectedBail) ? 'Cloture...' : 'Cloturer le bail' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteBail(selectedBail)"
+                [disabled]="isDeleting(selectedBail)"
+              >
+                {{ isDeleting(selectedBail) ? 'Suppression...' : 'Supprimer' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-summary-grid">
+            <article class="summary-chip">
+              <span>Loyer actuel</span>
+              <strong>{{ formatCurrency(selectedBail.nouveauMontantLoyer) }}</strong>
+            </article>
+            <article class="summary-chip">
+              <span>Solde cumule</span>
+              <strong>{{ formatCurrency(selectedOutstandingBalance) }}</strong>
+            </article>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span>Locataire</span>
+              <strong>{{ getBailLocataireLabel(selectedBail) }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Designation</span>
+              <strong>{{ selectedBail.designationBail || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Bien</span>
+              <strong>{{ selectedBail.bienImmobilierOperation || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Code du bien</span>
+              <strong>{{ getBailAssetCodeLabel(selectedBail) }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Date de debut</span>
+              <strong>{{ selectedBail.dateDebut | date: 'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Date de fin</span>
+              <strong>{{ selectedBail.dateFin | date: 'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Caution</span>
+              <strong>{{ formatCurrency(selectedBail.montantCautionBail) }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Mois de caution</span>
+              <strong>{{ selectedBail.nbreMoisCautionBail ?? 0 }}</strong>
+            </div>
+          </div>
+
+          <div class="card-heading card-heading--section">
+            <div>
+              <span class="card-heading__eyebrow">Appels</span>
+              <h2>Appels de loyer</h2>
+              <p>Vision immediate des echeances associees au bail.</p>
+            </div>
+            <div class="card-heading__meta">
+              <div class="toolbar-field toolbar-field--compact">
+                <label for="loyerPageSize">Lignes</label>
+                <select
+                  id="loyerPageSize"
+                  class="toolbar-select"
+                  [value]="loyerPageSize"
+                  (change)="onLoyerPageSizeChange($event)"
+                >
+                  @for (size of loyerPageSizeOptions; track size) {
+                    <option [value]="size">{{ size }} / page</option>
+                  }
+                </select>
+              </div>
+              <span class="baux-count">{{ bailLoyers.length }} appel(s)</span>
+            </div>
+          </div>
+
+          @if (isLoadingDetails) {
+            <div class="state-card">Chargement des appels de loyer...</div>
+          }
+
+          @if (!isLoadingDetails && bailLoyers.length === 0) {
+            <div class="state-card">
+              Aucun appel de loyer n'a ete trouve pour ce bail.
+            </div>
+          }
+
+          @if (!isLoadingDetails && bailLoyers.length > 0) {
+            <div class="table-shell table-shell--compact">
+              <div class="table-responsive">
+                <table class="table align-middle loyer-table">
+                  <thead>
+                    <tr>
+                      <th>Periode</th>
+                      <th>Echeance</th>
+                      <th>Montant</th>
+                      <th>Solde</th>
+                      <th>Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (loyer of paginatedBailLoyers; track trackByLoyer($index, loyer)) {
+                      <tr>
+                        <td>{{ formatLoyerPeriod(loyer) }}</td>
+                        <td>
+                          {{
+                            loyer.datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy'
+                          }}
+                        </td>
+                        <td>{{ formatCurrency(loyer.montantBailLPeriode) }}</td>
+                        <td>{{ formatCurrency(loyer.soldeAppelLoyer) }}</td>
+                        <td>
+                          <span [class]="getLoyerStatusClass(loyer)">
+                            {{ getLoyerStatusLabel(loyer) }}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="pagination-toolbar">
+              <p class="pagination-summary">
+                Affichage {{ loyersPaginationStart }} à {{ loyersPaginationEnd }} sur
+                {{ bailLoyers.length }} appel(s)
+              </p>
+
+              <div class="pagination-controls">
+                <button
+                  type="button"
+                  class="page-btn"
+                  [disabled]="currentLoyerPageNumber <= 1"
+                  (click)="previousLoyerPage()"
+                >
+                  Precedent
+                </button>
+
+                @for (page of loyersVisiblePages; track page) {
+                  <button
+                    type="button"
+                    class="page-btn"
+                    [class.is-active]="page === currentLoyerPageNumber"
+                    (click)="goToLoyerPage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="page-btn"
+                  [disabled]="currentLoyerPageNumber >= loyersTotalPages"
+                  (click)="nextLoyerPage()"
+                >
+                  Suivant
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+</div>
+
+@if (isCloseBailModalOpen) {
+  <div class="close-bail-modal-backdrop" (click)="cancelCloseBailModal()"></div>
+
+  <section
+    class="close-bail-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="close-bail-title"
+  >
+    <div class="close-bail-modal__header">
+      <div>
+        <span class="close-bail-modal__eyebrow">Cloture de bail</span>
+        <h2 id="close-bail-title">Conserver les periodes a recouvrer</h2>
+        <p>
+          Selectionnez les mois non soldes a garder pour le recouvrement au
+          {{ closeBailEffectiveDateLabel }}. Les autres mois non
+          consommes seront supprimes lors de la cloture.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cancelCloseBailModal()"
+        [disabled]="closingBailId !== null"
+      >
+        Fermer
+      </button>
+    </div>
+
+    <div class="close-bail-modal__content">
+      <section class="close-bail-hero">
+        <div class="close-bail-hero__copy">
+          <span class="close-bail-hero__label">{{ closeBailTargetLabel }}</span>
+          <strong>{{ getBailTenantAssetLabel(closeBailTarget) }}</strong>
+          <p>
+            Les arrieres deja consommes avant le mois courant restent disponibles
+            automatiquement. La selection ci-dessous sert a conserver les
+            periodes ouvertes a partir de maintenant.
+          </p>
+        </div>
+
+        <div class="close-bail-hero__summary">
+          <article class="close-bail-metric">
+            <span>Periodes proposees</span>
+            <strong>{{ closeBailPeriodOptions.length }}</strong>
+          </article>
+          <article class="close-bail-metric close-bail-metric--accent">
+            <span>Periodes gardees</span>
+            <strong>{{ selectedCloseBailPeriodsCount }}</strong>
+          </article>
+        </div>
+      </section>
+
+      @if (closeBailModalErrorMessage) {
+        <div class="alert alert-danger close-bail-alert">
+          {{ closeBailModalErrorMessage }}
+        </div>
+      }
+
+      @if (isLoadingCloseBailOptions) {
+        <div class="state-card">
+          Chargement des periodes non soldees du bail...
+        </div>
+      }
+
+      @if (!isLoadingCloseBailOptions && !closeBailModalErrorMessage && closeBailPeriodOptions.length === 0) {
+        <div class="state-card">
+          Aucune periode non soldee a partir du mois courant n'est disponible.
+          La cloture supprimera uniquement les mois non consommes restants.
+        </div>
+      }
+
+      @if (!isLoadingCloseBailOptions && closeBailPeriodOptions.length > 0) {
+        <div class="close-bail-period-list">
+          @for (option of closeBailPeriodOptions; track option.periodCode) {
+            <label
+              class="close-bail-period-card"
+              [class.close-bail-period-card--selected]="option.selected"
+            >
+              <input
+                type="checkbox"
+                [checked]="option.selected"
+                (change)="toggleCloseBailPeriod(option.periodCode, $any($event.target).checked)"
+              />
+
+              <div class="close-bail-period-card__content">
+                <div class="close-bail-period-card__header">
+                  <div>
+                    <strong>{{ formatLoyerPeriod(option.loyer) }}</strong>
+                    <span>{{ option.periodCode }}</span>
+                  </div>
+
+                  @if (option.isCurrentMonth) {
+                    <span class="close-bail-tag">Mois courant</span>
+                  }
+                </div>
+
+                <div class="close-bail-period-card__details">
+                  <div>
+                    <span>Echeance</span>
+                    <strong>{{ option.loyer.datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy' }}</strong>
+                  </div>
+                  <div>
+                    <span>Solde</span>
+                    <strong>{{ formatCurrency(option.loyer.soldeAppelLoyer) }}</strong>
+                  </div>
+                  <div>
+                    <span>Statut</span>
+                    <strong>{{ getLoyerStatusLabel(option.loyer) }}</strong>
+                  </div>
+                </div>
+              </div>
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="close-bail-modal__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cancelCloseBailModal()"
+        [disabled]="closingBailId !== null"
+      >
+        Annuler
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-warning"
+        (click)="confirmCloseBail()"
+        [disabled]="closingBailId !== null || isLoadingCloseBailOptions"
+      >
+        {{ closingBailId !== null ? 'Cloture...' : 'Cloturer le bail' }}
+      </button>
+    </div>
+  </section>
+}

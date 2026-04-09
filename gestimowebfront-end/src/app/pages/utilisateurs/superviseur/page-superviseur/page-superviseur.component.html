@@ -1,0 +1,103 @@
+
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Liste de(s) administrateur(s)</h1>
+    </div>
+    <div class="col-md-4 text-right">
+
+    </div>
+
+  </div>
+  <div class="col">
+    <!-- main content -->
+    <div class="tab-content" id="myTabContent">
+      <!-- user table -->
+      <div class="tab-pane fade show active" id="users">
+        <div class="mb-3 float-left">
+          <div class="col btn-group">
+            <div class="row md-12">
+              <form class="form-inline mr-2">
+                <input name="searchTerm"  class="form-control" ngModel
+                  type="search" placeholder="Recherche utilisateurs...">
+                </form>
+                <button  type="button" class="btn btn-info" data-toggle="modal" data-target="#addUserModal">
+                  <i class="fa fa-plus"></i>&nbsp;New User
+                </button>
+              </div>
+
+            </div>
+          </div>
+          <div>
+            @if (superviseurState$ | async; as state) {
+              @switch (state.dataState) {
+                @case (SuperviseurStateEnum.ERROR) {
+                  <div class="p-2 invalid-feedback">error...</div>
+                }
+                @case (SuperviseurStateEnum.LOADING) {
+                  <div class="p-2"> les données sont en chargement ...</div>
+                }
+                @case (SuperviseurStateEnum.LOADED) {
+                  <table class="table table-hover m-3 p-3">
+                    <thead class="table-borderless">
+                      <tr class="text-center mt-3">
+                        <th>Photo</th>
+                        <th>User ID</th>
+                        <th>Nom prénoms</th>
+                        <th>Nom utilisateur</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody >
+                      @for (superviseur of state.superviseurs; track superviseur) {
+                        <tr class="text-center" >
+                          <td >
+                            <img height="40" width="40" src="assets/nassmam.jpg" class="rounded-circle img-fluid img-thumbnail" alt=""/>
+                          </td>
+                          <td >{{superviseur.utilisateurIdApp}}</td>
+                          <td >{{superviseur.nom}} {{superviseur.prenom}}</td>
+                          <td >{{superviseur.username}}</td>
+                          <td >{{superviseur.mobile}}</td>
+                          <td >{{superviseur.email}}</td>
+                          <td>
+                            <div class="">Status:
+                              <span [hidden]="!superviseur.active" class="badge badge-success">Active</span>
+                              <span [hidden]="superviseur.active" class="badge badge-danger">Inactive</span>
+                            </div>
+                          </td>
+                          <td class="">
+                            <div class="btn-group">
+                              <button class="btn btn-outline-info" ><i class="fas fa-edit"></i></button>
+                              <button class="btn btn-outline-danger" ><i class="fas fa-trash"></i></button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+              }
+            }
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="row mb-3">
+      <div class=" col-md-12 text-center">
+        <!-- <app-pagination></app-pagination> -->
+      </div>
+    </div>
+
+  </div>
+
+
+
+
+
+

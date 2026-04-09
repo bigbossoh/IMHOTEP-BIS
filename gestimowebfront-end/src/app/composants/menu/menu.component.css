@@ -1,0 +1,104 @@
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.agency-banner {
+  background: linear-gradient(135deg, #173f7a, #0d2c57);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: #e7f0ff;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+}
+
+.agency-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.agency-name {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.menu-group {
+  background: #f8fbff;
+  border: 1px solid #d9e3f2;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.menu-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+
+.menu-trigger__text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.menu-trigger__caret {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+  color: #4b5563;
+}
+
+.menu-group.open .menu-trigger__caret {
+  transform: rotate(180deg);
+}
+
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.55rem 0.55rem;
+  display: none;
+}
+
+.menu-group.open .menu-list {
+  display: block;
+}
+
+.menu-link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 10px;
+  padding: 0.6rem 0.65rem;
+  color: #334155;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-link:hover {
+  background: #e2ebf8;
+  color: #0f172a;
+  transform: translateX(2px);
+}
+
+.menu-link.active {
+  background: linear-gradient(135deg, #1d4ed8, #1f6feb);
+  color: #fff;
+  box-shadow: 0 8px 14px rgba(30, 64, 175, 0.28);
+}

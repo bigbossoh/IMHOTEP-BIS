@@ -1,0 +1,496 @@
+<section class="expense-page">
+  <header class="expense-hero">
+    <div class="expense-hero__copy">
+      <span class="expense-eyebrow">Gestion des dépenses</span>
+      <h1>Création et validation des dépenses</h1>
+      <p>
+        Centralisez la saisie des dépenses, les justificatifs, l’affectation
+        immobilière et le suivi du circuit de validation depuis un seul écran.
+      </p>
+    </div>
+
+    <div class="expense-hero__actions">
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="navigateToWorkflowSettings()"
+      >
+        Paramétrer le circuit
+      </button>
+      <div class="expense-pill">
+        <strong>Seuil actuel</strong>
+        <span>{{ formatCurrency(thresholdAmount) }}</span>
+      </div>
+      <div class="expense-pill expense-pill--soft">
+        <strong>Circuit</strong>
+        <span>{{ workflowEnabled ? 'Actif' : 'Désactivé' }}</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="expense-metrics">
+    <article class="metric-card" data-tone="primary">
+      <span>Demandes</span>
+      <strong>{{ expenses.length }}</strong>
+      <small>Total des dépenses enregistrées</small>
+    </article>
+
+    <article class="metric-card" data-tone="warning">
+      <span>En validation</span>
+      <strong>{{ pendingValidationCount }}</strong>
+      <small>Demandes dans le workflow</small>
+    </article>
+
+    <article class="metric-card" data-tone="success">
+      <span>Validées</span>
+      <strong>{{ validatedCount }}</strong>
+      <small>Dépenses approuvées</small>
+    </article>
+
+    <article class="metric-card" data-tone="dark">
+      <span>Montant cumulé</span>
+      <strong>{{ formatCurrency(totalMontant) }}</strong>
+      <small>Toutes les dépenses confondues</small>
+    </article>
+  </section>
+
+  <div class="expense-layout">
+    <section class="panel panel--form">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Formulaire</span>
+          <h2>Nouvelle dépense</h2>
+        </div>
+        <span class="panel-chip">
+          {{ exceedsThreshold && workflowEnabled ? 'Soumise au workflow' : 'Validation simplifiée' }}
+        </span>
+      </div>
+
+      <form class="expense-form" [formGroup]="form">
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Informations générales</h3>
+            <p>Référence, date, catégorie et description de la dépense.</p>
+          </div>
+
+          <div class="form-grid form-grid--2">
+            <label class="field">
+              <span>Référence <span class="field-badge-auto">Auto</span></span>
+              <input type="text" class="form-control ref-readonly" formControlName="referenceDepense" readonly />
+              <small class="field-error" *ngIf="isFieldInvalid('referenceDepense')">{{ getErrorMessage('referenceDepense') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Date</span>
+              <input type="date" class="form-control" formControlName="dateEncaissement" />
+              <small class="field-error" *ngIf="isFieldInvalid('dateEncaissement')">{{ getErrorMessage('dateEncaissement') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Catégorie</span>
+              <select class="form-control" formControlName="categorieDepense">
+                <option value="" disabled>-- Sélectionnez une catégorie --</option>
+                <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+              </select>
+              <small class="field-error" *ngIf="isFieldInvalid('categorieDepense')">{{ getErrorMessage('categorieDepense') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Libellé</span>
+              <input type="text" class="form-control" formControlName="libelleDepense" placeholder="Exemple : réparation climatisation" />
+              <small class="field-error" *ngIf="isFieldInvalid('libelleDepense')">{{ getErrorMessage('libelleDepense') }}</small>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Description</span>
+            <textarea rows="4" class="form-control" formControlName="descriptionDepense" placeholder="Précisez le contexte, les travaux ou l’objet de la dépense."></textarea>
+            <small class="field-error" *ngIf="isFieldInvalid('descriptionDepense')">{{ getErrorMessage('descriptionDepense') }}</small>
+          </label>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Informations financières</h3>
+            <p>Montant, paiement et impact sur le circuit de validation.</p>
+          </div>
+
+          <div class="form-grid form-grid--2">
+            <label class="field">
+              <span>Montant</span>
+              <input type="number" min="1" class="form-control" formControlName="montantDepense" placeholder="0" />
+              <small class="field-error" *ngIf="isFieldInvalid('montantDepense')">{{ getErrorMessage('montantDepense') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Mode de paiement</span>
+              <input type="text" class="form-control" list="expense-payment-modes" formControlName="modePaiement" placeholder="Espèce, Mobile money, Virement..." />
+              <datalist id="expense-payment-modes">
+                <option *ngFor="let mode of paymentModes" [value]="mode"></option>
+              </datalist>
+              <small class="field-error" *ngIf="isFieldInvalid('modePaiement')">{{ getErrorMessage('modePaiement') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Statut</span>
+              <select class="form-select" formControlName="statutPaiement">
+                <option *ngFor="let option of paymentStatusOptions" [value]="option.value">{{ option.label }}</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Date de paiement</span>
+              <input type="date" class="form-control" formControlName="datePaiement" />
+              <small class="field-error" *ngIf="isFieldInvalid('datePaiement')">{{ getErrorMessage('datePaiement') }}</small>
+            </label>
+          </div>
+
+          <div class="info-banner" [class.info-banner--warning]="exceedsThreshold && workflowEnabled">
+            <div>
+              <strong>{{ formatCurrency(amountValue) }}</strong>
+              <p>{{ workflowPreviewText }}</p>
+            </div>
+            <span class="info-banner__flag">
+              {{ exceedsThreshold && workflowEnabled ? 'Workflow requis' : 'Traitement standard' }}
+            </span>
+          </div>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Affectation immobilière</h3>
+            <p>Recherchez le bien concerné puis le local ou l’appartement.</p>
+          </div>
+
+          <div class="form-grid form-grid--2">
+            <label class="field">
+              <span>Site géographique</span>
+              <select class="form-control" formControlName="siteId" (change)="onSiteChange()">
+                <option [ngValue]="null" disabled>-- Sélectionnez un site --</option>
+                <option *ngFor="let site of sites" [ngValue]="site.id">
+                  {{ site.nomSite || site.abrSite || ('Site #' + site.id) }}
+                </option>
+              </select>
+              <small class="field-error" *ngIf="isFieldInvalid('siteId')">{{ getErrorMessage('siteId') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Bien immobilier</span>
+              <select class="form-control" formControlName="bienImmobilierSelection" (change)="onBienChange()" [attr.disabled]="!form.controls.siteId.value ? true : null">
+                <option [ngValue]="null" disabled>
+                  {{ form.controls.siteId.value ? '-- Sélectionnez un bien --' : '-- Choisir un site d\'abord --' }}
+                </option>
+                <option *ngFor="let bien of biensForSelectedSite" [ngValue]="bien.key">
+                  [{{ bien.type }}] {{ bien.label }}
+                </option>
+              </select>
+              <small class="field-error" *ngIf="isFieldInvalid('bienImmobilierId')">{{ getErrorMessage('bienImmobilierId') }}</small>
+            </label>
+          </div>
+
+          <div class="form-grid form-grid--2" *ngIf="hasSelectedImmeuble">
+            <label class="field">
+              <span>Biens de l'immeuble</span>
+              <select
+                class="form-control"
+                formControlName="appartementLocalSelection"
+                (change)="onAppartementLocalChange()"
+                [attr.disabled]="!linkedBiensForSelectedImmeuble.length ? true : null"
+              >
+                <option [ngValue]="null">
+                  {{
+                    linkedBiensForSelectedImmeuble.length
+                      ? '-- Immeuble entier ou unité précise --'
+                      : '-- Aucun appartement ou local trouvé --'
+                  }}
+                </option>
+                <option
+                  *ngFor="let bien of linkedBiensForSelectedImmeuble"
+                  [ngValue]="bien.key"
+                >
+                  [{{ bien.type }}] {{ bien.code || bien.label }}
+                </option>
+              </select>
+              <small class="text-muted">
+                Sélectionnez ici l'appartement ou le local concerné si la
+                dépense vise une unité précise de l'immeuble.
+              </small>
+            </label>
+          </div>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Fournisseur et justificatif</h3>
+            <p>Informations de contact et pièce justificative au format accepté.</p>
+          </div>
+
+          <div class="form-grid form-grid--3">
+            <label class="field">
+              <span>Fournisseur</span>
+              <input type="text" class="form-control" list="expense-suppliers" formControlName="fournisseurNom" placeholder="Nom du fournisseur" (blur)="onSupplierBlur()" />
+              <datalist id="expense-suppliers">
+                <option *ngFor="let supplier of supplierSuggestions" [value]="supplier.fournisseurNom || ''"></option>
+              </datalist>
+            </label>
+
+            <label class="field">
+              <span>Téléphone</span>
+              <input type="tel" class="form-control" formControlName="fournisseurTelephone" placeholder="+225 07 00 00 00 00" />
+              <small class="field-error" *ngIf="isFieldInvalid('fournisseurTelephone')">{{ getErrorMessage('fournisseurTelephone') }}</small>
+            </label>
+
+            <label class="field">
+              <span>Email</span>
+              <input type="email" class="form-control" formControlName="fournisseurEmail" placeholder="contact@fournisseur.com" />
+              <small class="field-error" *ngIf="isFieldInvalid('fournisseurEmail')">{{ getErrorMessage('fournisseurEmail') }}</small>
+            </label>
+          </div>
+
+          <div class="upload-box">
+            <div class="upload-box__content">
+              <h4>Pièce justificative</h4>
+              <p>Formats autorisés : PDF, JPG, JPEG, PNG.</p>
+            </div>
+            <label class="btn btn-outline-secondary upload-box__button">
+              Ajouter un fichier
+              <input type="file" [accept]="attachmentAccept" hidden (change)="onFileSelected($event)" />
+            </label>
+          </div>
+
+          <div class="attachment-preview" *ngIf="selectedAttachment">
+            <div class="attachment-preview__meta">
+              <strong>{{ attachmentPreviewName }}</strong>
+              <span *ngIf="attachmentPreviewKind === 'image'">Aperçu image disponible</span>
+              <span *ngIf="attachmentPreviewKind === 'document'">Document prêt à être envoyé</span>
+            </div>
+            <button type="button" class="btn btn-link" (click)="clearAttachmentSelection()">Retirer</button>
+          </div>
+
+          <div class="attachment-preview attachment-preview--image" *ngIf="attachmentPreviewKind === 'image' && attachmentPreviewUrl">
+            <img [src]="attachmentPreviewUrl" alt="Aperçu du justificatif" />
+          </div>
+        </article>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Annuler</button>
+          <button type="button" class="btn btn-outline-primary" (click)="saveDraft()" [disabled]="!canSaveDraft">
+            <span class="spinner-border spinner-border-sm" *ngIf="isSavingDraft"></span>
+            Enregistrer
+          </button>
+          <button type="button" class="btn btn-primary" (click)="submitExpense()" [disabled]="!canSubmit">
+            <span class="spinner-border spinner-border-sm" *ngIf="isSubmitting"></span>
+            Soumettre pour validation
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="panel panel--sidebar" *ngIf="selectedExpense as expense">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Suivi</span>
+          <h2>{{ expense.referenceDepense || 'Détail de la dépense' }}</h2>
+        </div>
+        <span class="status-badge" [attr.data-tone]="getStatusTone(expense.workflowStatus)">
+          {{ getWorkflowStatusLabel(expense.workflowStatus) }}
+        </span>
+      </div>
+
+      <div class="detail-stack">
+        <div class="detail-row">
+          <div>
+            <span>Demandeur</span>
+            <strong>{{ expense.demandeurNom || 'Non renseigné' }}</strong>
+          </div>
+          <div>
+            <span>Montant</span>
+            <strong>{{ formatCurrency(expense.montantDepense) }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <div>
+            <span>Bien</span>
+            <strong>{{ expense.bienImmobilierLibelle || 'Non renseigné' }}</strong>
+          </div>
+          <div>
+            <span>Local</span>
+            <strong>{{ expense.appartementLocalLibelle || 'Non renseigné' }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <div>
+            <span>Statut paiement</span>
+            <strong class="status-inline" [attr.data-tone]="getPaymentTone(expense.statutPaiement)">
+              {{ getPaymentStatusLabel(expense.statutPaiement) }}
+            </strong>
+          </div>
+          <div>
+            <span>Date paiement</span>
+            <strong>{{ formatDate(expense.datePaiement) }}</strong>
+          </div>
+        </div>
+
+        <section class="workflow-box">
+          <div class="workflow-box__head">
+            <h3>Progression du workflow</h3>
+            <span>{{ currentStepLabel }}</span>
+          </div>
+          <div class="workflow-steps">
+            <div class="workflow-step" *ngFor="let step of getWorkflowSteps(expense)" [attr.data-state]="step.state">
+              <span class="workflow-step__dot"></span>
+              <div>
+                <strong>{{ step.label }}</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="workflow-box">
+          <div class="workflow-box__head">
+            <h3>Historique des validations</h3>
+            <span>{{ expense.history?.length || 0 }} action(s)</span>
+          </div>
+          <div class="timeline" *ngIf="expense.history?.length; else emptyHistory">
+            <article class="timeline-item" *ngFor="let item of expense.history">
+              <div class="timeline-item__meta">
+                <strong>{{ item.actorName || 'Utilisateur' }}</strong>
+                <span>{{ formatDateTime(item.actionAt) }}</span>
+              </div>
+              <p>{{ item.actionType || 'Action' }} - {{ item.workflowStatusAfterAction || 'Statut' }}</p>
+              <small *ngIf="item.commentaire">{{ item.commentaire }}</small>
+            </article>
+          </div>
+          <ng-template #emptyHistory>
+            <p class="empty-inline">Aucune action historisée pour le moment.</p>
+          </ng-template>
+        </section>
+
+        <section class="workflow-box" *ngIf="expense.hasJustificatif">
+          <div class="workflow-box__head">
+            <h3>Justificatif joint</h3>
+            <span>{{ expense.justificatifNom || 'Fichier joint' }}</span>
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="downloadAttachment(expense)">
+            Télécharger le justificatif
+          </button>
+        </section>
+
+        <section class="workflow-box" *ngIf="canApprove(expense) || canCancel(expense)">
+          <div class="workflow-box__head">
+            <h3>Action rapide</h3>
+            <span>Commentaire optionnel</span>
+          </div>
+          <textarea rows="3" class="form-control" [(ngModel)]="actionComment" placeholder="Ajouter un commentaire de validation ou de rejet..."></textarea>
+          <div class="workflow-actions">
+            <button type="button" class="btn btn-outline-primary btn-sm" *ngIf="canApprove(expense)" (click)="approveSelectedExpense()" [disabled]="isWorkflowActionLoading">
+              Approuver
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" *ngIf="canApprove(expense)" (click)="rejectSelectedExpense()" [disabled]="isWorkflowActionLoading">
+              Rejeter
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" *ngIf="canCancel(expense)" (click)="cancelSelectedExpense()" [disabled]="isWorkflowActionLoading">
+              Annuler la demande
+            </button>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <span class="panel-kicker">Historique</span>
+        <h2>Liste des dépenses</h2>
+      </div>
+      <span class="panel-chip">{{ filteredExpenses.length }} dépense(s)</span>
+    </div>
+
+    <div class="list-toolbar">
+      <label class="field field--grow">
+        <span>Recherche</span>
+        <input type="search" class="form-control" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Référence, libellé, fournisseur, bien..." />
+      </label>
+
+      <label class="field field--compact">
+        <span>Workflow</span>
+        <select class="form-select" [ngModel]="workflowFilter" (ngModelChange)="onWorkflowFilterChange($event)">
+          <option *ngFor="let option of workflowFilters" [ngValue]="option.value">{{ option.label }}</option>
+        </select>
+      </label>
+
+      <label class="field field--compact">
+        <span>Afficher</span>
+        <select class="form-select" [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
+      </label>
+
+      <button type="button" class="btn btn-outline-primary list-toolbar__button" (click)="refreshExpenses()" [disabled]="isPageLoading">
+        Actualiser
+      </button>
+    </div>
+
+    <div class="table-shell" *ngIf="filteredExpenses.length; else emptyState">
+      <table class="expense-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Date</th>
+            <th>Bien</th>
+            <th>Libellé</th>
+            <th>Montant</th>
+            <th>Workflow</th>
+            <th>Paiement</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let expense of pagedExpenses; trackBy: trackByExpenseId" [class.is-selected]="selectedExpense?.id === expense.id">
+            <td>
+              <button type="button" class="link-button" (click)="selectExpense(expense)">
+                {{ expense.referenceDepense || 'Sans référence' }}
+              </button>
+            </td>
+            <td>{{ formatDate(expense.dateEncaissement) }}</td>
+            <td>{{ expense.appartementLocalLibelle || expense.bienImmobilierLibelle || 'Non renseigné' }}</td>
+            <td>
+              <strong>{{ expense.libelleDepense || 'Sans libellé' }}</strong>
+              <small>{{ expense.categorieDepense || 'Catégorie non renseignée' }}</small>
+            </td>
+            <td class="text-strong">{{ formatCurrency(expense.montantDepense) }}</td>
+            <td><span class="status-badge" [attr.data-tone]="getStatusTone(expense.workflowStatus)">{{ getWorkflowStatusLabel(expense.workflowStatus) }}</span></td>
+            <td><span class="status-badge" [attr.data-tone]="getPaymentTone(expense.statutPaiement)">{{ getPaymentStatusLabel(expense.statutPaiement) }}</span></td>
+            <td class="text-end">
+              <div class="table-actions">
+                <button type="button" class="table-action" (click)="selectExpense(expense)" title="Consulter"><i class="fas fa-eye"></i></button>
+                <button type="button" class="table-action" *ngIf="canEdit(expense)" (click)="editExpense(expense)" title="Modifier"><i class="fas fa-pen"></i></button>
+                <button type="button" class="table-action" *ngIf="expense.hasJustificatif" (click)="downloadAttachment(expense)" title="Justificatif"><i class="fas fa-paperclip"></i></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <p>Aucune dépense ne correspond aux filtres en cours.</p>
+      </div>
+    </ng-template>
+
+    <div class="pagination-bar" *ngIf="filteredExpenses.length">
+      <button type="button" class="pagination-bar__button" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Précédent</button>
+      <div class="pagination-bar__pages">
+        <button type="button" class="pagination-bar__page" *ngFor="let page of pageNumbers" [class.pagination-bar__page--active]="page === currentPage" (click)="setPage(page)">
+          {{ page }}
+        </button>
+      </div>
+      <button type="button" class="pagination-bar__button" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Suivant</button>
+    </div>
+  </section>
+</section>

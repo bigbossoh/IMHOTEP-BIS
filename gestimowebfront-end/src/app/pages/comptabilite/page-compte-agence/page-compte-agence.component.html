@@ -1,0 +1,80 @@
+
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Cloture des caisses</h1>
+    </div>
+    <div class="col-md-4 text-right"></div>
+  </div>
+
+  <div class="row">
+
+
+  </div>
+
+  <div>
+    <div class="mat-elevation-z8">
+      <div class="example-header">
+        <mat-form-field class="tail-50" style="margin-left: 12px;">
+          <mat-label>Rechercher</mat-label>
+          <input matInput (keyup)="applyFilterAppel($event)" #input placeholder="Rechercher un Appel" />
+        </mat-form-field>
+      </div>
+      <mat-paginator #paginator showFirstLastButtons [length]="100" [pageSizeOptions] ="pageSizeAppel" aria-label="Select page of users">
+      </mat-paginator>
+      <mat-table #tableAppel [dataSource]="dataSource" matSort>
+        <!-- Code colonne -->
+        <ng-container matColumnDef="caissiere">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            Personne
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.caissiere }}
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="dateDeDCloture">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+           Periode
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+          Du  {{ row.dateDeDCloture | date: "dd-MM-yyyy" }} à {{ row.dateFinCloture | date: "dd-MM-yyyy" }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="intervalNextCloture">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            Prochaine cloture
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+         Dans   {{ row.dateNextCloture| date: "dd-MM-yyyy" }} jours
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="totalEncaisse">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>
+            Total Encaissé
+          </mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            {{ row.totalEncaisse |currency:'XOF'}}</mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"> </mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            Aucune donnée enregistrée {{ input.value }}
+          </td>
+        </tr>
+      </mat-table>
+    </div>
+  </div>
+  <!-- LISTE DES APPELS PAR BIEN -->
+
+  <div>
+
+  </div>
+
+  <div>
+
+  </div>
+</div>
+

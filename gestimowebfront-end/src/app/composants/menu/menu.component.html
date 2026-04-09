@@ -1,0 +1,34 @@
+<nav class="menu-nav">
+  <div class="agency-banner">
+    <span class="agency-label">Agence connectee</span>
+    <strong class="agency-name">{{ agenceDto?.nomAgence || 'Chargement...' }}</strong>
+  </div>
+
+  @for (menu of menuProperties; track menu.id) {
+    <section class="menu-group" [class.open]="isExpanded(menu)">
+      <button type="button" class="menu-trigger" (click)="toggleGroup(menu)">
+        <span class="menu-trigger__text">
+          <i class="{{ menu.icon }}"></i>
+          {{ menu.titre }}
+        </span>
+        <i class="fas fa-chevron-down menu-trigger__caret"></i>
+      </button>
+
+      <ul class="menu-list">
+        @for (sousMenu of menu.sousMenu; track sousMenu.id) {
+          <li>
+            <button
+              type="button"
+              class="menu-link"
+              [class.active]="isRouteActive(sousMenu)"
+              (click)="navigate(sousMenu)"
+            >
+              <i class="{{ sousMenu.icon }}"></i>
+              <span>{{ sousMenu.titre }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</nav>

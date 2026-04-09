@@ -1,0 +1,161 @@
+<section class="scheduled-page">
+  <div class="scheduled-hero">
+    <div>
+      <p class="scheduled-eyebrow">Paramétrage</p>
+      <h1>Gestion des tâches planifiées</h1>
+      <p class="scheduled-subtitle">
+        Planifie l'appel des loyers chaque mois pour l'agence
+        <strong>{{ agenceLabel }}</strong> et envoie à la gérante un mail avec l'état PDF de la période suivante.
+      </p>
+    </div>
+
+    <div class="scheduled-actions">
+      <button type="button" class="ghost-button" (click)="refresh()" [disabled]="isLoading || isSaving || isRunningNow">
+        Recharger
+      </button>
+      <button
+        type="button"
+        class="primary-button"
+        (click)="saveAndRunNow()"
+        [disabled]="isLoading || isSaving || isRunningNow"
+      >
+        {{ isRunningNow ? 'Traitement en cours...' : 'Enregistrer puis lancer maintenant' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="status-grid">
+    <article class="status-card">
+      <span>Statut</span>
+      <strong>{{ cronForm.get('enabled')?.value ? 'Actif' : 'Inactif' }}</strong>
+      <small>Le traitement tourne chaque mois selon les paramètres ci-dessous.</small>
+    </article>
+
+    <article class="status-card">
+      <span>Prochaine exécution</span>
+      <strong>{{ nextExecutionPreviewLabel }}</strong>
+      <small>Déclenchement prévu le jour choisi, à l'heure indiquée.</small>
+    </article>
+
+    <article class="status-card">
+      <span>Dernière exécution</span>
+      <strong>{{ lastExecutionLabel }}</strong>
+      <small>{{ lastExecutionPeriodLabel }}</small>
+    </article>
+
+    <article class="status-card">
+      <span>Expression CRON</span>
+      <strong>{{ cronExpression }}</strong>
+      <small>Format: seconde minute heure jour mois jour-semaine</small>
+    </article>
+  </div>
+
+  <div class="page-error" *ngIf="loadErrorMessage">
+    {{ loadErrorMessage }}
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    Chargement de la configuration...
+  </div>
+
+  <div class="scheduled-layout" *ngIf="!isLoading">
+    <article class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2>Formulaire de planification</h2>
+          <p>Le cron exécutera l'appel des loyers et enverra le mail à la gérante.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="cronForm" class="scheduled-form" (ngSubmit)="saveConfiguration()">
+        <div class="field-grid">
+          <label class="field">
+            <span>Email de la gérante</span>
+            <input
+              type="email"
+              formControlName="managerEmail"
+              placeholder="gerante@agence.com"
+            />
+            <small *ngIf="cronForm.get('managerEmail')?.invalid && cronForm.get('managerEmail')?.touched">
+              Renseigne un email valide.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Jour du mois</span>
+            <select formControlName="dayOfMonth">
+              <option *ngFor="let day of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28]" [value]="day">
+                {{ day }}
+              </option>
+            </select>
+            <small>Pour éviter les mois plus courts, la limite est fixée à 28.</small>
+          </label>
+
+          <label class="field">
+            <span>Heure d'exécution</span>
+            <input type="time" formControlName="executionTime" />
+            <small>Heure locale du serveur utilisée pour le déclenchement.</small>
+          </label>
+
+          <label class="field field-toggle">
+            <span>Activation</span>
+            <select formControlName="enabled">
+              <option [ngValue]="true">Activée</option>
+              <option [ngValue]="false">Désactivée</option>
+            </select>
+            <small>Quand la planification est désactivée, aucun traitement automatique ne part.</small>
+          </label>
+        </div>
+
+        <div class="form-summary">
+          <div>
+            <span>Agence</span>
+            <strong>{{ agenceLabel }}</strong>
+          </div>
+          <div>
+            <span>Prochaine exécution</span>
+            <strong>{{ nextExecutionPreviewLabel }}</strong>
+          </div>
+          <div>
+            <span>Période envoyée</span>
+            <strong>Le mois suivant au moment du lancement</strong>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="secondary-button" [disabled]="isSaving || isLoading || isRunningNow">
+            {{ isSaving ? 'Enregistrement...' : 'Enregistrer la planification' }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <aside class="panel-card side-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Comportement automatique</h2>
+          <p>Ce qui se passe à chaque déclenchement mensuel.</p>
+        </div>
+      </div>
+
+      <ol class="timeline">
+        <li>
+          <strong>1. Vérification de l'échéance</strong>
+          <span>Le serveur vérifie chaque minute si la date et l'heure configurées sont atteintes.</span>
+        </li>
+        <li>
+          <strong>2. Génération des appels</strong>
+          <span>Les appels de loyers manquants du mois suivant sont créés pour les baux actifs de l'agence.</span>
+        </li>
+        <li>
+          <strong>3. Mail de synthèse</strong>
+          <span>La gérante reçoit un mail avec le nombre de baux éligibles, le nombre de nouveaux appels créés et le PDF <code>quittance-AAAA-MM</code> en pièce jointe.</span>
+        </li>
+        <li>
+          <strong>4. Replanification</strong>
+          <span>La prochaine exécution est automatiquement recalculée pour le mois suivant.</span>
+        </li>
+      </ol>
+    </aside>
+  </div>
+</section>

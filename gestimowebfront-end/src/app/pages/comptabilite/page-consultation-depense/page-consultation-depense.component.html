@@ -1,0 +1,372 @@
+<div class="consult-page container-fluid">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Consultation des dépenses</h1>
+      <p>Consultez et filtrez l'ensemble des dépenses enregistrées dans le système.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="loadExpenses()" [disabled]="loading">
+        <i class="fas fa-sync-alt"></i> Actualiser
+      </button>
+      <button type="button" class="btn btn-outline-success" (click)="exportToExcel()" [disabled]="!filteredExpenses.length">
+        <i class="fas fa-file-excel"></i> Exporter Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <article class="kpi-card kpi-blue">
+      <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+      <div>
+        <span class="kpi-label">Total dépenses</span>
+        <strong class="kpi-value">{{ totalCount }}</strong>
+      </div>
+    </article>
+    <article class="kpi-card kpi-purple">
+      <div class="kpi-icon"><i class="fas fa-wallet"></i></div>
+      <div>
+        <span class="kpi-label">Montant total</span>
+        <strong class="kpi-value kpi-value--sm">{{ fmtCurrency(totalMontant) }}</strong>
+      </div>
+    </article>
+    <article class="kpi-card kpi-green">
+      <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+      <div>
+        <span class="kpi-label">Validées</span>
+        <strong class="kpi-value">{{ validatedCount }}</strong>
+      </div>
+    </article>
+    <article class="kpi-card kpi-orange">
+      <div class="kpi-icon"><i class="fas fa-hourglass-half"></i></div>
+      <div>
+        <span class="kpi-label">En attente</span>
+        <strong class="kpi-value">{{ pendingCount }}</strong>
+      </div>
+    </article>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-card card">
+    <div class="card-body">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Recherche</label>
+          <input
+            type="search"
+            class="form-control"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+            placeholder="Référence, libellé, fournisseur..."
+          />
+        </div>
+        <div class="filter-group">
+          <label>Statut</label>
+          <div class="select-wrap">
+            <select class="form-control" [(ngModel)]="workflowFilter" (ngModelChange)="onFilterChange()">
+              <option *ngFor="let opt of workflowFilterOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Catégorie</label>
+          <div class="select-wrap">
+            <select class="form-control" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
+              <option value="">Toutes les catégories</option>
+              <option *ngFor="let cat of availableCategories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Date début</label>
+          <input type="date" class="form-control" [(ngModel)]="dateDebut" (ngModelChange)="onFilterChange()" />
+        </div>
+        <div class="filter-group">
+          <label>Date fin</label>
+          <input type="date" class="form-control" [(ngModel)]="dateFin" (ngModelChange)="onFilterChange()" />
+        </div>
+        <div class="filter-group filter-group--action">
+          <label>&nbsp;</label>
+          <button type="button" class="btn btn-outline-secondary w-100" (click)="resetFilters()" [disabled]="!hasActiveFilters()">
+            <i class="fas fa-times"></i> Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau + panneau détail -->
+  <div class="content-row" [class.has-detail]="!!selectedExpense">
+
+    <!-- Tableau principal -->
+    <div class="table-card card">
+      <div class="card-body">
+        <div class="table-toolbar">
+          <span class="results-count">
+            <strong>{{ filteredExpenses.length }}</strong> dépense(s)
+            @if (filteredExpenses.length > 0) {
+              &nbsp;·&nbsp; <strong>{{ fmtCurrency(filteredTotalMontant) }}</strong>
+            }
+          </span>
+          <div class="select-wrap">
+            <select class="form-control page-size-select" [(ngModel)]="pageSize" (ngModelChange)="goToPage(1)">
+              <option *ngFor="let opt of pageSizeOptions" [value]="opt">{{ opt }} / page</option>
+            </select>
+          </div>
+        </div>
+
+        @if (loading) {
+          <div class="state-box">
+            <i class="fas fa-circle-notch fa-spin fa-2x mb-2"></i>
+            <span>Chargement des dépenses...</span>
+          </div>
+        }
+
+        @if (!loading && expenses.length === 0) {
+          <div class="state-box">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <span>Aucune dépense enregistrée.</span>
+          </div>
+        }
+
+        @if (!loading && expenses.length > 0 && filteredExpenses.length === 0) {
+          <div class="state-box">
+            <i class="fas fa-search fa-2x mb-2"></i>
+            <span>Aucune dépense ne correspond aux filtres appliqués.</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" (click)="resetFilters()">
+              Réinitialiser les filtres
+            </button>
+          </div>
+        }
+
+        @if (!loading && paginatedExpenses.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle consult-table">
+              <thead>
+                <tr>
+                  <th>Référence</th>
+                  <th>Date</th>
+                  <th>Catégorie</th>
+                  <th>Libellé</th>
+                  <th>Bien / Local</th>
+                  <th>Fournisseur</th>
+                  <th class="text-end">Montant</th>
+                  <th>Statut</th>
+                  <th>Paiement</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (expense of paginatedExpenses; track expense.id) {
+                  <tr
+                    [class.row-selected]="selectedExpense?.id === expense.id"
+                    (click)="selectExpense(expense)"
+                  >
+                    <td><span class="ref-text">{{ expense.referenceDepense || '–' }}</span></td>
+                    <td class="text-nowrap">{{ fmtDate(expense.dateEncaissement) }}</td>
+                    <td><span class="cat-badge">{{ expense.categorieDepense || '–' }}</span></td>
+                    <td>
+                      <div class="libelle-cell">
+                        <strong>{{ expense.libelleDepense || '–' }}</strong>
+                        @if (expense.descriptionDepense) {
+                          <small class="text-muted d-block text-truncate desc-truncate">{{ expense.descriptionDepense }}</small>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <span class="text-truncate bien-cell" [title]="localLabel(expense)">{{ localLabel(expense) }}</span>
+                    </td>
+                    <td>{{ expense.fournisseurNom || '–' }}</td>
+                    <td class="text-end text-nowrap montant-cell">{{ fmtCurrency(expense.montantDepense) }}</td>
+                    <td>
+                      <span class="status-badge" [attr.data-tone]="workflowTone(expense.workflowStatus)">
+                        {{ workflowLabel(expense.workflowStatus) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge" [attr.data-tone]="paymentTone(expense.statutPaiement)">
+                        {{ paymentLabel(expense.statutPaiement) }}
+                      </span>
+                    </td>
+                    <td class="chevron-cell">
+                      <i class="fas fa-chevron-right row-arrow" [class.row-arrow--open]="selectedExpense?.id === expense.id"></i>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-toolbar">
+            <span class="pagination-summary">{{ paginationStart }}–{{ paginationEnd }} sur {{ filteredExpenses.length }}</span>
+            <div class="pagination-controls">
+              <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+              @for (page of visiblePages; track $index) {
+                @if (page === -1) {
+                  <span class="page-btn page-btn--ellipsis">…</span>
+                } @else {
+                  <button class="page-btn" [class.page-btn--active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+                }
+              }
+              <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Panneau détail -->
+    @if (selectedExpense) {
+      <aside class="detail-panel card">
+        <div class="card-body">
+          <div class="detail-header">
+            <div>
+              <span class="detail-kicker">Détail de la dépense</span>
+              <h2 class="detail-ref">{{ selectedExpense.referenceDepense || 'Sans référence' }}</h2>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="closeDetail()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="detail-badges">
+            <span class="status-badge" [attr.data-tone]="workflowTone(selectedExpense.workflowStatus)">
+              {{ workflowLabel(selectedExpense.workflowStatus) }}
+            </span>
+            <span class="status-badge" [attr.data-tone]="paymentTone(selectedExpense.statutPaiement)">
+              {{ paymentLabel(selectedExpense.statutPaiement) }}
+            </span>
+          </div>
+
+          <!-- Général -->
+          <div class="detail-section">
+            <div class="detail-row">
+              <span>Date</span>
+              <strong>{{ fmtDate(selectedExpense.dateEncaissement) }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Catégorie</span>
+              <strong>{{ selectedExpense.categorieDepense || '–' }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Libellé</span>
+              <strong>{{ selectedExpense.libelleDepense || '–' }}</strong>
+            </div>
+            @if (selectedExpense.descriptionDepense) {
+              <div class="detail-row detail-row--block">
+                <span>Description</span>
+                <p>{{ selectedExpense.descriptionDepense }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Financier -->
+          <div class="detail-section">
+            <div class="detail-section-title">Financier</div>
+            <div class="detail-row">
+              <span>Montant</span>
+              <strong class="amount-highlight">{{ fmtCurrency(selectedExpense.montantDepense) }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Mode de paiement</span>
+              <strong>{{ selectedExpense.modePaiement || '–' }}</strong>
+            </div>
+            @if (selectedExpense.datePaiement) {
+              <div class="detail-row">
+                <span>Date de paiement</span>
+                <strong>{{ fmtDate(selectedExpense.datePaiement) }}</strong>
+              </div>
+            }
+          </div>
+
+          <!-- Bien immobilier -->
+          <div class="detail-section">
+            <div class="detail-section-title">Bien immobilier</div>
+            <div class="detail-row">
+              <span>Bien</span>
+              <strong>{{ selectedExpense.bienImmobilierLibelle || '–' }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Local / Appartement</span>
+              <strong>{{ selectedExpense.appartementLocalLibelle || '–' }}</strong>
+            </div>
+            @if (selectedExpense.typeBienImmobilier) {
+              <div class="detail-row">
+                <span>Type</span>
+                <strong>{{ selectedExpense.typeBienImmobilier }}</strong>
+              </div>
+            }
+          </div>
+
+          <!-- Fournisseur -->
+          @if (selectedExpense.fournisseurNom) {
+            <div class="detail-section">
+              <div class="detail-section-title">Fournisseur</div>
+              <div class="detail-row">
+                <span>Nom</span>
+                <strong>{{ selectedExpense.fournisseurNom }}</strong>
+              </div>
+              @if (selectedExpense.fournisseurTelephone) {
+                <div class="detail-row">
+                  <span>Téléphone</span>
+                  <strong>{{ selectedExpense.fournisseurTelephone }}</strong>
+                </div>
+              }
+              @if (selectedExpense.fournisseurEmail) {
+                <div class="detail-row">
+                  <span>Email</span>
+                  <strong>{{ selectedExpense.fournisseurEmail }}</strong>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Workflow -->
+          <div class="detail-section">
+            <div class="detail-section-title">Workflow</div>
+            <div class="detail-row">
+              <span>Demandeur</span>
+              <strong>{{ selectedExpense.demandeurNom || '–' }}</strong>
+            </div>
+            @if (selectedExpense.submittedAt) {
+              <div class="detail-row">
+                <span>Soumis le</span>
+                <strong>{{ fmtDateTime(selectedExpense.submittedAt) }}</strong>
+              </div>
+            }
+            @if (selectedExpense.validatedAt) {
+              <div class="detail-row">
+                <span>Validé le</span>
+                <strong>{{ fmtDateTime(selectedExpense.validatedAt) }}</strong>
+              </div>
+            }
+            @if (selectedExpense.rejectedAt) {
+              <div class="detail-row">
+                <span>Rejeté le</span>
+                <strong class="text-danger">{{ fmtDateTime(selectedExpense.rejectedAt) }}</strong>
+              </div>
+            }
+            @if (selectedExpense.cancelledAt) {
+              <div class="detail-row">
+                <span>Annulé le</span>
+                <strong class="text-secondary">{{ fmtDateTime(selectedExpense.cancelledAt) }}</strong>
+              </div>
+            }
+            @if (selectedExpense.hasJustificatif) {
+              <div class="detail-row">
+                <span>Justificatif</span>
+                <span class="badge-file"><i class="fas fa-paperclip me-1"></i>{{ selectedExpense.justificatifNom || 'Joint' }}</span>
+              </div>
+            }
+          </div>
+
+        </div>
+      </aside>
+    }
+
+  </div>
+
+</div>

@@ -1,0 +1,552 @@
+<div class="new-bail-dialog">
+  <section class="hero-card">
+    <div class="hero-card__copy">
+      <span class="hero-card__eyebrow">Creation de bail</span>
+      <h1>Nouveau bail</h1>
+      <p>
+        Choisissez le type de contrat puis remplissez directement les
+        informations du locataire, du bien, du loyer et des dates.
+      </p>
+    </div>
+
+    <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+      Fermer
+    </button>
+  </section>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <section class="switch-card">
+    <div class="contract-switch">
+      @for (type of listTypeContrat; track type) {
+        <button
+          type="button"
+          class="contract-switch__button"
+          [class.contract-switch__button--active]="ngSelectTypeContrat === type"
+          (click)="onContractTypeChange(type)"
+        >
+          {{ type }}
+        </button>
+      }
+    </div>
+
+    <p class="switch-card__hint">{{ currentContractDescription }}</p>
+  </section>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span>Loyer saisi</span>
+      <strong>{{ formatAmount(currentPreviewLoyer) }} FCFA</strong>
+    </article>
+    <article class="summary-card">
+      <span>Caution calculee</span>
+      <strong>{{ formatAmount(currentPreviewCaution) }} FCFA</strong>
+    </article>
+    <article class="summary-card">
+      <span>Mois de caution</span>
+      <strong>{{ currentPreviewMonths }}</strong>
+    </article>
+  </section>
+
+  @if (bailAppartementForm && ngSelectTypeContrat === 'Bail Appartement') {
+    <form
+      [formGroup]="bailAppartementForm"
+      (ngSubmit)="onSaveBailAppartement()"
+      class="form-card"
+      novalidate
+    >
+      <div class="form-card__header">
+        <div>
+          <span class="form-card__eyebrow">Appartement</span>
+          <h2>Creer un bail appartement</h2>
+        </div>
+      </div>
+
+      <div class="section-grid section-grid--primary">
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-app-locataire">Locataire</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des locataires...</div>
+          } @else {
+            <select
+              id="bail-app-locataire"
+              class="form-select"
+              formControlName="idLocataire"
+              [class.is-invalid]="isControlInvalid(bailAppartementForm, 'idLocataire')"
+            >
+              <option [ngValue]="null">Selectionnez un locataire</option>
+              @for (utilis of locataires; track utilis.id ?? $index) {
+                <option [ngValue]="utilis.id">
+                  {{ utilis.nom }} {{ utilis.prenom }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailAppartementForm, 'idLocataire')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-app-bien">Appartement</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des appartements...</div>
+          } @else if (appartements.length === 0) {
+            <div class="field-state">Aucun appartement libre disponible.</div>
+          } @else {
+            <select
+              id="bail-app-bien"
+              class="form-select"
+              formControlName="idAppartement"
+              [class.is-invalid]="isControlInvalid(bailAppartementForm, 'idAppartement')"
+            >
+              <option [ngValue]="null">Selectionnez un appartement</option>
+              @for (appar of appartements; track appar.id ?? $index) {
+                <option [ngValue]="appar.id">
+                  {{ appar.codeAbrvBienImmobilier }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailAppartementForm, 'idAppartement')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div>
+          <label class="form-label" for="bail-app-designation">Designation du bail*</label>
+          <input
+            id="bail-app-designation"
+            class="form-control"
+            type="text"
+            formControlName="designationBail"
+            placeholder="Ex: Bail appartement A-12"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'designationBail')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'designationBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-app-loyer">Loyer mensuel*</label>
+          <input
+            id="bail-app-loyer"
+            class="form-control"
+            type="number"
+            formControlName="nouveauMontantLoyer"
+            (input)="calculMontantCautionApp()"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'nouveauMontantLoyer')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'nouveauMontantLoyer')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-app-caution-mois">Nombre de mois de caution*</label>
+          <input
+            id="bail-app-caution-mois"
+            class="form-control"
+            type="number"
+            formControlName="nbreMoisCautionBail"
+            (input)="calculMontantCautionApp()"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'nbreMoisCautionBail')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'nbreMoisCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-app-caution">Montant de la caution*</label>
+          <input
+            id="bail-app-caution"
+            class="form-control"
+            type="number"
+            formControlName="montantCautionBail"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'montantCautionBail')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'montantCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-app-date-debut">Date de debut*</label>
+          <input
+            id="bail-app-date-debut"
+            class="form-control"
+            type="date"
+            formControlName="dateDebut"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'dateDebut')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'dateDebut')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-app-date-fin">Date de fin*</label>
+          <input
+            id="bail-app-date-fin"
+            class="form-control"
+            type="date"
+            formControlName="dateFin"
+            [class.is-invalid]="isControlInvalid(bailAppartementForm, 'dateFin')"
+          />
+          @if (isControlInvalid(bailAppartementForm, 'dateFin')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-card__actions">
+        <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSavingAppartement">
+          {{ isSavingAppartement ? 'Enregistrement...' : 'Creer le bail appartement' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (bailMagainForm && ngSelectTypeContrat === 'Bail Magasin') {
+    <form
+      [formGroup]="bailMagainForm"
+      (ngSubmit)="onSaveBailMagasin()"
+      class="form-card"
+      novalidate
+    >
+      <div class="form-card__header">
+        <div>
+          <span class="form-card__eyebrow">Magasin</span>
+          <h2>Creer un bail magasin</h2>
+        </div>
+      </div>
+
+      <div class="section-grid section-grid--primary">
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-mag-locataire">Locataire</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des locataires...</div>
+          } @else {
+            <select
+              id="bail-mag-locataire"
+              class="form-select"
+              formControlName="idLocataire"
+              [class.is-invalid]="isControlInvalid(bailMagainForm, 'idLocataire')"
+            >
+              <option [ngValue]="null">Selectionnez un locataire</option>
+              @for (utilis of locataires; track utilis.id ?? $index) {
+                <option [ngValue]="utilis.id">
+                  {{ utilis.nom }} {{ utilis.prenom }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailMagainForm, 'idLocataire')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-mag-bien">Magasin</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des magasins...</div>
+          } @else if (magasins.length === 0) {
+            <div class="field-state">Aucun magasin libre disponible.</div>
+          } @else {
+            <select
+              id="bail-mag-bien"
+              class="form-select"
+              formControlName="idMagasin"
+              [class.is-invalid]="isControlInvalid(bailMagainForm, 'idMagasin')"
+            >
+              <option [ngValue]="null">Selectionnez un magasin</option>
+              @for (mag of magasins; track mag.id ?? $index) {
+                <option [ngValue]="mag.id">
+                  {{ mag.codeAbrvBienImmobilier }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailMagainForm, 'idMagasin')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div>
+          <label class="form-label" for="bail-mag-designation">Designation du bail*</label>
+          <input
+            id="bail-mag-designation"
+            class="form-control"
+            type="text"
+            formControlName="designationBail"
+            placeholder="Ex: Bail magasin B-03"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'designationBail')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'designationBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-mag-loyer">Loyer mensuel*</label>
+          <input
+            id="bail-mag-loyer"
+            class="form-control"
+            type="number"
+            formControlName="nouveauMontantLoyer"
+            (input)="calculMontantCautionMag()"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'nouveauMontantLoyer')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'nouveauMontantLoyer')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-mag-caution-mois">Nombre de mois de caution*</label>
+          <input
+            id="bail-mag-caution-mois"
+            class="form-control"
+            type="number"
+            formControlName="nbreMoisCautionBail"
+            (input)="calculMontantCautionMag()"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'nbreMoisCautionBail')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'nbreMoisCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-mag-caution">Montant de la caution*</label>
+          <input
+            id="bail-mag-caution"
+            class="form-control"
+            type="number"
+            formControlName="montantCautionBail"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'montantCautionBail')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'montantCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-mag-date-debut">Date de debut*</label>
+          <input
+            id="bail-mag-date-debut"
+            class="form-control"
+            type="date"
+            formControlName="dateDebut"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'dateDebut')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'dateDebut')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-mag-date-fin">Date de fin*</label>
+          <input
+            id="bail-mag-date-fin"
+            class="form-control"
+            type="date"
+            formControlName="dateFin"
+            [class.is-invalid]="isControlInvalid(bailMagainForm, 'dateFin')"
+          />
+          @if (isControlInvalid(bailMagainForm, 'dateFin')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-card__actions">
+        <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSavingMagasin">
+          {{ isSavingMagasin ? 'Enregistrement...' : 'Creer le bail magasin' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (bailvillaForm && ngSelectTypeContrat === 'Bail Villa') {
+    <form
+      [formGroup]="bailvillaForm"
+      (ngSubmit)="onSaveBailVilla()"
+      class="form-card"
+      novalidate
+    >
+      <div class="form-card__header">
+        <div>
+          <span class="form-card__eyebrow">Villa</span>
+          <h2>Creer un bail villa</h2>
+        </div>
+      </div>
+
+      <div class="section-grid section-grid--primary">
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-villa-locataire">Locataire</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des locataires...</div>
+          } @else {
+            <select
+              id="bail-villa-locataire"
+              class="form-select"
+              formControlName="idLocataire"
+              [class.is-invalid]="isControlInvalid(bailvillaForm, 'idLocataire')"
+            >
+              <option [ngValue]="null">Selectionnez un locataire</option>
+              @for (utilis of locataires; track utilis.id ?? $index) {
+                <option [ngValue]="utilis.id">
+                  {{ utilis.nom }} {{ utilis.prenom }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailvillaForm, 'idLocataire')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+
+        <div class="field-panel">
+          <label class="field-panel__label" for="bail-villa-bien">Villa</label>
+          @if (isLoadingReferences) {
+            <div class="field-state">Chargement des villas...</div>
+          } @else if (villas.length === 0) {
+            <div class="field-state">Aucune villa libre disponible.</div>
+          } @else {
+            <select
+              id="bail-villa-bien"
+              class="form-select"
+              formControlName="idVilla"
+              [class.is-invalid]="isControlInvalid(bailvillaForm, 'idVilla')"
+            >
+              <option [ngValue]="null">Selectionnez une villa</option>
+              @for (villa of villas; track villa.id ?? $index) {
+                <option [ngValue]="villa.id">
+                  {{ villa.codeAbrvBienImmobilier }}
+                </option>
+              }
+            </select>
+            @if (isControlInvalid(bailvillaForm, 'idVilla')) {
+              <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="section-grid">
+        <div>
+          <label class="form-label" for="bail-villa-designation">Designation du bail*</label>
+          <input
+            id="bail-villa-designation"
+            class="form-control"
+            type="text"
+            formControlName="designationBail"
+            placeholder="Ex: Bail villa C-02"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'designationBail')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'designationBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-villa-loyer">Loyer mensuel*</label>
+          <input
+            id="bail-villa-loyer"
+            class="form-control"
+            type="number"
+            formControlName="nouveauMontantLoyer"
+            (input)="calculMontantCautionVil()"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'nouveauMontantLoyer')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'nouveauMontantLoyer')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-villa-caution-mois">Nombre de mois de caution*</label>
+          <input
+            id="bail-villa-caution-mois"
+            class="form-control"
+            type="number"
+            formControlName="nbreMoisCautionBail"
+            (input)="calculMontantCautionVil()"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'nbreMoisCautionBail')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'nbreMoisCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-villa-caution">Montant de la caution*</label>
+          <input
+            id="bail-villa-caution"
+            class="form-control"
+            type="number"
+            formControlName="montantCautionBail"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'montantCautionBail')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'montantCautionBail')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-villa-date-debut">Date de debut*</label>
+          <input
+            id="bail-villa-date-debut"
+            class="form-control"
+            type="date"
+            formControlName="dateDebut"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'dateDebut')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'dateDebut')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="bail-villa-date-fin">Date de fin*</label>
+          <input
+            id="bail-villa-date-fin"
+            class="form-control"
+            type="date"
+            formControlName="dateFin"
+            [class.is-invalid]="isControlInvalid(bailvillaForm, 'dateFin')"
+          />
+          @if (isControlInvalid(bailvillaForm, 'dateFin')) {
+            <div class="invalid-feedback d-block">Ce champ est obligatoire.</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-card__actions">
+        <button type="button" class="btn btn-outline-secondary" (click)="onClose()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSavingVilla">
+          {{ isSavingVilla ? 'Enregistrement...' : 'Creer le bail villa' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

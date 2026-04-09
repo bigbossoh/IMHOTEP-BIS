@@ -1,0 +1,119 @@
+@if (siteState$ | async; as state) {
+  @switch (state.dataState) {
+    @case (SiteStateEnum.INITIAL) {
+      <div class="p-2">Initialisation des données</div>
+    }
+    @case (SiteStateEnum.ERROR) {
+      <div class="p-2">Erreur : {{ state.errorMessage }}</div>
+    }
+    @case (SiteStateEnum.LOADED) {
+      @for (site of state.sites; track site) {
+        <div>
+          <div class="row mb-1 mr-0 custom-border">
+            <div class="col-md-1 custom-border-right p-1 text-center mb-1 mt-1">
+              <img src="assets/sitegeo.png" width="100px" height="100px" />
+            </div>
+            <!--  Details article-->
+            <div class="col-md-5 custom-border-right mb-1 mt-2 p-0">
+              <div class="col">
+                <div class="row">
+                  <div class="col-md-1">
+                    <i class="fas fa-info-circle blue-color"></i>
+                  </div>
+                  <div class="col-md-11">Code Site : {{ site.abrSite }}</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-1">
+                    <i class="fas fa-info-circle blue-color"></i>
+                  </div>
+                  <div class="col-md-11">Nom du site : {{ site.nomSite }}</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-1">
+                    <i class="fas fa-info-circle blue-color"></i>
+                  </div>
+                  <div class="col-md-11">
+                    Date de création : {{ site.nomSite }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-1"><i class="fas fa-plug blue-color"></i></div>
+                  <div class="col-md-11">
+                    Nombre de biens associé(s): Creer un controller pour sa
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--  details categorie-->
+            <div class="col-md-3 custom-border-right mb-1 mt-1">
+              <div class="row">
+                <div class="col-md-2">
+                  <i class="fas fa-building blue-color"></i>
+                </div>
+                <div class="col-md-10">
+                  <div class="row">
+                    <div class="col-md-12 p-0">Quartier: {{site?.quartierResponseDto?.nomQuartier}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2">
+                  <i class="fas fa-building blue-color"></i>
+                </div>
+                <div class="col-md-10">
+                  <div class="row">
+                    <div class="col-md-12 p-0">Commune: {{site?.quartierResponseDto?.communeResponseDto?.nomCommune}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2">
+                  <i class="fas fa-city blue-color"></i>
+                </div>
+                <div class="col-md-10">
+                  <div class="row">
+                    <div class="col-md-12 p-0">Ville: {{site?.quartierResponseDto?.communeResponseDto?.villeDto?.nomVille}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2">
+                  <i class="fas fa-building blue-color"></i>
+                </div>
+                <div class="col-md-10">
+                  <div class="row">
+                    <div class="col-md-12 p-0">Pays: {{site?.nomSite?.substring(0,13)}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--  boutons action-->
+            <div class="col-md-3 mb-1 mt-1">
+              <div class="row">
+                <div class="col-md-4">
+                  <button type="button" class="btn btn-link">
+                    <i class="fas fa-pencil-alt"></i>&nbsp;Modifier
+                  </button>
+                </div>
+                <div class="col-md-4">
+                  <button
+                    class="btn btn-link text-danger"
+                    data-toggle="modal"
+                    (click)="deleteSite(site.id, site.nomSite)"
+                    >
+                    <i class="fas fa-trash-alt"></i>&nbsp;Supprimer
+                  </button>
+                </div>
+                <div class="col-md-4">
+                  <button type="button" class="btn btn-link">
+                    <i class="far fa-list-alt"></i>&nbsp;Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+}

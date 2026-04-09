@@ -1,0 +1,326 @@
+<div class="ca-page container-fluid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       EN-TÊTE PAGE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ca-page-header">
+    <div class="ca-page-header__copy">
+      <span class="ca-eyebrow">Paramétrage</span>
+      <h1>Catégories d'appartement</h1>
+      <p>Gérez les catégories, les grilles tarifaires et les appartements associés.</p>
+    </div>
+    <div class="ca-page-header__actions">
+      <button type="button" class="ca-btn ca-btn--primary" (click)="openDialogNewCategorie()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Nouvelle catégorie
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       KPI CARDS
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ca-kpi-row">
+    <div class="ca-kpi-card ca-kpi-card--blue">
+      <div class="ca-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <div>
+        <span class="ca-kpi-card__label">Catégories</span>
+        <strong class="ca-kpi-card__value">{{ allCategories.length }}</strong>
+        <span class="ca-kpi-card__sub">au total</span>
+      </div>
+    </div>
+
+    <div class="ca-kpi-card ca-kpi-card--teal">
+      <div class="ca-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div>
+        <span class="ca-kpi-card__label">Catégorie active</span>
+        <strong class="ca-kpi-card__value ca-kpi-card__value--sm">{{ selectedCategorie?.name || '—' }}</strong>
+        <span class="ca-kpi-card__sub">sélectionnée</span>
+      </div>
+    </div>
+
+    <div class="ca-kpi-card ca-kpi-card--green">
+      <div class="ca-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div>
+        <span class="ca-kpi-card__label">Grilles tarifaires</span>
+        <strong class="ca-kpi-card__value">{{ allPrix.length }}</strong>
+        <span class="ca-kpi-card__sub">pour cette catégorie</span>
+      </div>
+    </div>
+
+    <div class="ca-kpi-card ca-kpi-card--orange">
+      <div class="ca-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 6s+1-2 7-2 9 4 9 4-3 2-9 2-7-4-7-4z"/>
+          <path d="M1 18s+1-2 7-2 9 4 9 4-3 2-9 2-7-4-7-4z"/>
+          <line x1="1" y1="12" x2="22" y2="12"/>
+        </svg>
+      </div>
+      <div>
+        <span class="ca-kpi-card__label">Appartements</span>
+        <strong class="ca-kpi-card__value">{{ allApparts.length }}</strong>
+        <span class="ca-kpi-card__sub">dans cette catégorie</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       VUE MAÎTRE / DÉTAIL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ca-split-view">
+
+    <!-- ─── PANNEAU GAUCHE : liste catégories ──────────────────── -->
+    <div class="ca-master-panel">
+      <div class="ca-panel-header">
+        <div>
+          <span class="ca-eyebrow">Liste</span>
+          <h2>Catégories</h2>
+        </div>
+        <span class="ca-count-pill">{{ filteredCategories.length }}</span>
+      </div>
+
+      <!-- Recherche -->
+      <div class="ca-search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" placeholder="Rechercher..." (input)="onSearchCategorie($event)" />
+      </div>
+
+      <!-- État chargement -->
+      @if (isLoadingCategories) {
+        <div class="ca-state-inline">
+          <div class="ca-spinner"></div>
+          <span>Chargement...</span>
+        </div>
+      } @else if (filteredCategories.length === 0) {
+        <div class="ca-empty-list">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <p>Aucune catégorie trouvée</p>
+        </div>
+      } @else {
+        <ul class="ca-category-list">
+          @for (cat of filteredCategories; track cat.id) {
+            <li
+              class="ca-category-item"
+              [class.ca-category-item--active]="selectedCategorie?.id === cat.id"
+              (click)="selectCategorie(cat)"
+            >
+              <div class="ca-category-item__avatar">{{ getInitials(cat.name) }}</div>
+              <div class="ca-category-item__body">
+                <strong>{{ cat.name }}</strong>
+                <span>{{ cat.description || 'Aucune description' }}</span>
+              </div>
+              <svg class="ca-category-item__chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- ─── PANNEAU DROIT : détail ────────────────────────────── -->
+    <div class="ca-detail-panel">
+
+      @if (!selectedCategorie) {
+        <div class="ca-detail-placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p>Sélectionnez une catégorie</p>
+          <span>Cliquez sur une ligne à gauche pour afficher les détails.</span>
+        </div>
+      } @else {
+
+        <!-- Heading catégorie sélectionnée -->
+        <div class="ca-detail-heading">
+          <div class="ca-detail-heading__left">
+            <div class="ca-detail-avatar">{{ getInitials(selectedCategorie.name) }}</div>
+            <div>
+              <h2>{{ selectedCategorie.name }}</h2>
+              <p>{{ selectedCategorie.description || 'Aucune description' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglets -->
+        <div class="ca-tabs">
+          <button class="ca-tab" [class.ca-tab--active]="detailTab === 'prix'" (click)="setDetailTab('prix')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            Grilles tarifaires
+            <span class="ca-tab-badge">{{ allPrix.length }}</span>
+          </button>
+          <button class="ca-tab" [class.ca-tab--active]="detailTab === 'appartements'" (click)="setDetailTab('appartements')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Appartements
+            <span class="ca-tab-badge">{{ allApparts.length }}</span>
+          </button>
+        </div>
+
+        <!-- ── Onglet Prix ── -->
+        @if (detailTab === 'prix') {
+          <div class="ca-tab-content">
+            <div class="ca-tab-toolbar">
+              <span class="ca-tab-section-title">Grilles tarifaires de <strong>{{ selectedCategorie.name }}</strong></span>
+              <button type="button" class="ca-btn ca-btn--primary ca-btn--sm" (click)="openDialogPrix()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Ajouter un tarif
+              </button>
+            </div>
+
+            @if (isLoadingPrix) {
+              <div class="ca-state-inline"><div class="ca-spinner"></div><span>Chargement...</span></div>
+            } @else if (allPrix.length === 0) {
+              <div class="ca-empty-tab">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <p>Aucune grille tarifaire pour cette catégorie.</p>
+              </div>
+            } @else {
+              <div class="ca-table-shell">
+                <table class="ca-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre de jours</th>
+                      <th>Intervalle (jours)</th>
+                      <th>Prix</th>
+                      <th class="ca-col-actions">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of allPrix; track row.id ?? $index) {
+                      <tr>
+                        <td>
+                          <span class="ca-days-badge">{{ row.nombreDeJour }} j</span>
+                        </td>
+                        <td>{{ row.nbrDiffJour ?? '—' }}</td>
+                        <td>
+                          <strong class="ca-amount--green">{{ formatCurrency(row.prix) }}</strong>
+                        </td>
+                        <td class="ca-col-actions">
+                          <button type="button" class="ca-btn ca-btn--danger-ghost ca-btn--sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="3 6 5 6 21 6"/>
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                              <path d="M10 11v6"/><path d="M14 11v6"/>
+                            </svg>
+                            Supprimer
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Onglet Appartements ── -->
+        @if (detailTab === 'appartements') {
+          <div class="ca-tab-content">
+            <div class="ca-tab-toolbar">
+              <span class="ca-tab-section-title">Appartements dans <strong>{{ selectedCategorie.name }}</strong></span>
+            </div>
+
+            @if (isLoadingApparts) {
+              <div class="ca-state-inline"><div class="ca-spinner"></div><span>Chargement...</span></div>
+            } @else if (allApparts.length === 0) {
+              <div class="ca-empty-tab">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <p>Aucun appartement dans cette catégorie.</p>
+              </div>
+            } @else {
+              <div class="ca-table-shell">
+                <table class="ca-table">
+                  <thead>
+                    <tr>
+                      <th>Appartement</th>
+                      <th class="ca-col-actions">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of allApparts; track row.id ?? $index) {
+                      <tr>
+                        <td>
+                          <div class="ca-appart-cell">
+                            <div class="ca-appart-avatar">
+                              {{ getInitials(row.nomBaptiserBienImmobilier) }}
+                            </div>
+                            <strong>{{ row.nomBaptiserBienImmobilier || '—' }}</strong>
+                          </div>
+                        </td>
+                        <td class="ca-col-actions">
+                          <button
+                            type="button"
+                            class="ca-btn ca-btn--outline ca-btn--sm"
+                            (click)="openDialogApp(row)"
+                          >
+                            Changer de catégorie
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+      }
+    </div>
+  </div>
+
+</div>

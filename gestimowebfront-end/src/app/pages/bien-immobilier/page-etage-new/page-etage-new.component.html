@@ -1,0 +1,132 @@
+<div class="container-xl px-4 mt-4">
+  <!-- Account page navigation-->
+
+  <hr class="mt-0 mb-4" />
+  <div class="row">
+    <div class="col-md-4">
+      <!-- Profile picture card-->
+      <div class="card mb-4 mb-xl-0">
+        <div class="card-header">Image d'illustration</div>
+        <div class="card-body text-center">
+          <!-- Profile picture image-->
+          <img
+            class="img-account-profile rounded-circle mb-2"
+            src="assets/bien-immobilier.png"
+            width="120px"
+            height="120px"
+            alt=""
+            />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <!-- Account details card-->
+        <div class="card mb-4">
+
+          <div class="card-header font-weight-bold" >
+            Informations sur le Bien l'Etage
+          </div>
+          <div class="card-body">
+
+            <!-- FORM POUR APPARTEMENT -->
+            @if (etageForm) {
+              <form
+                [formGroup]="etageForm"
+                >
+                <div class="row gx-3 mb-3">
+                  <div class="col-md-9">
+                    @if (immeubleState$ | async; as immeubleState) {
+                      @switch (immeubleState.dataState) {
+                        @case (ImmeubleStateEnum.ERROR) {
+                          <div class="p-2">
+                            Erreur: {{ immeubleState.errorMessage | json }}
+                          </div>
+                        }
+                        @case (ImmeubleStateEnum.LOADING) {
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        }
+                        @case (ImmeubleStateEnum.LOADED) {
+                          <label class="small mb-1" for="inputFirstName"
+                            >Immeuble</label
+                            >
+                            <select
+                              formControlName="idImmeuble"
+                              name="idImmeuble"
+                              class="form-control form-control-lg"
+                      [ngClass]="{
+                        'is-invalid':
+                          submitted &&
+                          etageForm.controls.idImmeuble.errors
+                      }"
+                              >
+                              <option [value]="0">Sélection un Immeuble</option>
+                              <option [value]="0">Aucun Immeuble</option>
+                              @for (immeub of immeubleState.immeubles; track immeub) {
+                                <option
+                                  [value]="immeub.id"
+                                  >
+                                  <!-- {{ immeub.abrvNomImmeuble }} -->
+                                </option>
+                              }
+                            </select>
+                          }
+                        }
+                      }
+                    </div>
+                    <div class="row gx-3 mb-3">
+                      <!-- Form Group (organization name)-->
+                      <div class="col-md-6">
+                        <label class="small mb-1" for="inputLocation"
+                          >Niveau étages </label
+                          >
+                          <input
+                            formControlName="numEtage"
+                            class="form-control"
+                            name="inputLocation"
+                            type="number"
+                            />
+                          </div>
+                          <div class="col-md-6">
+                            <label class="small mb-1" for="inputLocation"
+                              >Nom</label
+                              >
+                              <input
+                                formControlName="nomEtage"
+                                class="form-control"
+                                type="text"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col d-flex justify-content-end">
+                              <button
+                                type="button"
+                                class="btn btn-danger mr-2"
+                                data-dismiss="modal"
+                                (click)="onClose()"
+                                id="closeAgenceButton"
+                                >
+                                <i class="fas fa-ban"></i>
+                                Close
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-primary"
+                                (click)="onSaveEtage()"
+                                >
+                                <i class="fas fa-save"></i>
+                                Enregistrer
+                              </button>
+                            </div>
+                          </div>
+                        </form>
+                      }
+                      <!-- FORM POUR LES ETAGES -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>

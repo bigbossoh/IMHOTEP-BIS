@@ -1,0 +1,341 @@
+<section class="closure-page">
+  <header class="closure-hero">
+    <div class="closure-hero__copy">
+      <span class="closure-eyebrow">Tresorerie</span>
+      <h1>Cloture de caisse</h1>
+      <p>
+        Centralisez les encaissements et les depenses non clotures sur une meme
+        periode avant validation de caisse.
+      </p>
+    </div>
+
+    <div class="closure-hero__badges">
+      <span class="closure-badge">
+        <i class="fas fa-store" aria-hidden="true"></i>
+        {{ etablissementName || 'Etablissement en chargement' }}
+      </span>
+      <span class="closure-badge closure-badge--soft">
+        <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+        {{ periodLabel }}
+      </span>
+    </div>
+  </header>
+
+  <section class="closure-card closure-card--filters">
+    <div class="section-head">
+      <div>
+        <span class="section-head__kicker">Preparation</span>
+        <h2>Periode de travail</h2>
+      </div>
+      <span class="section-head__status">
+        Prochaine cloture theorique: {{ nextClosureDateLabel }}
+      </span>
+    </div>
+
+    <div class="closure-filter-grid">
+      <label class="closure-field">
+        <span>Date de debut</span>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="selectedStartDate"
+        />
+      </label>
+
+      <label class="closure-field">
+        <span>Date de fin</span>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="selectedEndDate"
+        />
+      </label>
+
+      <div class="closure-context">
+        <span class="closure-context__label">Contexte</span>
+        <strong>{{ etablissementName || 'Etablissement non charge' }}</strong>
+        <small>
+          Les lignes affichees correspondent aux operations non cloturees de la
+          caisse sur la periode selectionnee.
+        </small>
+      </div>
+    </div>
+
+    <div class="closure-actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="resetToCurrentPeriod()"
+      >
+        Periode en cours
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="refreshData()"
+        [disabled]="isEtablissementLoading"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="saveFirstCloture()"
+        [disabled]="!canSubmitCloture"
+      >
+        @if (isSubmittingCloture) {
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        }
+        Cloturer la caisse
+      </button>
+    </div>
+  </section>
+
+  <div class="summary-grid">
+    <article class="summary-card" data-tone="success">
+      <span class="summary-card__label">Encaissements</span>
+      <strong>{{ formatCurrency(totalEncaissements) }}</strong>
+      <small>{{ encaissements.length }} operation(s) chargee(s)</small>
+    </article>
+
+    <article class="summary-card" data-tone="danger">
+      <span class="summary-card__label">Depenses</span>
+      <strong>{{ formatCurrency(totalDepenses) }}</strong>
+      <small>{{ depenses.length }} sortie(s) a integrer</small>
+    </article>
+
+    <article class="summary-card" data-tone="primary">
+      <span class="summary-card__label">Solde net</span>
+      <strong>{{ formatCurrency(soldeNet) }}</strong>
+      <small>Encaissements moins depenses</small>
+    </article>
+
+    <article class="summary-card" data-tone="warning">
+      <span class="summary-card__label">Montant de cloture</span>
+      <strong>{{ formatCurrency(montantCloture) }}</strong>
+      <small>Valeur enregistree par la cloture actuelle</small>
+    </article>
+  </div>
+
+  <div class="content-grid">
+    <section class="closure-card data-card">
+      <div class="section-head">
+        <div>
+          <span class="section-head__kicker">Entrees</span>
+          <h2>Encaissements de loyers</h2>
+        </div>
+        <span class="section-head__status">{{ filteredEncaissements.length }} ligne(s)</span>
+      </div>
+
+      <div class="table-toolbar">
+        <label class="table-toolbar__field">
+          <span>Recherche</span>
+          <input
+            type="search"
+            class="form-control"
+            [ngModel]="encaissementSearch"
+            (ngModelChange)="onEncaissementSearchChange($event)"
+            placeholder="Locataire, bien, periode, mode..."
+          />
+        </label>
+
+        <label class="table-toolbar__select">
+          <span>Afficher</span>
+          <select
+            class="form-select"
+            [ngModel]="encaissementPageSize"
+            (ngModelChange)="onEncaissementPageSizeChange($event)"
+          >
+            @for (size of pageSizeOptions; track size) {
+              <option [ngValue]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (isEncaissementsLoading) {
+        <div class="empty-state">
+          <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+          <p>Chargement des encaissements en cours...</p>
+        </div>
+      } @else if (filteredEncaissements.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-receipt" aria-hidden="true"></i>
+          <p>Aucun encaissement non cloture sur cette periode.</p>
+        </div>
+      } @else {
+        <div class="table-shell">
+          <table class="closure-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Locataire / Bien</th>
+                <th>Periode</th>
+                <th>Mode</th>
+                <th class="text-end">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedEncaissements; track trackById($index, row)) {
+                <tr>
+                  <td>{{ formatHumanDate(row.dateEncaissement) }}</td>
+                  <td>
+                    <strong>{{ getEncaissementLabel(row) }}</strong>
+                    <small>{{ row.typePaiement || 'Reglement de loyer' }}</small>
+                  </td>
+                  <td>{{ getEncaissementPeriod(row) }}</td>
+                  <td>{{ formatModePaiement(row.modePaiement) }}</td>
+                  <td class="text-end text-strong">
+                    {{ formatCurrency(row.montantEncaissement) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <button
+            type="button"
+            class="pagination-bar__button"
+            (click)="setEncaissementPage(encaissementCurrentPage - 1)"
+            [disabled]="encaissementCurrentPage === 1"
+          >
+            Precedent
+          </button>
+
+          <div class="pagination-bar__pages">
+            @for (page of encaissementPageNumbers; track page) {
+              <button
+                type="button"
+                class="pagination-bar__page"
+                [class.pagination-bar__page--active]="page === encaissementCurrentPage"
+                (click)="setEncaissementPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="pagination-bar__button"
+            (click)="setEncaissementPage(encaissementCurrentPage + 1)"
+            [disabled]="encaissementCurrentPage === encaissementTotalPages"
+          >
+            Suivant
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="closure-card data-card">
+      <div class="section-head">
+        <div>
+          <span class="section-head__kicker">Sorties</span>
+          <h2>Depenses de caisse</h2>
+        </div>
+        <span class="section-head__status">{{ filteredDepenses.length }} ligne(s)</span>
+      </div>
+
+      <div class="table-toolbar">
+        <label class="table-toolbar__field">
+          <span>Recherche</span>
+          <input
+            type="search"
+            class="form-control"
+            [ngModel]="depenseSearch"
+            (ngModelChange)="onDepenseSearchChange($event)"
+            placeholder="Designation, mode, montant..."
+          />
+        </label>
+
+        <label class="table-toolbar__select">
+          <span>Afficher</span>
+          <select
+            class="form-select"
+            [ngModel]="depensePageSize"
+            (ngModelChange)="onDepensePageSizeChange($event)"
+          >
+            @for (size of pageSizeOptions; track size) {
+              <option [ngValue]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (isDepensesLoading) {
+        <div class="empty-state">
+          <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+          <p>Chargement des depenses en cours...</p>
+        </div>
+      } @else if (filteredDepenses.length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-wallet" aria-hidden="true"></i>
+          <p>Aucune depense non cloturee sur cette periode.</p>
+        </div>
+      } @else {
+        <div class="table-shell">
+          <table class="closure-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Designation</th>
+                <th>Mode</th>
+                <th class="text-end">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagedDepenses; track trackById($index, row)) {
+                <tr>
+                  <td>{{ formatHumanDate(row.dateEncaissement) }}</td>
+                  <td>
+                    <strong>{{ row.designation || 'Depense de caisse' }}</strong>
+                    <small>{{ row.codeTransaction || 'Sans reference' }}</small>
+                  </td>
+                  <td>{{ formatModePaiement(row.modePaiement) }}</td>
+                  <td class="text-end text-strong">
+                    {{ formatCurrency(row.montantDepense) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <button
+            type="button"
+            class="pagination-bar__button"
+            (click)="setDepensePage(depenseCurrentPage - 1)"
+            [disabled]="depenseCurrentPage === 1"
+          >
+            Precedent
+          </button>
+
+          <div class="pagination-bar__pages">
+            @for (page of depensePageNumbers; track page) {
+              <button
+                type="button"
+                class="pagination-bar__page"
+                [class.pagination-bar__page--active]="page === depenseCurrentPage"
+                (click)="setDepensePage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="pagination-bar__button"
+            (click)="setDepensePage(depenseCurrentPage + 1)"
+            [disabled]="depenseCurrentPage === depenseTotalPages"
+          >
+            Suivant
+          </button>
+        </div>
+      }
+    </section>
+  </div>
+</section>

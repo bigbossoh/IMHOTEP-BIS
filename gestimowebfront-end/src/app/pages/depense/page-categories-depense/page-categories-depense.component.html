@@ -1,0 +1,247 @@
+<div class="categories-page container-fluid">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Catégories de dépenses</h1>
+      <p>Gérez les catégories utilisées dans le formulaire de création de dépenses.</p>
+    </div>
+    <div class="page-actions">
+      <!-- Import caché -->
+      <input
+        id="importFileInput"
+        type="file"
+        accept=".xlsx,.xls"
+        style="display:none"
+        (change)="onImportFileSelected($event)"
+      />
+      <button type="button" class="btn btn-outline-secondary" (click)="loadCategories()" [disabled]="loading">
+        Actualiser
+      </button>
+      <button type="button" class="btn btn-outline-success" (click)="exportToExcel()" [disabled]="!categories.length">
+        <i class="fas fa-file-excel me-1"></i> Exporter Excel
+      </button>
+      <button type="button" class="btn btn-outline-info" (click)="triggerImport()" [disabled]="isImporting || saving">
+        <i class="fas fa-file-import me-1"></i>
+        {{ isImporting ? 'Import en cours...' : 'Importer Excel' }}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openAddForm()">
+        + Nouvelle catégorie
+      </button>
+    </div>
+  </div>
+
+  <!-- Résultat d'import -->
+  @if (importResult) {
+    <div
+      class="alert alert-dismissible fade show mb-3"
+      [class.alert-success]="importResult.type === 'success'"
+      [class.alert-danger]="importResult.type === 'error'"
+      [class.alert-warning]="importResult.type === 'warn'"
+      role="alert"
+    >
+      {{ importResult.message }}
+      <button type="button" class="btn-close" (click)="dismissImportResult()"></button>
+    </div>
+  }
+
+  <!-- Carte stat -->
+  <div class="stats-row">
+    <article class="stat-card stat-card--blue">
+      <span>Total catégories</span>
+      <strong>{{ categories.length }}</strong>
+    </article>
+  </div>
+
+  <!-- Formulaire ajout / modification -->
+  @if (isFormVisible) {
+    <div class="cat-form-card card">
+      <div class="card-body">
+        <div class="form-header">
+          <div>
+            <h2>{{ isEditing ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h2>
+            <p>Les champs marqués <span class="required-star">*</span> sont obligatoires.</p>
+          </div>
+          <button type="button" class="btn btn-link" (click)="closeForm()">Fermer</button>
+        </div>
+
+        <form [formGroup]="addForm" (ngSubmit)="saveCategory()">
+          <div class="form-grid form-grid--2">
+            <div class="form-group">
+              <label for="catName">Nom de la catégorie <span class="required-star">*</span></label>
+              <input
+                id="catName"
+                type="text"
+                class="form-control"
+                formControlName="name"
+                placeholder="ex : Entretien, Sécurité, Travaux..."
+                autocomplete="off"
+              />
+              @if (addForm.get('name')?.touched && addForm.get('name')?.hasError('required')) {
+                <small class="text-danger">Le nom est obligatoire.</small>
+              }
+              @if (addForm.get('name')?.touched && addForm.get('name')?.hasError('minlength')) {
+                <small class="text-danger">Minimum 2 caractères.</small>
+              }
+              @if (addForm.get('name')?.touched && addForm.get('name')?.hasError('maxlength')) {
+                <small class="text-danger">Maximum 80 caractères.</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="addForm.invalid || saving"
+            >
+              {{ saving ? 'Enregistrement...' : (isEditing ? 'Modifier' : 'Ajouter') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Liste des catégories -->
+  <div class="cat-list-card card">
+    <div class="card-body">
+      <div class="list-header">
+        <div>
+          <h2>Liste des catégories</h2>
+          <p>{{ filteredCategories.length }} catégorie(s) trouvée(s)</p>
+        </div>
+        <div class="filters">
+          <div class="page-size-select">
+            <label for="pageSizeSelect">Afficher</label>
+            <div class="select-wrap">
+              <select
+                id="pageSizeSelect"
+                class="form-control"
+                [(ngModel)]="pageSize"
+                (ngModelChange)="onPageSizeChange()"
+              >
+                @for (opt of pageSizeOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="search-box">
+            <label for="catSearch">Recherche</label>
+            <input
+              id="catSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Filtrer par nom..."
+            />
+          </div>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state">Chargement des catégories...</div>
+      }
+
+      @if (!loading && !categories.length) {
+        <div class="empty-state">
+          <h3>Aucune catégorie définie</h3>
+          <p>Cliquez sur "Nouvelle catégorie" pour en ajouter une.</p>
+        </div>
+      }
+
+      @if (!loading && filteredCategories.length === 0 && searchTerm) {
+        <div class="empty-state">
+          <h3>Aucun résultat</h3>
+          <p>Aucune catégorie ne correspond à "{{ searchTerm }}".</p>
+        </div>
+      }
+
+      @if (!loading && paginatedCategories.length > 0) {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nom de la catégorie</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of paginatedCategories; track entry.name; let i = $index) {
+                <tr>
+                  <td class="row-index">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+                  <td>
+                    <strong>{{ entry.name }}</strong>
+                  </td>
+                  <td class="actions-column">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="openEditForm(entry)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger-soft"
+                      [disabled]="saving"
+                      (click)="deleteCategory(entry)"
+                    >
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-toolbar">
+          <span class="pagination-summary">
+            {{ paginationStart }}–{{ paginationEnd }} sur {{ filteredCategories.length }}
+          </span>
+          <div class="pagination-controls">
+            <button
+              class="page-btn"
+              (click)="goToPage(currentPage - 1)"
+              [disabled]="currentPage === 1"
+            >
+              ‹
+            </button>
+
+            @for (page of visiblePages; track $index) {
+              @if (page === -1) {
+                <span class="page-btn page-btn--ellipsis">…</span>
+              } @else {
+                <button
+                  class="page-btn"
+                  [class.page-btn--active]="page === currentPage"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+            }
+
+            <button
+              class="page-btn"
+              (click)="goToPage(currentPage + 1)"
+              [disabled]="currentPage === totalPages"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,283 @@
+<div class="au-page container-fluid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       EN-TÊTE PAGE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="au-page-header">
+    <div class="au-page-header__copy">
+      <span class="au-eyebrow">Paramétrage</span>
+      <h1>Journal d'audit</h1>
+      <p>Historique complet de toutes les actions réalisées par les utilisateurs sur l'application.</p>
+    </div>
+    <div class="au-page-header__actions no-print">
+      <button type="button" class="au-btn au-btn--ghost" (click)="printPage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimer
+      </button>
+      <button type="button" class="au-btn au-btn--outline" (click)="exportToExcel()" [disabled]="filteredEntries.length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter Excel
+      </button>
+      <button type="button" class="au-btn au-btn--danger" (click)="clearAudit()" [disabled]="allEntries.length === 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+        Effacer l'historique
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       KPI CARDS
+  ══════════════════════════════════════════════════════════ -->
+  <div class="au-kpi-row">
+    <div class="au-kpi-card au-kpi-card--blue">
+      <div class="au-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div>
+        <span class="au-kpi-card__label">Total actions</span>
+        <strong class="au-kpi-card__value">{{ totalActions }}</strong>
+        <span class="au-kpi-card__sub">enregistrées</span>
+      </div>
+    </div>
+
+    <div class="au-kpi-card au-kpi-card--green">
+      <div class="au-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div>
+        <span class="au-kpi-card__label">Succès</span>
+        <strong class="au-kpi-card__value">{{ totalSuccess }}</strong>
+        <span class="au-kpi-card__sub">{{ successRate }} % de réussite</span>
+      </div>
+    </div>
+
+    <div class="au-kpi-card au-kpi-card--orange">
+      <div class="au-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <span class="au-kpi-card__label">Erreurs</span>
+        <strong class="au-kpi-card__value">{{ totalErrors }}</strong>
+        <span class="au-kpi-card__sub">actions en échec</span>
+      </div>
+    </div>
+
+    <div class="au-kpi-card au-kpi-card--teal">
+      <div class="au-kpi-card__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div>
+        <span class="au-kpi-card__label">Utilisateurs actifs</span>
+        <strong class="au-kpi-card__value">{{ activeUsers }}</strong>
+        <span class="au-kpi-card__sub">dans l'historique</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FILTRES
+  ══════════════════════════════════════════════════════════ -->
+  <div class="au-filter-card no-print">
+    <div class="au-filter-card__heading">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      <span>Filtres</span>
+    </div>
+    <div class="au-filter-row">
+      <!-- Dates -->
+      <div class="au-form-group">
+        <label class="au-form-label">Du</label>
+        <input type="date" class="au-date-input" [(ngModel)]="debutStr" (change)="applyDateFilter()" />
+      </div>
+      <div class="au-form-group">
+        <label class="au-form-label">Au</label>
+        <input type="date" class="au-date-input" [(ngModel)]="finStr" (change)="applyDateFilter()" />
+      </div>
+      <!-- Module -->
+      <div class="au-form-group">
+        <label class="au-form-label">Module</label>
+        <div class="au-select-wrap">
+          <select (change)="setModuleFilter($event)">
+            <option value="">Tous les modules</option>
+            @for (mod of availableModules; track mod) {
+              <option [value]="mod">{{ mod }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <!-- Bouton reset -->
+      <div class="au-form-group au-form-group--action">
+        <button type="button" class="au-btn au-btn--ghost" (click)="resetFilters()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.61"/>
+          </svg>
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TABLEAU
+  ══════════════════════════════════════════════════════════ -->
+  <div class="au-table-panel">
+
+    <!-- Toolbar -->
+    <div class="au-table-toolbar no-print">
+      <!-- Recherche -->
+      <div class="au-search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="search"
+          placeholder="Rechercher utilisateur, action, module..."
+          (input)="onSearchChange($event)"
+        />
+      </div>
+
+      <!-- Filtres méthode -->
+      <div class="au-method-filters">
+        <button class="au-filter-btn" [class.au-filter-btn--active]="methodFilter === ''" (click)="setMethodFilter('')">
+          Tous
+        </button>
+        <button class="au-filter-btn au-filter-btn--post" [class.au-filter-btn--active]="methodFilter === 'POST'" (click)="setMethodFilter('POST')">
+          POST
+        </button>
+        <button class="au-filter-btn au-filter-btn--put" [class.au-filter-btn--active]="methodFilter === 'PUT'" (click)="setMethodFilter('PUT')">
+          PUT
+        </button>
+        <button class="au-filter-btn au-filter-btn--delete" [class.au-filter-btn--active]="methodFilter === 'DELETE'" (click)="setMethodFilter('DELETE')">
+          DELETE
+        </button>
+      </div>
+
+      <!-- Filtres statut -->
+      <div class="au-method-filters">
+        <button class="au-filter-btn" [class.au-filter-btn--active]="statusFilter === ''" (click)="setStatusFilter('')">
+          Tous
+        </button>
+        <button class="au-filter-btn au-filter-btn--success" [class.au-filter-btn--active]="statusFilter === 'success'" (click)="setStatusFilter('success')">
+          Succès
+        </button>
+        <button class="au-filter-btn au-filter-btn--error" [class.au-filter-btn--active]="statusFilter === 'error'" (click)="setStatusFilter('error')">
+          Échec
+        </button>
+      </div>
+
+      <span class="au-count-pill">{{ filteredEntries.length }} entrée(s)</span>
+    </div>
+
+    <!-- État vide -->
+    @if (allEntries.length === 0) {
+      <div class="au-empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <p>Aucune activité enregistrée</p>
+        <span>Les actions (créations, modifications, suppressions) s'enregistreront automatiquement.</span>
+      </div>
+    } @else if (filteredEntries.length === 0) {
+      <div class="au-empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p>Aucun résultat pour ces filtres.</p>
+      </div>
+    } @else {
+      <div class="au-table-shell">
+        <table class="au-table">
+          <thead>
+            <tr>
+              <th>Date / Heure</th>
+              <th>Utilisateur</th>
+              <th>Module</th>
+              <th>Action</th>
+              <th>Méthode</th>
+              <th>Statut</th>
+              <th>Durée</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of filteredEntries; track entry.id) {
+              <tr [class.au-row--error]="!entry.success">
+                <td>
+                  <span class="au-ts-main">{{ formatTs(entry.timestamp) }}</span>
+                  <span class="au-ts-rel">{{ getRelativeTime(entry.timestamp) }}</span>
+                </td>
+                <td>
+                  <div class="au-user-cell">
+                    <div class="au-user-avatar">{{ getInitials(entry.userName) }}</div>
+                    <span>{{ entry.userName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="au-module-pill">{{ entry.module }}</span>
+                </td>
+                <td class="au-action-cell">{{ entry.action }}</td>
+                <td>
+                  <span [class]="getMethodClass(entry.method)">{{ entry.method }}</span>
+                </td>
+                <td>
+                  <span [class]="getStatusClass(entry)">
+                    {{ entry.success ? 'Succès' : 'Échec' }}
+                    @if (entry.status) { <em>({{ entry.status }})</em> }
+                  </span>
+                </td>
+                <td>
+                  <span class="au-duration" [class.au-duration--slow]="entry.durationMs > 2000">
+                    {{ entry.durationMs }} ms
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

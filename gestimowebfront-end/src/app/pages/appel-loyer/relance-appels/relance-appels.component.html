@@ -1,0 +1,261 @@
+<section class="relance-page">
+  <header class="relance-hero">
+    <div class="relance-hero__copy">
+      <span class="relance-eyebrow">Gestion des loyers</span>
+      <h1>Gestion des relances</h1>
+      <p>
+        Listez tous les loyers impayes anterieurs a la periode en cours et
+        envoyez des emails de relance aux locataires concernes.
+      </p>
+    </div>
+
+    <div class="relance-hero__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="loadRelances()"
+        [disabled]="isLoading || isBulkActionRunning"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="sendBulkRelances()"
+        [disabled]="!canSendBulk"
+      >
+        Envoyer les relances simples
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="sendBulkGlobalRelances()"
+        [disabled]="!canSendBulkGlobal"
+      >
+        Envoyer les relances globales
+      </button>
+    </div>
+  </header>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger relance-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <section class="relance-summary">
+    <article class="summary-card" data-tone="danger">
+      <span class="summary-card__label">Loyers a relancer</span>
+      <strong>{{ totalRelances }}</strong>
+      <small>Impayes strictement anterieurs au mois en cours</small>
+    </article>
+
+    <article class="summary-card" data-tone="warning">
+      <span class="summary-card__label">Solde cumule</span>
+      <strong>{{ formatCurrency(totalSolde) }}</strong>
+      <small>Total des arrieres a recouvrer</small>
+    </article>
+
+    <article class="summary-card" data-tone="success">
+      <span class="summary-card__label">Emails exploitables</span>
+      <strong>{{ withEmailCount }}</strong>
+      <small>Locataires pouvant recevoir une relance</small>
+    </article>
+
+    <article class="summary-card" data-tone="neutral">
+      <span class="summary-card__label">Emails manquants</span>
+      <strong>{{ missingEmailCount }}</strong>
+      <small>Locataires a completer avant envoi</small>
+    </article>
+  </section>
+
+  <section class="relance-card">
+    <div class="section-head">
+      <div>
+        <span class="section-head__kicker">Filtres</span>
+        <h2>Recherche et pagination</h2>
+      </div>
+      <span class="section-head__status">
+        {{ selectedCount }} ligne(s) selectionnee(s) | {{ selectedGlobalCount }} locataire(s) pour relance globale
+      </span>
+    </div>
+
+    <div class="relance-toolbar">
+      <label class="relance-field relance-field--search">
+        <span>Recherche</span>
+        <input
+          type="search"
+          class="form-control"
+          [ngModel]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Locataire, periode, bien, bail, email..."
+        />
+      </label>
+
+      <label class="relance-field relance-field--compact">
+        <span>Afficher</span>
+        <select
+          class="form-select"
+          [ngModel]="pageSize"
+          (ngModelChange)="onPageSizeChange($event)"
+        >
+          @for (size of pageSizeOptions; track size) {
+            <option [ngValue]="size">{{ size }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="relance-card">
+    <div class="section-head">
+      <div>
+        <span class="section-head__kicker">Impayes</span>
+        <h2>Liste des loyers a relancer</h2>
+      </div>
+      <span class="section-head__status">{{ filteredRelances.length }} ligne(s)</span>
+    </div>
+
+    @if (isLoading) {
+      <div class="empty-state">
+        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+        <p>Chargement des relances...</p>
+      </div>
+    } @else if (filteredRelances.length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <p>Aucun loyer impaye anterieur au mois en cours.</p>
+      </div>
+    } @else {
+      <div class="table-shell">
+        <table class="relance-table">
+          <thead>
+            <tr>
+              <th class="select-col">
+                <input
+                  type="checkbox"
+                  [checked]="areAllCurrentPageSelected()"
+                  (change)="toggleCurrentPageSelection($any($event.target).checked)"
+                />
+              </th>
+              <th>Periode</th>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Bail</th>
+              <th class="text-end">Solde</th>
+              <th>Email</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (relance of pagedRelances; track trackByRelance($index, relance)) {
+              <tr>
+                <td class="select-col">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(relance)"
+                    [disabled]="!hasEmail(relance) || isSending(relance) || isSendingGlobal(relance)"
+                    (change)="toggleSelection(relance, $any($event.target).checked)"
+                  />
+                </td>
+                <td>
+                  <strong>{{ formatPeriod(relance) }}</strong>
+                  <small class="table-note">{{ relance.periodeAppelLoyer || '-' }}</small>
+                </td>
+                <td>
+                  <strong>{{ getLocataireLabel(relance) }}</strong>
+                  <small class="table-note">
+                    Echeance prevue :
+                    {{ relance.datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy' }}
+                  </small>
+                </td>
+                <td>
+                  <strong>{{ relance.bienImmobilierFullName || relance.abrvBienimmobilier || '-' }}</strong>
+                </td>
+                <td>
+                  <strong>{{ relance.abrvCodeBail || '-' }}</strong>
+                </td>
+                <td class="text-end text-strong">
+                  {{ formatCurrency(relance.soldeAppelLoyer) }}
+                </td>
+                <td>
+                  @if (hasEmail(relance)) {
+                    <span>{{ relance.emailLocatire }}</span>
+                  } @else {
+                    <span class="email-missing">Email manquant</span>
+                  }
+                </td>
+                <td class="text-end">
+                  <div class="action-stack">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="sendSingleRelance(relance)"
+                      [disabled]="!hasEmail(relance) || isSending(relance) || isSendingGlobal(relance) || isBulkActionRunning"
+                    >
+                      @if (isSending(relance)) {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      }
+                      Simple
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-primary"
+                      (click)="sendSingleGlobalRelance(relance)"
+                      [disabled]="!hasEmail(relance) || isSending(relance) || isSendingGlobal(relance) || isBulkActionRunning"
+                    >
+                      @if (isSendingGlobal(relance)) {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                      }
+                      Globale
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-bar">
+        <span class="pagination-bar__meta">
+          Affichage de {{ paginationStart }} a {{ paginationEnd }} sur
+          {{ filteredRelances.length }} ligne(s)
+        </span>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="previousPage()"
+            [disabled]="currentPageNumber <= 1"
+          >
+            Precedent
+          </button>
+
+          <div class="pagination-pages">
+            @for (page of visiblePages; track page) {
+              <button
+                type="button"
+                class="page-chip"
+                [class.page-chip--active]="page === currentPageNumber"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="nextPage()"
+            [disabled]="currentPageNumber >= totalPages"
+          >
+            Suivant
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+</section>

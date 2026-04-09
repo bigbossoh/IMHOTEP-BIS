@@ -1,0 +1,39 @@
+<div class="header-shell">
+  <div class="header-search">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Rechercher un locataire, un bail ou un bien..." />
+  </div>
+
+  <div class="header-right">
+    <div class="etab-chip">
+      <span class="label">Etablissement</span>
+      @if (etablissementState$ | async; as state) {
+        <strong>{{ state.etabname?.nomEtabless || 'Non defini' }}</strong>
+      } @else {
+        <strong>Chargement...</strong>
+      }
+    </div>
+
+    <details class="user-menu" #userMenu>
+      <summary class="user-chip user-chip--button">
+        <span class="avatar">{{ userInitials }}</span>
+        <div class="identity">
+          <strong>{{ user?.nom }} {{ user?.prenom }}</strong>
+          <small>{{ userRoleLabel }}</small>
+        </div>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+      </summary>
+
+      <div class="user-menu__panel">
+        <button type="button" class="user-menu__action" (click)="goToProfile(userMenu)">
+          <i class="fas fa-user"></i>
+          Profil
+        </button>
+        <button type="button" class="user-menu__action user-menu__action--danger" (click)="logoutUser(userMenu)">
+          <i class="fas fa-sign-out-alt"></i>
+          Deconnexion
+        </button>
+      </div>
+    </details>
+  </div>
+</div>

@@ -1,0 +1,507 @@
+<div class="appels-page container-fluid">
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Suivi des echeances</span>
+      <h1>Appels de loyers</h1>
+      <p>
+        Pilotez les quittances par periode, filtrez rapidement les loyers
+        impayes et declenchez les impressions ou envois de mails depuis une
+        interface unique.
+      </p>
+    </div>
+
+    <div class="hero-panel__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoadingYears || isLoadingPeriods || isLoadingAppels"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openReductionDialog()"
+        [disabled]="!selectedPeriod"
+      >
+        Appliquer une reduction
+      </button>
+    </div>
+  </section>
+
+  <div *ngIf="pageErrorMessage" class="alert alert-danger page-alert">
+    {{ pageErrorMessage }}
+  </div>
+
+  <section class="surface-card filters-card">
+    <div class="surface-card__body">
+      <div class="filters-grid">
+        <div class="field-group field-group--year">
+          <label for="anneeAppel">Annee</label>
+          <select
+            id="anneeAppel"
+            name="anneeAppel"
+            class="form-select"
+            [ngModel]="selectedYear"
+            (ngModelChange)="onYearChange($event)"
+            [disabled]="isLoadingYears || availableYears.length === 0"
+          >
+            <option *ngIf="availableYears.length === 0" value="">
+              Aucune annee disponible
+            </option>
+            <option *ngFor="let year of availableYears" [ngValue]="year">
+              {{ year }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field-group field-group--period">
+          <label for="periodeAppel">Periode</label>
+          <select
+            id="periodeAppel"
+            name="periodeAppel"
+            class="form-select"
+            [ngModel]="selectedPeriod"
+            (ngModelChange)="onPeriodChange($event)"
+            [disabled]="isLoadingPeriods || availablePeriods.length === 0"
+          >
+            <option *ngIf="availablePeriods.length === 0" value="">
+              Aucune periode disponible
+            </option>
+            <option
+              *ngFor="let period of availablePeriods"
+              [ngValue]="period.periodeAppelLoyer"
+            >
+              {{ period.periodeLettre || period.periodeAppelLoyer }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field-group field-group--search">
+          <label for="searchAppel">Recherche</label>
+          <input
+            id="searchAppel"
+            type="search"
+            class="form-control"
+            [value]="searchTerm"
+            (input)="onSearch($event)"
+            placeholder="Locataire, bien, bail, periode..."
+          />
+        </div>
+      </div>
+
+      <div class="toolbar-row">
+        <div class="segmented">
+          <button
+            type="button"
+            class="segmented__button"
+            [class.segmented__button--active]="statusFilter === 'all'"
+            (click)="setStatusFilter('all')"
+          >
+            Tous
+          </button>
+          <button
+            type="button"
+            class="segmented__button"
+            [class.segmented__button--active]="statusFilter === 'impaye'"
+            (click)="setStatusFilter('impaye')"
+          >
+            Impayes
+          </button>
+          <button
+            type="button"
+            class="segmented__button"
+            [class.segmented__button--active]="statusFilter === 'partiel'"
+            (click)="setStatusFilter('partiel')"
+          >
+            Partiels
+          </button>
+          <button
+            type="button"
+            class="segmented__button"
+            [class.segmented__button--active]="statusFilter === 'solde'"
+            (click)="setStatusFilter('solde')"
+          >
+            Soldes
+          </button>
+        </div>
+
+        <div class="toolbar-actions">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="exportFilteredRows()"
+            [disabled]="filteredAppels.length === 0"
+          >
+            Exporter CSV
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="downloadCurrentPeriod()"
+            [disabled]="!selectedPeriod || isDownloadingPeriod"
+          >
+            {{ isDownloadingPeriod ? 'Telechargement...' : 'Telecharger le PDF' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="printCurrentPeriod()"
+            [disabled]="!selectedPeriod || isPrintingPeriod"
+          >
+            {{ isPrintingPeriod ? 'Impression...' : 'Imprimer la periode' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-success"
+            (click)="sendGroupedMail()"
+            [disabled]="!selectedPeriod || isSendingGroupMail"
+          >
+            {{ isSendingGroupMail ? 'Envoi...' : 'Envoyer les quittances' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-card__label">Appels charges</span>
+      <strong>{{ totalAppels }}</strong>
+      <small>{{ selectedPeriodLabel }}</small>
+    </article>
+
+    <article class="stat-card stat-card--info">
+      <span class="stat-card__label">Montant facture</span>
+      <strong>{{ formatCurrency(totalBilledAmount) }}</strong>
+      <small>Somme des loyers de la periode</small>
+    </article>
+
+    <article class="stat-card stat-card--success">
+      <span class="stat-card__label">Montant encaisse</span>
+      <strong>{{ formatCurrency(totalPaidAmount) }}</strong>
+      <small>{{ soldCount }} ligne(s) soldes</small>
+    </article>
+
+    <article class="stat-card stat-card--warning">
+      <span class="stat-card__label">Reste a payer</span>
+      <strong>{{ formatCurrency(totalOutstandingAmount) }}</strong>
+      <small>{{ unpaidCount }} impaye(s), {{ partialCount }} partiel(s)</small>
+    </article>
+  </section>
+
+  <div class="appels-layout">
+    <section class="surface-card appels-list-card">
+      <div class="surface-card__body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>Liste des appels</h2>
+            <p>
+              Priorite aux appels non soldes, avec recherche instantanee sur les
+              locataires et les biens.
+            </p>
+          </div>
+          <span class="count-pill">{{ filteredAppels.length }} ligne(s)</span>
+        </div>
+
+        <div class="period-banner" *ngIf="appels.length > 0">
+          <article class="period-chip">
+            <span>Periode</span>
+            <strong>{{ selectedPeriodLabel }}</strong>
+          </article>
+          <article class="period-chip">
+            <span>Du</span>
+            <strong>{{
+              appels[0].dateDebutMoisAppelLoyer | date: 'dd/MM/yyyy'
+            }}</strong>
+          </article>
+          <article class="period-chip">
+            <span>Au</span>
+            <strong>{{
+              appels[0].dateFinMoisAppelLoyer | date: 'dd/MM/yyyy'
+            }}</strong>
+          </article>
+          <article class="period-chip">
+            <span>Reglement attendu</span>
+            <strong>{{
+              appels[0].datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy'
+            }}</strong>
+          </article>
+        </div>
+
+        <div
+          class="state-card"
+          *ngIf="isLoadingYears || isLoadingPeriods || isLoadingAppels"
+        >
+          Chargement des appels de loyers...
+        </div>
+
+        <div
+          class="state-card"
+          *ngIf="
+            !isLoadingYears &&
+            !isLoadingPeriods &&
+            availablePeriods.length === 0 &&
+            availableYears.length > 0
+          "
+        >
+          Aucune periode d'appel n'est disponible pour l'annee selectionnee.
+        </div>
+
+        <div
+          class="state-card"
+          *ngIf="
+            !isLoadingYears &&
+            !isLoadingPeriods &&
+            !isLoadingAppels &&
+            availableYears.length === 0
+          "
+        >
+          Aucun appel de loyer n'est encore enregistre pour cette agence.
+        </div>
+
+        <div
+          class="state-card"
+          *ngIf="
+            !isLoadingYears &&
+            !isLoadingPeriods &&
+            !isLoadingAppels &&
+            availablePeriods.length > 0 &&
+            appels.length === 0
+          "
+        >
+          Aucun appel n'a ete genere pour la periode selectionnee.
+        </div>
+
+        <div
+          class="state-card"
+          *ngIf="
+            !isLoadingAppels &&
+            appels.length > 0 &&
+            filteredAppels.length === 0
+          "
+        >
+          Aucun appel ne correspond a votre recherche ou a votre filtre.
+        </div>
+
+        <div class="table-shell" *ngIf="filteredAppels.length > 0">
+          <div class="table-responsive">
+            <table class="table align-middle appels-table">
+              <thead>
+                <tr>
+                  <th>Periode</th>
+                  <th>Locataire</th>
+                  <th>Bien</th>
+                  <th>Loyer</th>
+                  <th>Solde</th>
+                  <th>Statut</th>
+                  <th class="actions-column">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let appel of filteredAppels; trackBy: trackByAppel"
+                  [class.row-selected]="selectedAppelId === getAppelId(appel)"
+                  (click)="selectAppel(appel)"
+                >
+                  <td>
+                    <span class="table-pill">
+                      {{ appel.periodeLettre || appel.periodeAppelLoyer || '-' }}
+                    </span>
+                    <div class="row-helper">
+                      Echeance
+                      {{ appel.datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy' }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <strong>{{ getLocataireName(appel) }}</strong>
+                    <div class="row-helper">{{ appel.emailLocatire || '-' }}</div>
+                  </td>
+
+                  <td>
+                    <strong>{{ appel.abrvBienimmobilier || '-' }}</strong>
+                    <div class="row-helper">
+                      {{ appel.bienImmobilierFullName || '-' }}
+                    </div>
+                  </td>
+
+                  <td>{{ formatCurrency(getMontantLoyer(appel)) }}</td>
+                  <td>{{ formatCurrency(appel.soldeAppelLoyer) }}</td>
+                  <td>
+                    <span [class]="getAppelStatusClass(appel)">
+                      {{ getAppelStatusLabel(appel) }}
+                    </span>
+                  </td>
+                  <td class="actions-column" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="printAppel(appel)"
+                      [disabled]="isAppelPrinting(appel)"
+                    >
+                      {{ isAppelPrinting(appel) ? 'Impression...' : 'Imprimer' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-success"
+                      (click)="sendAppelMail(appel)"
+                      [disabled]="isAppelMailing(appel)"
+                    >
+                      {{ isAppelMailing(appel) ? 'Envoi...' : 'Mail' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="surface-card detail-card">
+      <div class="surface-card__body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Detail</span>
+            <h2>Appel selectionne</h2>
+            <p>Retrouvez les informations du locataire, du bien et du solde.</p>
+          </div>
+          <span class="count-pill" *ngIf="selectedAppel">
+            #{{ selectedAppel.id }}
+          </span>
+        </div>
+
+        <div class="state-card" *ngIf="!selectedAppel && filteredAppels.length === 0">
+          Aucune ligne n'est disponible pour afficher un detail.
+        </div>
+
+        <div class="state-card" *ngIf="!selectedAppel && filteredAppels.length > 0">
+          Selectionnez un appel dans la liste pour afficher sa fiche.
+        </div>
+
+        <ng-container *ngIf="selectedAppel as appel">
+          <div class="detail-hero">
+            <div>
+              <span class="detail-hero__label">
+                {{ getAppelStatusLabel(appel) }}
+              </span>
+              <strong>{{ getLocataireName(appel) }}</strong>
+              <small>
+                {{ appel.abrvBienimmobilier || '-' }} /
+                {{ appel.periodeLettre || appel.periodeAppelLoyer || '-' }}
+              </small>
+            </div>
+            <span [class]="getAppelStatusClass(appel)">
+              {{ getAppelStatusLabel(appel) }}
+            </span>
+          </div>
+
+          <div class="detail-actions">
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              (click)="printAppel(appel)"
+              [disabled]="isAppelPrinting(appel)"
+            >
+              {{
+                isAppelPrinting(appel)
+                  ? 'Impression...'
+                  : 'Imprimer la quittance'
+              }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-success"
+              (click)="sendAppelMail(appel)"
+              [disabled]="isAppelMailing(appel)"
+            >
+              {{
+                isAppelMailing(appel)
+                  ? 'Envoi en cours...'
+                  : 'Envoyer par mail'
+              }}
+            </button>
+          </div>
+
+          <div class="detail-summary-grid">
+            <article class="summary-chip">
+              <span>Loyer</span>
+              <strong>{{ formatCurrency(getMontantLoyer(appel)) }}</strong>
+            </article>
+            <article class="summary-chip">
+              <span>Solde</span>
+              <strong>{{ formatCurrency(appel.soldeAppelLoyer) }}</strong>
+            </article>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span>Locataire</span>
+              <strong>{{ getLocataireName(appel) }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Email</span>
+              <strong>{{ appel.emailLocatire || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Bien</span>
+              <strong>{{ appel.bienImmobilierFullName || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Code bien</span>
+              <strong>{{ appel.abrvBienimmobilier || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Code bail</span>
+              <strong>{{ appel.abrvCodeBail || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Proprietaire</span>
+              <strong>{{ getProprietaireName(appel) }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Periode</span>
+              <strong>{{ appel.periodeLettre || appel.periodeAppelLoyer || '-' }}</strong>
+            </div>
+            <div class="detail-item">
+              <span>Echeance</span>
+              <strong>{{
+                appel.datePaiementPrevuAppelLoyer | date: 'dd/MM/yyyy'
+              }}</strong>
+            </div>
+          </div>
+
+          <div class="card-heading card-heading--section">
+            <div>
+              <span class="card-heading__eyebrow">Reduction</span>
+              <h2>Informations complementaires</h2>
+              <p>Verifiez le taux applique et le message associe a la periode.</p>
+            </div>
+          </div>
+
+          <div class="meta-list">
+            <div class="meta-row">
+              <span>Taux applique</span>
+              <strong>{{ reductionRate }} %</strong>
+            </div>
+            <div class="meta-row">
+              <span>Agence</span>
+              <strong>{{ appel.nomAgence || '-' }}</strong>
+            </div>
+            <div class="meta-row">
+              <span>Telephone agence</span>
+              <strong>{{ appel.telAgence || appel.mobileAgence || '-' }}</strong>
+            </div>
+            <div class="meta-row meta-row--stack" *ngIf="hasReductionMessage">
+              <span>Message de reduction</span>
+              <strong>{{ appel.messageReduction }}</strong>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </aside>
+  </div>
+</div>

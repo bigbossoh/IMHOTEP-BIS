@@ -1,0 +1,248 @@
+<div class="page-shell">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Paramétrage des dépenses</h1>
+      <p class="page-sub">Configurez le circuit de validation et les référentiels de dépenses.</p>
+    </div>
+    <button mat-raised-button color="primary" [disabled]="saving" (click)="saveConfig()">
+      @if (saving) {
+        <mat-progress-spinner diameter="18" mode="indeterminate" color="accent"></mat-progress-spinner>
+      } @else {
+        <mat-icon>save</mat-icon>
+      }
+      Sauvegarder
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-center">
+      <mat-progress-spinner mode="indeterminate" color="primary" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else {
+
+    <div class="param-grid">
+
+      <!-- ── Bloc 1 : Workflow principal ──────────────── -->
+      <mat-card class="param-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon card-icon--blue">account_tree</mat-icon>
+          <mat-card-title>Circuit de validation</mat-card-title>
+          <mat-card-subtitle>Activez et configurez le workflow de validation des dépenses</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="workflowForm" class="config-form">
+
+            <!-- Toggle actif -->
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <span class="toggle-label">Activer le circuit de validation</span>
+                <span class="toggle-hint">Les dépenses dépassant le seuil seront soumises à validation</span>
+              </div>
+              <mat-slide-toggle formControlName="active" color="primary"></mat-slide-toggle>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="form-row-2">
+              <mat-form-field appearance="outline">
+                <mat-label>Seuil de déclenchement (XOF) <span class="req">*</span></mat-label>
+                <input matInput type="number" formControlName="validationThreshold" min="1" />
+                <mat-icon matSuffix>euro_symbol</mat-icon>
+                <mat-hint>Actuellement : {{ getThresholdFormatted() }}</mat-hint>
+                <mat-error>Seuil obligatoire et > 0</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre de niveaux de validation <span class="req">*</span></mat-label>
+                <mat-select formControlName="levelCount">
+                  @for (opt of LEVEL_COUNT_OPTIONS; track opt.value) {
+                    <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Preview box -->
+            @if (workflowActive) {
+              <div class="preview-box">
+                <mat-icon>info</mat-icon>
+                <span>
+                  Toute dépense supérieure à <strong>{{ getThresholdFormatted() }}</strong>
+                  déclenchera automatiquement un circuit à <strong>{{ levelCount }} niveau(x)</strong>.
+                </span>
+              </div>
+            }
+
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ── Bloc 2 : Niveaux de validation ───────────── -->
+      <mat-card class="param-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon card-icon--purple">supervisor_account</mat-icon>
+          <mat-card-title>Niveaux de validation</mat-card-title>
+          <mat-card-subtitle>Définissez les validateurs par niveau</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="levels-container">
+
+            <!-- Niveau 1 -->
+            <div class="level-block">
+              <div class="level-badge level-badge--1">N.1</div>
+              <form [formGroup]="level1Form" class="level-form">
+                <mat-form-field appearance="outline">
+                  <mat-label>Intitulé du niveau 1 <span class="req">*</span></mat-label>
+                  <input matInput formControlName="levelLabel" placeholder="ex: Supérieur hiérarchique" />
+                </mat-form-field>
+                <div class="form-row-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Rôle validateur</mat-label>
+                    <input matInput formControlName="validatorRoleName" placeholder="ex: MANAGER" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nom du validateur</mat-label>
+                    <input matInput formControlName="validatorUserDisplayName" placeholder="Nom prénom" />
+                  </mat-form-field>
+                </div>
+              </form>
+            </div>
+
+            <!-- Niveau 2 -->
+            <div class="level-block">
+              <div class="level-badge level-badge--2">N.2</div>
+              <form [formGroup]="level2Form" class="level-form">
+                <mat-form-field appearance="outline">
+                  <mat-label>Intitulé du niveau 2 <span class="req">*</span></mat-label>
+                  <input matInput formControlName="levelLabel" placeholder="ex: Directeur final" />
+                </mat-form-field>
+                <div class="form-row-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Rôle validateur</mat-label>
+                    <input matInput formControlName="validatorRoleName" placeholder="ex: DIRECTOR" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nom du validateur</mat-label>
+                    <input matInput formControlName="validatorUserDisplayName" placeholder="Nom prénom" />
+                  </mat-form-field>
+                </div>
+              </form>
+            </div>
+
+            <!-- Niveau 3 (conditionnel) -->
+            @if (levelCount >= 3) {
+              <div class="level-block">
+                <div class="level-badge level-badge--3">N.3</div>
+                <form [formGroup]="level3Form" class="level-form">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Intitulé du niveau 3 <span class="req">*</span></mat-label>
+                    <input matInput formControlName="levelLabel" placeholder="ex: Directeur général" />
+                  </mat-form-field>
+                  <div class="form-row-2">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Rôle validateur</mat-label>
+                      <input matInput formControlName="validatorRoleName" placeholder="ex: CEO" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Nom du validateur</mat-label>
+                      <input matInput formControlName="validatorUserDisplayName" placeholder="Nom prénom" />
+                    </mat-form-field>
+                  </div>
+                </form>
+              </div>
+            }
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ── Bloc 3 : Catégories ───────────────────────── -->
+      <mat-card class="param-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon card-icon--green">label</mat-icon>
+          <mat-card-title>Catégories de dépenses</mat-card-title>
+          <mat-card-subtitle>Gérez les catégories disponibles dans le formulaire</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="add-input-row">
+            <mat-form-field appearance="outline" style="flex:1">
+              <mat-label>Nouvelle catégorie</mat-label>
+              <input matInput [(ngModel)]="newCategory" placeholder="ex: Sécurité" (keyup.enter)="addCategory()" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="addCategory()">
+              <mat-icon>add</mat-icon> Ajouter
+            </button>
+          </div>
+
+          <div class="tag-list">
+            @for (cat of categories; track cat) {
+              <div class="tag-item">
+                <span>{{ cat }}</span>
+                <button mat-icon-button class="tag-remove" (click)="removeCategory(cat)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+            @if (!categories.length) {
+              <p class="empty-hint">Aucune catégorie définie. Ajoutez-en une ci-dessus.</p>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- ── Bloc 4 : Modes de paiement ───────────────── -->
+      <mat-card class="param-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon card-icon--orange">credit_card</mat-icon>
+          <mat-card-title>Modes de paiement</mat-card-title>
+          <mat-card-subtitle>Configurez les modes de paiement acceptés</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="add-input-row">
+            <mat-form-field appearance="outline" style="flex:1">
+              <mat-label>Nouveau mode de paiement</mat-label>
+              <input matInput [(ngModel)]="newPaymentMode" placeholder="ex: Virement" (keyup.enter)="addPaymentMode()" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="addPaymentMode()">
+              <mat-icon>add</mat-icon> Ajouter
+            </button>
+          </div>
+
+          <div class="tag-list">
+            @for (mode of paymentModes; track mode) {
+              <div class="tag-item">
+                <span>{{ mode }}</span>
+                <button mat-icon-button class="tag-remove" (click)="removePaymentMode(mode)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+            @if (!paymentModes.length) {
+              <p class="empty-hint">Aucun mode de paiement défini.</p>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- Save footer -->
+    <div class="save-footer">
+      <button mat-raised-button color="primary" [disabled]="saving" (click)="saveConfig()">
+        @if (saving) {
+          <mat-progress-spinner diameter="18" mode="indeterminate" color="accent"></mat-progress-spinner>
+        } @else {
+          <mat-icon>save</mat-icon>
+        }
+        Sauvegarder la configuration
+      </button>
+    </div>
+
+  }
+</div>

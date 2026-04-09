@@ -1,0 +1,331 @@
+<form  [formGroup]="newUserForm">
+  <!-- <div class="modal-content"> -->
+
+  <div class="modal-body">
+    <div>
+
+      <div class="row gutters">
+        <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <div class="account-settings">
+                <div class="user-profile">
+                  <div class="user-avatar">
+                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" class="rounded" height="120"
+                      width="120" alt="Maxwell Admin">
+                    </div>
+                    <h5 class="user-name">{{nomProfil}} {{nomPrenom}}</h5>
+                    <h6 class="user-email"></h6>
+                  </div>
+                  <div class="about">
+                    <!-- <h5>Role:{{nomRole}}</h5> -->
+                    <!-- <pre>
+                    <pre>{{newUserForm.value |json}}</pre>
+                  </pre> -->
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+          <div class="card h-100">
+            <h1 mat-dialog-title style="margin: 10px;">{{actionBtn}} Utilisateur</h1>
+            <mat-tab-group mat-align-tabs="start">
+              <mat-tab label="Information personnelle">
+                <div class="row gutters m-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Rôle*</mat-label>
+                    <mat-select formControlName="roleUsed" placeholder="Rôle">
+                      <mat-option value="GERANT">Gérant</mat-option>
+                      <mat-option value="LOCATAIRE">Locataire</mat-option>
+                      <mat-option value="PROPRIETAIRE">Propriétaire</mat-option>
+                      <mat-option value="CLIENT HOTEL">Client Reservation</mat-option>
+                    </mat-select>
+                    <mat-error>Ce champ est obligatoire.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Civilité</mat-label>
+                    <mat-select formControlName="genre" placeholder="Monsieur">
+                      <mat-option value="Monsieur">Monsieur</mat-option>
+                      <mat-option value="Madame">Madame</mat-option>
+                      <mat-option value="Mademoiselle">Mademoiselle</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="row gutters m-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nom*</mat-label>
+                    <input formControlName="nom" matInput placeholder="Nom*">
+                    <mat-error>Ce champ est obligatoire.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Prénom</mat-label>
+                    <input  formControlName="prenom" matInput placeholder="Prénom">
+                  </mat-form-field>
+                </div>
+
+                <div class="row gutters m-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Login/Mobile</mat-label>
+                    <input formControlName="username" matInput placeholder="Login/Mobile">
+                    <mat-error>Ce champ est obligatoire.</mat-error>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Email</mat-label>
+                    <input formControlName="email" matInput placeholder="Email" placeholder="Ex. pat@example.com">
+                    <!-- <mat-error *ngIf="newUserForm.controls['email'].errors?.required">Ce champ est obligatoire.
+                  </mat-error> -->
+                  @if (newUserForm.controls['email'].errors?.email) {
+                    <mat-error>Invalide email adresse.
+                    </mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              @if (idCompare==0) {
+                <div class="row gutters m-2">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Nouveau mot de passe</mat-label>
+                    <input formControlName="password" type="password" matInput placeholder="*******"
+                      [type]="hide ? 'password':'text'" />
+                      <mat-icon matSuffix (click)="hide = !hide">
+                        {{hide ? 'visibility' : 'visibility_off'}}
+                      </mat-icon>
+                    </mat-form-field>
+                    <!-- <mat-form-field appearance="outline">
+                    <mat-label>Confirmer le mot de passe</mat-label>
+                    <input type="repassword" matInput type="password" placeholder="*******">
+                  </mat-form-field> -->
+                </div>
+              }
+              <div class="row gutters m-2">
+                <mat-checkbox formControlName="active" color="primary" class="example-margin">Utilisateur actif
+                </mat-checkbox>
+              </div>
+              <div class="row gutters m-2">
+                <mat-checkbox formControlName="nonLocked" color="primary" class="example-margin">Utilisateur non
+                bloqué</mat-checkbox>
+              </div>
+            </mat-tab>
+            <mat-tab label="Information additionelle">
+              <div class="row gutters m-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Type de pièce d'identité</mat-label>
+                  <mat-select formControlName="typePieceIdentite" placeholder="Type de pièce d'identité">
+                    <mat-option value="CNI">CNI</mat-option>
+                    <mat-option value="PASSPORT">PASSPORT</mat-option>
+                    <mat-option value="ATTESTATION D'IDENTITE">ATTESTATION D'IDENTITE</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>N° Pièce</mat-label>
+                  <input formControlName="numeroPieceIdentite" matInput placeholder="N° Pièce">
+                </mat-form-field>
+
+              </div>
+              <div class="row gutters m-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Date de naissance</mat-label>
+                  <input formControlName="dateDeNaissance" matInput [matDatepicker]="picker">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Lieu de naissance</mat-label>
+                  <input formControlName="lieuNaissance" matInput placeholder="Lieu de naissance">
+                </mat-form-field>
+              </div>
+              <div class="row gutters m-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Date debut</mat-label>
+                  <input formControlName="dateDebutPiece" matInput [matDatepicker]="picker1">
+                  <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                  <mat-datepicker #picker1></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Date fin</mat-label>
+                  <input formControlName="dateFinPiece" matInput [matDatepicker]="picker2">
+                  <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                  <mat-datepicker #picker2></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="row gutters m-2">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nationalité</mat-label>
+                  <mat-select formControlName="nationalité" placeholder="Nationalité">
+                    <mat-option value="Ivoirien">Ivoirien</mat-option>
+                    <mat-option value="Français">Français</mat-option>
+                    <mat-option value="Nigérian">Nigérian</mat-option>
+                    <mat-option value="Ivoirien">Burkinabé</mat-option>
+                    <mat-option value="Français">Togolais</mat-option>
+                    <mat-option value="Nigérian">Beninois</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </mat-tab>
+            <!-- <mat-tab label="register">
+            <div class="login-page">
+              <mat-card class="mat-elevation-z12">
+                <mat-card-title style="text-align:center;">SignIn/SignUp</mat-card-title>
+                <mat-tab-group mat-stretch-tabs class="example-stretched-tabs">
+                  <mat-tab label="Sign In">
+                    <mat-card-content>
+                      <form action="">
+                        <mat-form-field>
+                          <input
+                            matInput
+                            placeholder="Email"
+                            required
+                            name="email"
+                            ngModel
+                            #email="ngModel">
+                            <mat-error *ngIf="email.invalid">Email is required</mat-error>
+                            <mat-icon matSuffix>email</mat-icon>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <input
+                              matInput
+                              placeholder="Password"
+                              type="password"
+                              required
+                              minlength="6"
+                              name="password"
+                              ngModel
+                              #password="ngModel">
+                              <mat-error
+                                *ngIf="password.errors && password.errors.required">
+                                Password is required
+                              </mat-error>
+                              <mat-error
+                                *ngIf="password.errors && password.errors.minlength">
+                                Password must be of length 6
+                              </mat-error>
+                              <mat-icon matSuffix>lock</mat-icon>
+                            </mat-form-field>
+                            <mat-checkbox>Remember Me!</mat-checkbox>
+                            <button
+                              mat-raised-button
+                              color="primary"
+                              class="login-button">
+                              Sign In
+                            </button>
+
+                            <button
+                              mat-raised-button
+                              class="login-button">
+                              Login with Google
+                            </button>
+                          </form>
+                        </mat-card-content>
+                      </mat-tab>
+                      <mat-tab label="Sign Up">
+                        <mat-card-content>
+                          <form action="">
+                            <mat-form-field>
+                              <input
+                                matInput
+                                placeholder="User Name"
+                                required
+                                name="username"
+                                ngModel
+                                #username="ngModel">
+                                <mat-icon matSuffix>perm_identity</mat-icon>
+                                <mat-error
+                                  *ngIf="username.invalid">
+                                  Username is required
+                                </mat-error>
+
+                              </mat-form-field>
+                              <mat-form-field>
+                                <input
+                                  matInput
+                                  placeholder="Email"
+                                  required
+                                  name="email"
+                                  ngModel
+                                  #email="ngModel">
+                                  <mat-error *ngIf="email.invalid">Email is required</mat-error>
+                                  <mat-icon matSuffix>email</mat-icon>
+                                </mat-form-field>
+                                <mat-form-field>
+                                  <input
+                                    matInput
+                                    placeholder="Password"
+                                    type="password"
+                                    required
+                                    minlength="6"
+                                    name="password"
+                                    ngModel
+                                    #password="ngModel">
+                                    <mat-error
+                                      *ngIf="password.errors && password.errors.required">
+                                      Password is required
+                                    </mat-error>
+                                    <mat-error
+                                      *ngIf="password.errors && password.errors.minlength">
+                                      Password must be of length 6
+                                    </mat-error>
+                                    <mat-icon matSuffix>lock</mat-icon>
+
+                                  </mat-form-field>
+                                  <mat-form-field>
+                                    <input
+                                      matInput
+                                      placeholder="Password"
+                                      type="password"
+                                      required
+                                      minlength="6"
+                                      name="repassword"
+                                      ngModel
+                                      #repassword="ngModel">
+                                      <mat-error
+                                        *ngIf="repassword.errors && repassword.errors.required">
+                                        Re-Enter Password is required
+                                      </mat-error>
+                                      <mat-icon matSuffix>lock</mat-icon>
+                                    </mat-form-field>
+                                    <button
+                                      mat-raised-button
+                                      color="primary"
+                                      class="login-button">
+                                      Sign Up
+                                    </button>
+                                  </form>
+                                </mat-card-content>
+                              </mat-tab>
+                            </mat-tab-group>
+                          </mat-card>
+                        </div>
+                      </mat-tab> -->
+                    </mat-tab-group>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </form>
+        <div>
+
+
+        </div>
+        <div mat-dialog-actions [align]="'end'">
+          <button mat-raised-button color="warn" mat-dialog-close>
+            <mat-icon>cancel</mat-icon>
+            Annuler
+          </button>
+          @if (idCompare==0) {
+            <button mat-raised-button color="primary" (click)="saveNewUser()" [disabled]="newUserForm.invalid">
+              <mat-icon>save</mat-icon>
+              {{actionBtn}}
+            </button>
+          }
+          @if (idCompare != 0) {
+            <button  mat-raised-button color="primary"  (click)="saveNewUser()">
+              <mat-icon>save</mat-icon>
+              {{actionBtn}}
+            </button>
+          }
+        </div>

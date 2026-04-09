@@ -1,0 +1,31 @@
+@if (formGroup) {
+  <form [formGroup]="formGroup">
+    <mat-label
+      >Période de :<span class="font-weight:bold">{{
+      periode | date : "MMMM yyyy" | uppercase
+    }}</span></mat-label
+    >
+    <div class="row gx-3 mb-3">
+      <div class="col-md-6">
+        <mat-form-field appearance="outline">
+          <mat-label>Taux de réduction </mat-label>
+          <input formControlName="tauxApplique" type="number" matInput />
+          <mat-error>Ce champ est obligatoire.</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <!-- Form Row-->
+    <div class="row gx-3 mb-3">
+      <div class="col-md-6">
+        <mat-form-field appearance="outline">
+          <mat-label>Message d'information</mat-label>
+          <textarea matInput formControlName="messageReduction"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    <button mat-raised-button color="primary" (click)="saveReduction()">
+      <mat-icon>save</mat-icon>
+      Valider
+    </button>
+  </form>
+}

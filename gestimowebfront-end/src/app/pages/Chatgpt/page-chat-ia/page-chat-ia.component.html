@@ -1,0 +1,110 @@
+<div class="container">
+  <div class="col-md-12 col-xs-12 col-md-offset-2">
+    <!-- Panel Chat -->
+    <div class="panel" id="chat">
+      <div class="panel-heading m-3">
+        <h3 class="panel-title text-center">
+          <i class="icon wb-chat-text" aria-hidden="true"></i> Bienvenue sur votre interface de chat avec l'intelligence artificiel
+        </h3>
+      </div>
+      <div class="panel-body">
+        <div class="chats">
+          <!-- <div class="chat">
+          <div class="chat-avatar">
+            <a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="right" title="" data-original-title="June Lane">
+              <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="...">
+              <i></i>
+            </a>
+          </div>
+          <div class="chat-body">
+            <div class="chat-content">
+              <p>
+                Good morning, sir.
+                <br>What can I do for you?
+                </p>
+                <time class="chat-time" datetime="2015-07-01T11:37">11:37:08 am</time>
+              </div>
+            </div>
+          </div> -->
+          <!-- <div class="chat chat-left">
+          <div class="chat-avatar">
+            <a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="left" title="" data-original-title="Edward Fletcher">
+              <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="...">
+              <i></i>
+            </a>
+          </div>
+          <div class="chat-body">
+            <div class="chat-content">
+              <p>Well, I am just looking around.</p>
+              <time class="chat-time" datetime="2015-07-01T11:39">11:39:57 am</time>
+            </div>
+          </div>
+        </div> -->
+        <!-- <div class="chat">
+        <div class="chat-avatar">
+          <a class="avatar avatar-online" data-toggle="tooltip" href="#" data-placement="right" title="" data-original-title="June Lane">
+            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="...">
+            <i></i>
+          </a>
+        </div>
+        <div class="chat-body">
+          <div class="chat-content">
+            <p>
+              If necessary, please ask me.
+            </p>
+            <time class="chat-time" datetime="2015-07-01T11:40">11:40:10 am</time>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+
+      <div class="card">
+        <div class="card-header">Conversation</div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Reponse</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (message of messages; track message) {
+                <tr>
+                  <td>{{message.role}}</td>
+                  <td><pre>{{message.content}}</pre></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <form [formGroup]="queryFormGroup" (ngSubmit)="handleAskGPT()">
+
+        <div class="mb-3">
+          <label for="" class="form-label">Entrez votre Question</label>
+          <textarea formControlName="query" class="form-control"></textarea>
+        </div>
+        <button class="btn btn-success ">Envoyer<i class="fa fa-paper-plane ml-2 "></i></button>
+      </form>
+      @if (result) {
+        <div class="alert alert-success mb-3">
+          <!-- <pre>{{result|json}}</pre> -->
+          <ul class="list-group">
+            @for (choice of result.choices; track choice) {
+              <li class="list-group-item">
+                <pre>{{choice.message.content}}</pre>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+<!-- End Panel Chat -->
+</div>
+</div>

@@ -1,0 +1,73 @@
+<div class="auth-page">
+  <div class="auth-overlay"></div>
+
+  <div class="auth-layout">
+    <section class="auth-brand">
+      <img src="assets/logoGestimo.png" alt="Gestimo logo" />
+      <h1>Gestion Immobiliere Nouvelle Generation</h1>
+      <p>
+        Pilotez vos baux, loyers, encaissements et disponibilites depuis une
+        interface moderne, claire et orientee performance.
+      </p>
+      <ul>
+        <li>Suivi temps reel des loyers et impayes</li>
+        <li>Tableaux de bord multi-sites</li>
+        <li>Automatisation comptable et reporting</li>
+      </ul>
+    </section>
+
+    <section class="auth-card">
+      <h2>Connexion</h2>
+      <p>Accedez a votre espace de gestion Gestimo.</p>
+
+      <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm.value)">
+        <label for="email">Adresse email</label>
+        <div class="input-wrap">
+          <i class="fas fa-envelope"></i>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="Votre adresse email"
+            ngModel
+            #emailInput="ngModel"
+            required
+            email
+          />
+        </div>
+        @if (emailInput.invalid && emailInput.touched) {
+          <small class="error">Veuillez renseigner une adresse email valide.</small>
+        }
+
+        <label for="password">Mot de passe</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock"></i>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="Votre mot de passe"
+            ngModel
+            #passwordInput="ngModel"
+            required
+          />
+        </div>
+        @if (passwordInput.invalid && passwordInput.touched) {
+          <small class="error">Veuillez renseigner votre mot de passe.</small>
+        }
+
+        <div class="auth-actions">
+          <a routerLink="/reset-password" class="auth-link">Mot de passe oublie ?</a>
+        </div>
+
+        <button type="submit" [disabled]="loginForm.invalid || showLoading">
+          @if (!showLoading) {
+            <span><i class="fas fa-sign-in-alt"></i> Se connecter</span>
+          } @else {
+            <span><i class="fas fa-spinner fa-spin"></i> Connexion...</span>
+          }
+        </button>
+      </form>
+    </section>
+  </div>
+</div>

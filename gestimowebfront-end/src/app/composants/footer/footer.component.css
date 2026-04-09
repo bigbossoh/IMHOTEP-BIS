@@ -1,0 +1,29 @@
+.footer-shell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.footer-shell strong {
+  display: block;
+  color: #0f172a;
+}
+
+.footer-shell span {
+  display: block;
+}
+
+.footer-contact {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-contact i {
+  margin-right: 0.35rem;
+  color: #1d4ed8;
+}

@@ -1,0 +1,234 @@
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Règlement Réservation</h1>
+    </div>
+    <div class="col-md-4 text-right">
+
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        <h5>
+          <i class="fas fa-asterisk blue-color"></i>&nbsp;Paramètre de règlement
+        </h5>
+      </div>
+    </div>
+    <hr style="margin-top: 0" />
+    <div class="row">
+      <div class="col-md-12">
+        @if (reservationState$| async; as reservationState) {
+          @switch (reservationState.dataState) {
+            @case (ReservationStateEnum.LOADING) {
+            }
+            @case (ReservationStateEnum.LOADED) {
+              <!-- <label>Locataires</label> -->
+              <div class="col-md-6">
+                <mat-form-field appearance="outline">
+                  <mat-label> Locataires</mat-label>
+                  <mat-select #selectionlocataire [(value)]="leLocataire"
+                    (valueChange)="getAllEncaissementByBienImmobilier(selectionlocataire.value)">
+                    <mat-option [value]="0">Selectionner un Client / résidence
+                    </mat-option>
+                    @for (reserv of reservationState.reservationouverts; track reserv) {
+                      <mat-option [value]="reserv">
+                        {{reserv.utilisateurOperation}} / {{reserv.bienImmobilierOperation}}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6">
+              </div>
+              <ng-container >
+                <ng-container >
+                  <div class="row">
+                    <div class="col-md-8">
+                      <h5>
+                        <i class="fas fa-asterisk blue-color"></i>&nbsp;Montant
+                        de règlement
+                      </h5>
+                    </div>
+                    <div class="col-md-8">
+                      @if (leLocataire) {
+                        <h5>
+                          <i class="fas fa-asterisk blue-color"></i>&nbsp;Rest à payer
+                          <label style="color: red;" for="">{{leLocataire.soldReservation |currency:'XOF' : 'symbol'}}</label>
+                        </h5>
+                      }
+                    </div>
+                    <div class="col-md-4">
+                      <h5>
+                        <i class="fas fa-asterisk blue-color"></i>&nbsp;Période du :
+                        @if (leLocataire) {
+                          <label >
+                            {{ leLocataire.dateDebut|date:'dd-MM-yyyy'}} Au {{ leLocataire.dateFin|date:'dd-MM-yyyy'}}
+                          </label>
+                        }
+                      </h5>
+                    </div>
+                  </div>
+                  <hr style="margin-top: 0" />
+                  <div class="row">
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Mode de règlement*</mat-label>
+                        <mat-select placeholder="Mode de règlement" [(ngModel)]="modePaiement">
+                          <mat-option value="ESPESE">Espèce</mat-option>
+                          <mat-option value="MOBILE_MONEY">Money Electronique</mat-option>
+                          <mat-option value="CHEQUE_ECOBANK">Chèque</mat-option>
+                          <mat-option value="VIREMENT_ECOBANK">Virement Banquaire</mat-option>
+                        </mat-select>
+                        <mat-error>Ce champ est obligatoire.</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Montant encaissé</mat-label>
+                        <input type="number" matInput
+                          placeholder="Montant encaissé" [(ngModel)]="montantEnacaisse" />
+                          <mat-error>Ce champ est obligatoire.</mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="mat-typography">
+                          @if (leLocataire) {
+                            <h3>
+                              Nouveau solde:{{
+                              leLocataire.soldReservation-montantEnacaisse| currency: 'XOF' : 'symbol'
+                              }}
+                            </h3>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <button class="mr-2" mat-raised-button color="primary" (click)="onSaveEncaissement()"
+                          >
+                          <mat-icon>save</mat-icon>
+                          Encaisser
+                        </button>
+                        <button mat-raised-button color="warn" class="mr-1">
+                          <mat-icon>cancel</mat-icon>
+                          Annuler
+                        </button>
+                      </div>
+                    <!-- </div> -->
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="col panel-body text-right"></div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <h5>
+                        <i class="fas fa-asterisk blue-color"></i>&nbsp;Liste des
+                        encaissements
+                      </h5>
+                    </div>
+                  </div>
+                  <hr />
+                  <div>
+                    <div class="mat-elevation-z8">
+                      <div class="example-header">
+                        <mat-form-field class="tail-50" style="margin-left: 12px">
+                          <mat-label>Rechercher</mat-label>
+                          <input matInput (keyup)="applyFilter($event)" #input placeholder="Rechercher un Encaissement" />
+                        </mat-form-field>
+                      </div>
+                      <mat-paginator #matimmeuble showFirstLastButtons [pageSizeOptions]="pageSize"
+                        aria-label="Select page of users">
+                      </mat-paginator>
+                      <mat-table #tableEncaissemnt [dataSource]="dataSource" matSort>
+                        <!-- Code colonne -->
+                        <ng-container matColumnDef="idEncaiss">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            id
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            {{ row.id }}
+                          </mat-cell>
+                        </ng-container>
+                        <!-- Dénomination colonne -->
+                        <ng-container matColumnDef="Datedepaiement">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Date de Paiement
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            {{
+                            row.creationDate | date : "dd / MM / yyyy à HH:mm"
+                            }}
+                          </mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="Loyer">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Montant Payé
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            {{
+                            row.montantEncaissement| currency: 'XOF' : 'symbol'
+                          }}</mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="MontantPaye">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Ancien Solde
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                          {{ row.encienSoldReservation | currency: 'XOF' : 'symbol'}}</mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="ModedeReglement">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Mode de Paiement
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                          {{ row.modePaiement }}</mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="soldedumois">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>
+                            Nouveau Solde
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                          {{ row.nvoSoldeReservation| currency: 'XOF' : 'symbol' }}</mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="Actions">
+                          <mat-header-cell *matHeaderCellDef>
+                            Actions
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            <button mat-icon-button color="primary"
+                              (click)="printRecuPaiement(row.id)"
+                              >
+                              <mat-icon>print</mat-icon>
+                              @if (printQuittance$ | async; as qtState) {
+                                @switch (qtState.dataState) {
+                                  @case (QuittanceloyerStateEnum.Requested) {
+                                    <i class="fas fa-sync fa-spin"></i>
+                                  }
+                                }
+                              }
+                            </button>
+                          </mat-cell>
+                        </ng-container>
+                        <mat-header-row *matHeaderRowDef="displayedColumns">
+                        </mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+                        <!-- Row shown when there is no matching data. -->
+                        <tr class="mat-row" *matNoDataRow>
+                          <td class="mat-cell" colspan="4">
+                            Aucune donnée enregistrée {{ input.value }}
+                          </td>
+                        </tr>
+                      </mat-table>
+                    </div>
+                  </div>
+                </ng-container>
+              </ng-container>
+            }
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Règlement Réservation</h1>
+    </div>
+    <div class="col-md-4 text-right"></div>
+  </div>
+
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        <h5>
+          {{leLocataire.bienImmobilierOperation}}/{{leLocataire.utilisateurOperation}}
+
+        </h5>
+      </div>
+    </div>
+    <hr style="margin-top: 0" />
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-8">
+          </div>
+          <div class="col-md-8">
+            @if (leLocataire) {
+              <h5>
+                <i class="fas fa-asterisk blue-color"></i>&nbsp;Rest à payer
+                <label style="color: red" for="">{{
+                  leLocataire.soldReservation | currency : "XOF" : "symbol"
+                }}</label>
+              </h5>
+            }
+          </div>
+          <div class="col-md-4">
+
+          </div>
+        </div>
+        <hr style="margin-top: 0" />
+        <div class="row">
+          <div class="col-md-3">
+            <mat-form-field appearance="outline">
+              <mat-label>Mode de règlement*</mat-label>
+              <mat-select
+                placeholder="Mode de règlement"
+                [(ngModel)]="modePaiement"
+                >
+                <mat-option value="ESPESE">Espèce</mat-option>
+                <mat-option value="MOBILE_MONEY"
+                  >Money Electronique</mat-option
+                  >
+                  <mat-option value="CHEQUE_ECOBANK">Chèque</mat-option>
+                  <mat-option value="VIREMENT_ECOBANK"
+                    >Virement Banquaire</mat-option
+                    >
+                  </mat-select>
+                  <mat-error>Ce champ est obligatoire.</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Montant encaissé</mat-label>
+                  <input
+                    type="number"
+                    matInput
+                    placeholder="Montant encaissé"
+                    [(ngModel)]="montantEnacaisse"
+                    />
+                    <mat-error>Ce champ est obligatoire.</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="mat-typography">
+                    @if (leLocataire) {
+                      <h3>
+                        Nouveau solde:{{
+                        leLocataire.soldReservation - montantEnacaisse
+                        | currency : "XOF" : "symbol"
+                        }}
+                      </h3>
+                    }
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <button
+                    class="mr-2"
+                    mat-raised-button
+                    color="primary"
+                    (click)="onSaveEncaissement()"
+                    >
+                    <mat-icon>save</mat-icon>
+                    Encaisser
+                  </button>
+                  <button mat-raised-button color="warn" class="mr-1">
+                    <mat-icon>cancel</mat-icon>
+                    Annuler
+                  </button>
+                </div>
+              <!-- </div> -->
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="col panel-body text-right"></div>
+              </div>
+            </div>
+
+
+            <hr />
+
+          </div>
+        </div>
+      </div>
+    </div>

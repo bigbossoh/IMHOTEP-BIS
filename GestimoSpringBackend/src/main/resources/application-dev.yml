@@ -1,0 +1,27 @@
+# ===========================
+# DEV profile
+# ===========================
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3305/dbgestimoweb?serverTimezone=UTC}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:gestimoweb}
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+
+app:
+  password-reset-url: http://localhost:4200/reset-password
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.orm.jpa: WARN
+    org.springframework.transaction: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.data.auditing: WARN

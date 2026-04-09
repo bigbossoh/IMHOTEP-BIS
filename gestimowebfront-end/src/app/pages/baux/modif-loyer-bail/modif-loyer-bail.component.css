@@ -1,0 +1,398 @@
+:host {
+  display: block;
+  width: min(980px, 96vw);
+  max-width: 100%;
+}
+
+.rent-dialog {
+  --surface: rgba(255, 255, 255, 0.96);
+  --surface-strong: #ffffff;
+  --surface-muted: #f7f9fc;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(37, 99, 235, 0.16);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #c2410c;
+  --accent-soft: rgba(194, 65, 12, 0.14);
+  --success: #047857;
+  --success-soft: rgba(4, 120, 87, 0.16);
+  --danger: #b91c1c;
+  --danger-soft: rgba(220, 38, 38, 0.12);
+  --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 26%),
+    linear-gradient(180deg, #f4f7fb 0%, #edf2f7 100%);
+  color: var(--text-main);
+}
+
+.rent-dialog__header,
+.rent-card,
+.rent-hero {
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.rent-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.75rem 1.2rem;
+  background:
+    radial-gradient(circle at top right, rgba(194, 65, 12, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+  border-left: 0;
+  border-top: 0;
+  border-right: 0;
+}
+
+.rent-dialog__eyebrow,
+.rent-card__eyebrow,
+.hero-metric span,
+.summary-item span,
+.form-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rent-dialog__eyebrow,
+.rent-card__eyebrow {
+  color: var(--accent);
+}
+
+.rent-dialog__header h2,
+.rent-card h3 {
+  margin: 0.5rem 0 0;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.rent-dialog__header h2 {
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+}
+
+.rent-card h3 {
+  font-size: 1.25rem;
+}
+
+.rent-dialog__subtitle,
+.rent-hero__copy p,
+.form-section__header p,
+.summary-item small,
+.checklist,
+.field-hint {
+  color: var(--text-muted);
+}
+
+.rent-dialog__subtitle {
+  margin: 0.85rem 0 0;
+  max-width: 700px;
+  line-height: 1.65;
+}
+
+.rent-dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: 1.25rem 1.5rem 1rem;
+  overflow: auto;
+}
+
+.rent-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.3rem;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.13), transparent 32%),
+    linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.98));
+}
+
+.rent-hero__copy {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.rent-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rent-hero__copy strong {
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+.rent-hero__copy p {
+  margin: 0.1rem 0 0;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+.rent-hero__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 0.85rem;
+  width: min(100%, 470px);
+}
+
+.hero-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.hero-metric span,
+.summary-item span,
+.form-label {
+  color: #475569;
+}
+
+.hero-metric strong,
+.summary-item strong {
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.hero-metric--positive {
+  border-color: rgba(4, 120, 87, 0.16);
+  background: rgba(236, 253, 245, 0.92);
+}
+
+.hero-metric--positive strong {
+  color: var(--success);
+}
+
+.hero-metric--negative {
+  border-color: rgba(220, 38, 38, 0.16);
+  background: rgba(254, 242, 242, 0.95);
+}
+
+.hero-metric--negative strong {
+  color: var(--danger);
+}
+
+.rent-dialog__grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.rent-sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.rent-card {
+  border-radius: 28px;
+  background: var(--surface);
+}
+
+.rent-card--highlight {
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 32%),
+    linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.98));
+  border-color: var(--border-strong);
+}
+
+.rent-card--form,
+.rent-card--highlight,
+.rent-card:not(.rent-card--form) {
+  padding: 1.2rem;
+}
+
+.summary-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.95rem;
+}
+
+.summary-item {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.95rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.94);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.summary-item small {
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.checklist {
+  margin: 0.95rem 0 0;
+  padding-left: 1.1rem;
+  line-height: 1.6;
+}
+
+.checklist li + li {
+  margin-top: 0.55rem;
+}
+
+.rent-card--form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-section + .form-section {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.form-section__header p {
+  margin: 0.7rem 0 0;
+  line-height: 1.6;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.field-block {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border-radius: 22px;
+  background: var(--surface-muted);
+  border: 1px solid rgba(226, 232, 240, 0.92);
+}
+
+.form-label {
+  margin: 0;
+}
+
+.field-block .form-control {
+  min-height: 3rem;
+  border-radius: 16px;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+
+.field-block .form-control:focus {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
+}
+
+.field-block .form-control[readonly] {
+  background: rgba(241, 245, 249, 0.92);
+}
+
+.field-block .form-control.is-invalid {
+  border-color: rgba(220, 38, 38, 0.45);
+}
+
+.field-hint {
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.rent-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.4rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.92);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.rent-dialog__actions .btn,
+.rent-dialog__header .btn {
+  border-radius: 999px;
+}
+
+@media (max-width: 1199.98px) {
+  .rent-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rent-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991.98px) {
+  :host {
+    width: min(100vw, 100%);
+  }
+
+  .rent-dialog__header,
+  .rent-dialog__content,
+  .rent-dialog__actions {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .rent-dialog__header,
+  .rent-hero {
+    flex-direction: column;
+  }
+
+  .rent-hero__metrics,
+  .rent-sidebar,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767.98px) {
+  :host {
+    width: 100vw;
+  }
+
+  .rent-dialog {
+    min-height: 100vh;
+    border-radius: 0;
+    max-height: none;
+  }
+
+  .rent-dialog__header h2 {
+    font-size: 1.75rem;
+  }
+
+  .rent-hero,
+  .rent-card,
+  .field-block {
+    border-radius: 22px;
+  }
+
+  .rent-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .rent-dialog__actions .btn {
+    width: 100%;
+  }
+}

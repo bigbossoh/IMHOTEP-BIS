@@ -1,0 +1,236 @@
+.page-shell {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Header ─────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #0f172a);
+}
+
+.page-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted, #64748b);
+}
+
+/* ── Loading ─────────────────────────────── */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}
+
+/* ── Grid ───────────────────────────────── */
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* ── Cards ──────────────────────────────── */
+.param-card {
+  border-radius: 16px !important;
+  border: 1px solid var(--border, #d8e4f4) !important;
+  box-shadow: 0 4px 24px rgba(15,23,42,0.06) !important;
+}
+
+.card-icon {
+  font-size: 24px;
+  border-radius: 10px;
+  padding: 6px;
+  margin-right: 4px;
+}
+
+.card-icon--blue { background: #eff6ff; color: #1d4ed8; }
+.card-icon--purple { background: #faf5ff; color: #7c3aed; }
+.card-icon--green { background: #f0fdf4; color: #15803d; }
+.card-icon--orange { background: #fffbeb; color: #d97706; }
+
+/* ── Config form ────────────────────────── */
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.toggle-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.req {
+  color: #dc2626;
+}
+
+.preview-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  color: #1e40af;
+}
+
+.preview-box mat-icon {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+/* ── Levels ─────────────────────────────── */
+.levels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.level-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface-soft, #f8fbff);
+  border: 1px solid var(--border, #d8e4f4);
+  border-radius: 12px;
+}
+
+.level-badge {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+  margin-top: 8px;
+}
+
+.level-badge--1 { background: #dbeafe; color: #1d4ed8; }
+.level-badge--2 { background: #ede9fe; color: #7c3aed; }
+.level-badge--3 { background: #d1fae5; color: #065f46; }
+
+.level-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Tags ───────────────────────────────── */
+.add-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-top: 8px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  font-size: 0.83rem;
+  color: #1d4ed8;
+}
+
+.tag-remove {
+  width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+  color: #dc2626;
+}
+
+.tag-remove mat-icon {
+  font-size: 14px;
+}
+
+.empty-hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Save footer ────────────────────────── */
+.save-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 900px) {
+  .param-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-shell { padding: 12px; }
+  .add-input-row { flex-direction: column; align-items: stretch; }
+}

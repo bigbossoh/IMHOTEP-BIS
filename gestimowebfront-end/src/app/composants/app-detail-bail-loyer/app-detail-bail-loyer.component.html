@@ -1,0 +1,131 @@
+<div class="anyClass m-3 custom-border">
+  @for (apel of appelLoyerDto; track apel) {
+    <div
+      class="row m-2 custom-border custom-border-right text-center"
+      >
+      <div class="col-md-2 custom-border-right p-1 text-center mb-1 mt-1">
+        <div class="col-md-11">
+          Periode : {{ apel.periodeAppelLoyer | date: "MMMM-yyyy" }}
+        </div>
+      </div>
+      <!--  Details article-->
+      <div class="col-md-2 custom-border-right mb-1 mt-1">
+        <div class="col">
+          <div class="row">
+            <div class="col-md-2">
+              <mat-icon color="primary">info</mat-icon>
+            </div>
+            <div class="col-md-10">Loyer :{{ apel.montantBailLPeriode }}</div>
+          </div>
+        </div>
+      </div>
+      <!--  details categorie-->
+      <div class="col-md-2 custom-border-right mb-1 mt-1">
+        <div class="row">
+          <div class="col-md-2">
+            @if (apel.soldeAppelLoyer != 0) {
+              <mat-icon color="warn"
+                >cancel_presentation</mat-icon
+                >
+              }
+              @if (apel.soldeAppelLoyer == 0) {
+                <mat-icon
+            style="
+              color: rgb(0, 128, 55);
+              background-clip: text;
+              background-image: -webkit-linear-gradient(
+                rgb(67, 179, 188),
+                rgb(255, 0, 0)
+              );
+            "
+                  >check_circle</mat-icon
+                  >
+                }
+              </div>
+              <div class="col-md-10">
+                <div class="row">
+                  @if (apel.soldeAppelLoyer != 0) {
+                    <div class="col-md-12">
+                      Solde: {{ apel.soldeAppelLoyer }}
+                    </div>
+                  }
+                  @if (apel.soldeAppelLoyer == 0) {
+                    <div class="col-md-12">
+                      Solde: {{ apel.soldeAppelLoyer }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2 custom-border-right mb-1 mt-1">
+            <div class="row">
+              <div class="col-md-2">
+                @if (apel.soldeAppelLoyer != 0) {
+                  <mat-icon color="warn"
+                    >cancel_presentation</mat-icon
+                    >
+                  }
+                  @if (apel.soldeAppelLoyer == 0) {
+                    <mat-icon
+            style="
+              color: rgb(0, 128, 55);
+              background-clip: text;
+              background-image: -webkit-linear-gradient(
+                rgb(67, 179, 188),
+                rgb(255, 0, 0)
+              );
+            "
+                      >check_circle</mat-icon
+                      >
+                    }
+                  </div>
+                  <div class="col-md-10">
+                    <div class="row">
+                      @if (apel.soldeAppelLoyer != 0) {
+                        <div class="col-md-12">
+                          Status: {{ apel.statusAppelLoyer }}
+                        </div>
+                      }
+                      @if (apel.soldeAppelLoyer == 0) {
+                        <div class="col-md-12">
+                          Status: {{ apel.statusAppelLoyer }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2 custom-border-right mb-1 mt-1">
+                <div class="row">
+                  <div class="col-md-2">
+                    <mat-icon color="primary">info</mat-icon>
+                  </div>
+                  <div class="col-md-10">
+                    <div class="row">
+                      <div class="col-md-12">
+                        Date d'appel:
+                        {{ apel.datePaiementPrevuAppelLoyer | date: "dd-MM-yyyy" }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="col-md-2 custom-border-right mb-1 mt-1">
+              <button mat-icon-button color="primary">
+                <mat-icon>mail</mat-icon>
+              </button>
+              <button mat-icon-button color="primary">
+        <mat-icon   style="
+        color: rgb(0, 128, 55);
+        background-clip: text;
+        background-image: -webkit-linear-gradient(
+          rgb(67, 179, 188),
+          rgb(255, 0, 0)
+        );
+      ">message</mat-icon>
+              </button>
+            </div> -->
+          </div>
+        }
+      </div>

@@ -1,0 +1,215 @@
+<div class="card">
+  <div class="card-body">
+    @if (siteRegisterForm) {
+      <form [formGroup]="siteRegisterForm">
+        <h5 class="card-title">Nouveau site</h5>
+        <div class="card-text">
+          <div class="container">
+            <div class="row flex-lg-nowrap">
+              <div class="col">
+                <div class="row">
+                  <div class="col mb-3">
+                    <!-- <div class="card"> -->
+                    <!-- <div class="card-body p-2"> -->
+                    <div class="e-profile">
+                      <div class="tab-content pt-1">
+                        <div class="tab-pane active">
+                          <form
+                            (ngSubmit)="saveSite()"
+                            [formGroup]="siteRegisterForm"
+                            >
+                            <div class="row">
+                              <div class="col">
+                                <div class="col">
+                                  <div class="form-group">
+                                    @if (villeState$ | async; as state) {
+                                      @switch (state.dataState) {
+                                        @case (VilleStateEnum.LOADED) {
+                                          <label>Selectionnez une Ville</label>
+                                          <select #villeModel
+                                            class="form-control"
+                                        (change)="
+                                          changeCity($any($event.target).value)
+                                        "
+                                            >
+                                            <option value="">Aucune</option>
+                                            @for (ville of state.villes; track ville) {
+                                              <option
+                                                [value]="ville.id"
+                                                >
+                                                {{ ville.nomVille }}
+                                              </option>
+                                            }
+                                          </select>
+                                        }
+                                        @case (VilleStateEnum.LOADING) {
+                                          <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                            >
+                                            <span class="sr-only">Loading...</span>
+                                          </div>
+                                        }
+                                        @case (VilleStateEnum.ERROR) {
+                                          <div class="p-2 invalid-feedback">
+                                            Une Erreur est survenue lors du
+                                            chargement des sites
+                                          </div>
+                                        }
+                                      }
+                                    }
+                                  </div>
+                                </div>
+                                <div class="col">
+                                  <!-- Selection de commune -->
+                                  <div class="form-group">
+                                    @if (communeState$ | async; as state) {
+                                      @switch (state.dataState) {
+                                        @case (CommunesStateEnum.LOADED) {
+                                          @if (state.communes.length == 0) {
+                                            Aucune Commune disponible
+                                          }
+                                          @if (state.communes.length != 0) {
+                                            <label>Selectionnez une Commune</label>
+                                            <select #quartierModel
+                                              class="form-control"
+                                          (change)="
+                                            changeCommune(
+                                              $any($event.target).value
+                                            )
+                                          "
+                                              >
+                                              @for (
+                                                commune of state.communes
+                                                ; track
+                                                commune) {
+                                                <option
+                                                  [value]="commune.id"
+                                                  >
+                                                  {{ commune.nomCommune }}
+                                                </option>
+                                              }
+                                            </select>
+                                          }
+                                        }
+                                        @case (CommunesStateEnum.ERROR) {
+                                          {{ state.errorMessage }}
+                                        }
+                                        @case (CommunesStateEnum.LOADING) {
+                                          {{ state.errorMessage }}
+                                        }
+                                        @case (CommunesStateEnum.LOADING) {
+                                          <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                            >
+                                            <span class="sr-only">Loading...</span>
+                                          </div>
+                                        }
+                                      }
+                                    }
+                                  </div>
+                                </div>
+                                <div class="col">
+                                  <div class="form-group">
+                                    <!-- Selection de quartier -->
+                                    @if (quartierState$ | async; as state) {
+                                      @switch (state.dataState) {
+                                        @case (QuartierStateEnum.LOADED) {
+                                          @if (state.quartiers.length == 0) {
+                                            Aucune Quartier disponible
+                                          }
+                                          @if (state.quartiers.length != 0) {
+                                            <label>Selectionnez un Quartier</label>
+                                            <select
+                                              class="form-control"
+                                              formControlName="idQuartier"
+                                          (change)="
+                                            quartierChange(state.quartiers)
+                                          "
+                                              >
+                                              @for (
+                                                quartier of state.quartiers
+                                                ; track
+                                                quartier) {
+                                                <option
+                                                  [value]="quartier.id"
+                                                  >
+                                                  {{ quartier.nomQuartier }}
+                                                </option>
+                                              }
+                                            </select>
+                                            @if (
+                                              submitted &&
+                                              siteRegisterForm.controls.idQuartier
+                                              .errors
+                                              ) {
+                                              <div
+                                                class="invalid-feedback"
+                                                >
+                                                @if (
+                                                  siteRegisterForm.controls
+                                                  .idQuartier.errors.required
+                                                  ) {
+                                                  <div
+                                                    >
+                                                    *Champ obligatoire
+                                                  </div>
+                                                }
+                                              </div>
+                                            }
+                                          }
+                                        }
+                                        @case (QuartierStateEnum.ERROR) {
+                                          {{ state.errorMessage }}
+                                        }
+                                        @case (QuartierStateEnum.LOADING) {
+                                          <div
+                                            class="spinner-border text-primary"
+                                            role="status"
+                                            >
+                                            <span class="sr-only">Loading...</span>
+                                          </div>
+                                        }
+                                      }
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col d-flex justify-content-end">
+                                <button
+                                  type="button"
+                                  class="btn btn-danger mr-2"
+                                  data-dismiss="modal"
+                                  (click)="onClose()"
+                                  id="closeAgenceButton"
+                                  >
+                                  <i class="fas fa-ban"></i>
+                                  Close
+                                </button>
+                                <button
+                                  class="btn btn-primary"
+                                  type="submit"
+                                  [disabled]="!siteRegisterForm.valid"
+                                  >
+                                  <i class="fas fa-save"></i>
+                                  Enregistrer
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</div>

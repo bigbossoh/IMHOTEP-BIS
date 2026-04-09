@@ -1,0 +1,341 @@
+<div class="page-shell">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Gestion des dépenses</h1>
+      <p class="page-sub">Créez, suivez et validez les dépenses de votre agence.</p>
+    </div>
+    <div class="page-header__actions">
+      <button mat-raised-button color="primary" (click)="openNewExpenseDialog()">
+        <mat-icon>add</mat-icon> Nouvelle dépense
+      </button>
+      <button mat-stroked-button color="primary" (click)="loadExpenses()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <mat-icon class="kpi-icon kpi-icon--blue">receipt_long</mat-icon>
+      <div class="kpi-info">
+        <span class="kpi-value">{{ dataSource.filteredData.length }}</span>
+        <span class="kpi-label">Total dépenses</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <mat-icon class="kpi-icon kpi-icon--green">check_circle</mat-icon>
+      <div class="kpi-info">
+        <span class="kpi-value">{{ getTotalValidees() }}</span>
+        <span class="kpi-label">Validées</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <mat-icon class="kpi-icon kpi-icon--orange">pending</mat-icon>
+      <div class="kpi-info">
+        <span class="kpi-value">{{ getTotalEnAttente() }}</span>
+        <span class="kpi-label">En attente</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <mat-icon class="kpi-icon kpi-icon--purple">euro_symbol</mat-icon>
+      <div class="kpi-info">
+        <span class="kpi-value">{{ getTotalMontant() | number:'1.0-0' }} XOF</span>
+        <span class="kpi-label">Montant total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters bar -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Rechercher</mat-label>
+      <input matInput placeholder="Référence, libellé, fournisseur..." (input)="onSearch($any($event.target).value)" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="status-filter">
+      <mat-label>Statut</mat-label>
+      <mat-select [value]="statusFilter" (selectionChange)="onStatusFilter($event.value)">
+        @for (s of ALL_STATUSES; track s.value) {
+          <mat-option [value]="s.value">{{ s.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-layout" [class.has-detail]="showDetail || showActionPanel">
+
+    <!-- Table card -->
+    <div class="table-card">
+      @if (loading) {
+        <div class="loading-overlay">
+          <mat-progress-spinner mode="indeterminate" diameter="42" color="primary"></mat-progress-spinner>
+        </div>
+      }
+
+      <mat-table [dataSource]="dataSource" matSort class="expense-table">
+
+        <!-- Référence -->
+        <ng-container matColumnDef="referenceDepense">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Référence</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <button class="ref-link" (click)="openDetail(row)">{{ row.referenceDepense }}</button>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Date -->
+        <ng-container matColumnDef="dateEncaissement">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.dateEncaissement | date:'dd/MM/yyyy' }}</mat-cell>
+        </ng-container>
+
+        <!-- Libellé -->
+        <ng-container matColumnDef="libelleDepense">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Libellé</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <span class="cell-label">{{ row.libelleDepense }}</span>
+            @if (row.fournisseurNom) {
+              <span class="cell-hint">{{ row.fournisseurNom }}</span>
+            }
+          </mat-cell>
+        </ng-container>
+
+        <!-- Catégorie -->
+        <ng-container matColumnDef="categorieDepense">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.categorieDepense }}</mat-cell>
+        </ng-container>
+
+        <!-- Montant -->
+        <ng-container matColumnDef="montantDepense">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Montant</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <span class="amount">{{ row.montantDepense | number:'1.0-0' }} XOF</span>
+            @if (row.workflowRequired) {
+              <mat-icon class="wf-icon" matTooltip="Circuit de validation requis">account_tree</mat-icon>
+            }
+          </mat-cell>
+        </ng-container>
+
+        <!-- Mode paiement -->
+        <ng-container matColumnDef="modePaiement">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Mode</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.modePaiement }}</mat-cell>
+        </ng-container>
+
+        <!-- Statut workflow -->
+        <ng-container matColumnDef="workflowStatus">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Statut</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <span [class]="getStatusClass(row.workflowStatus)">{{ getStatusLabel(row.workflowStatus) }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <div class="actions-cell">
+              <button mat-icon-button matTooltip="Voir détail" (click)="openDetail(row)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              @if (canEdit(row)) {
+                <button mat-icon-button color="primary" matTooltip="Modifier" (click)="openNewExpenseDialog(row)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              }
+              @if (canApprove(row)) {
+                <button mat-icon-button color="primary" matTooltip="Approuver" (click)="openActionPanel(row, 'approve')">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              }
+              @if (canReject(row)) {
+                <button mat-icon-button color="warn" matTooltip="Rejeter" (click)="openActionPanel(row, 'reject')">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              }
+              @if (canCancel(row)) {
+                <button mat-icon-button color="warn" matTooltip="Annuler" (click)="openActionPanel(row, 'cancel')">
+                  <mat-icon>block</mat-icon>
+                </button>
+              }
+              @if (row.hasJustificatif) {
+                <button mat-icon-button matTooltip="Télécharger justificatif" (click)="downloadAttachment(row)">
+                  <mat-icon>download</mat-icon>
+                </button>
+              }
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" [class.row-selected]="detailExpense?.id === row.id"></mat-row>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell no-data" colspan="8">Aucune dépense trouvée.</td>
+        </tr>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
+    </div>
+
+    <!-- Side panel: detail -->
+    @if (showDetail && detailExpense) {
+      <aside class="side-panel">
+        <div class="side-panel__header">
+          <h3>Détail — {{ detailExpense.referenceDepense }}</h3>
+          <button mat-icon-button (click)="closeDetail()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="side-panel__body">
+          <div class="detail-row">
+            <span class="detail-label">Libellé</span>
+            <span>{{ detailExpense.libelleDepense }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Catégorie</span>
+            <span>{{ detailExpense.categorieDepense }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Montant</span>
+            <span class="amount">{{ detailExpense.montantDepense | number:'1.0-0' }} XOF</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Mode paiement</span>
+            <span>{{ detailExpense.modePaiement }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Statut paiement</span>
+            <span>{{ detailExpense.statutPaiement }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Bien immobilier</span>
+            <span>{{ detailExpense.bienImmobilierLibelle }}</span>
+          </div>
+          @if (detailExpense.appartementLocalLibelle) {
+            <div class="detail-row">
+              <span class="detail-label">Unité</span>
+              <span>{{ detailExpense.appartementLocalLibelle }}</span>
+            </div>
+          }
+          @if (detailExpense.fournisseurNom) {
+            <div class="detail-row">
+              <span class="detail-label">Fournisseur</span>
+              <span>{{ detailExpense.fournisseurNom }}</span>
+            </div>
+          }
+          @if (detailExpense.descriptionDepense) {
+            <div class="detail-desc">
+              <span class="detail-label">Description</span>
+              <p>{{ detailExpense.descriptionDepense }}</p>
+            </div>
+          }
+
+          <!-- Workflow status -->
+          @if (detailExpense.workflowRequired) {
+            <div class="wf-section">
+              <h4 class="wf-section__title">Progression workflow</h4>
+              <div class="wf-progress-bar">
+                <div class="wf-progress-bar__fill" [style.width.%]="getWorkflowProgressPercent(detailExpense)"></div>
+              </div>
+              <p class="wf-level-text">
+                Niveau {{ detailExpense.currentValidationLevel }} / {{ detailExpense.maxValidationLevel }}
+              </p>
+
+              <div class="wf-levels">
+                @if (detailExpense.validationNiveau1Label) {
+                  <div class="wf-level">
+                    <mat-icon class="wf-level__icon">account_circle</mat-icon>
+                    <div>
+                      <span class="wf-level__label">{{ detailExpense.validationNiveau1Label }}</span>
+                      <span class="wf-level__user">{{ detailExpense.validationNiveau1UserName || detailExpense.validationNiveau1Role || '-' }}</span>
+                    </div>
+                  </div>
+                }
+                @if (detailExpense.validationNiveau2Label) {
+                  <div class="wf-level">
+                    <mat-icon class="wf-level__icon">account_circle</mat-icon>
+                    <div>
+                      <span class="wf-level__label">{{ detailExpense.validationNiveau2Label }}</span>
+                      <span class="wf-level__user">{{ detailExpense.validationNiveau2UserName || detailExpense.validationNiveau2Role || '-' }}</span>
+                    </div>
+                  </div>
+                }
+                @if (detailExpense.validationNiveau3Label) {
+                  <div class="wf-level">
+                    <mat-icon class="wf-level__icon">account_circle</mat-icon>
+                    <div>
+                      <span class="wf-level__label">{{ detailExpense.validationNiveau3Label }}</span>
+                      <span class="wf-level__user">{{ detailExpense.validationNiveau3UserName || detailExpense.validationNiveau3Role || '-' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- History timeline -->
+          @if (detailExpense.history?.length) {
+            <div class="timeline-section">
+              <h4 class="timeline-section__title">Historique</h4>
+              <div class="timeline">
+                @for (h of detailExpense.history; track h.id) {
+                  <div class="timeline-item">
+                    <div class="timeline-dot" [class]="getHistoryActionClass(h.actionType ?? '')"></div>
+                    <div class="timeline-content">
+                      <span class="timeline-action">{{ getHistoryActionLabel(h.actionType ?? '') }}</span>
+                      <span class="timeline-actor">{{ h.actorName }} ({{ h.actorRoleName }})</span>
+                      <span class="timeline-date">{{ h.actionAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                      @if (h.commentaire) {
+                        <span class="timeline-comment">"{{ h.commentaire }}"</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </aside>
+    }
+
+    <!-- Side panel: action -->
+    @if (showActionPanel && actionTarget) {
+      <aside class="side-panel">
+        <div class="side-panel__header">
+          <h3>{{ actionTitle }}</h3>
+          <button mat-icon-button (click)="closeActionPanel()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="side-panel__body">
+          <div class="action-info">
+            <p><strong>Dépense :</strong> {{ actionTarget.referenceDepense }}</p>
+            <p><strong>Montant :</strong> {{ actionTarget.montantDepense | number:'1.0-0' }} XOF</p>
+            <p><strong>Libellé :</strong> {{ actionTarget.libelleDepense }}</p>
+          </div>
+
+          <form [formGroup]="actionForm" class="action-form">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Commentaire (optionnel)</mat-label>
+              <textarea matInput formControlName="commentaire" rows="4" placeholder="Raison de votre décision..."></textarea>
+            </mat-form-field>
+          </form>
+        </div>
+
+        <div class="side-panel__footer">
+          <button mat-button (click)="closeActionPanel()">Annuler</button>
+          <button mat-raised-button [color]="actionButtonColor" [disabled]="actionLoading" (click)="confirmAction()">
+            @if (actionLoading) {
+              <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+            }
+            {{ actionButtonLabel }}
+          </button>
+        </div>
+      </aside>
+    }
+
+  </div>
+</div>

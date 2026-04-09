@@ -1,0 +1,41 @@
+<p >
+  @if (varData.bien.id) {
+    <mat-form-field appearance="outline">
+      Changer de catégorie
+      <mat-label >{{varData.bien.nomBaptiserBienImmobilier}} {{varData.bien.id}}</mat-label>
+    </mat-form-field>
+  }
+</p>
+
+@if ( listeDesCategorieChambre$| async; as state) {
+  @switch (state.dataState) {
+    @case (CategorieChambreStateEnum.ERROR) {
+      <div class="p-2 invalid-feedback">
+        Une erreur est survenue
+      </div>
+    }
+    @case (CategorieChambreStateEnum.LOADED) {
+      <mat-form-field appearance="outline">
+        <mat-label>Categorie</mat-label>
+        <mat-select
+          name="Propriétaire"
+          >
+          <mat-option [value]=""
+            >Sélectionnez une catégorie</mat-option
+            >
+            @for (cate of state.listCategorieChambre; track cate) {
+              <mat-option
+                [value]="cate"
+                >
+                {{ cate.description }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-error>Ce champ est obligatoire.</mat-error>
+        </mat-form-field>
+      }
+    }
+  }
+  <div class="example-button-row">
+    <button mat-raised-button color="primary" (click)="onSaveForm()">Valider</button>
+  </div>

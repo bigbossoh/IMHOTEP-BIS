@@ -1,0 +1,228 @@
+<div class="dialog-shell">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="dialog-header__info">
+      <h2 class="dialog-header__title">{{ dialogTitle }}</h2>
+      <p class="dialog-header__sub">Remplissez les informations ci-dessous</p>
+    </div>
+    <button mat-icon-button type="button" class="dialog-header__close" (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Workflow alert -->
+  @if (workflowWarning) {
+    <div class="workflow-alert">
+      <mat-icon>info</mat-icon>
+      <span>
+        Le montant saisi dépasse le seuil de validation ({{ config?.validationThreshold | number:'1.0-0' }} XOF).
+        Cette dépense passera par un circuit de validation à {{ config?.levelCount }} niveau(x).
+      </span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="dialog-body">
+
+    <!-- SECTION 1 : Informations générales -->
+    <section class="form-section">
+      <h3 class="section-title"><mat-icon>info_outline</mat-icon> Informations générales</h3>
+      <div class="form-grid form-grid--3">
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Référence <span class="req">*</span></mat-label>
+          <input matInput formControlName="referenceDepense" placeholder="EX-2024-001" />
+          <mat-icon matSuffix>tag</mat-icon>
+          <mat-error>{{ getErrorMessage('referenceDepense') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date <span class="req">*</span></mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="dateEncaissement" />
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+          <mat-error>{{ getErrorMessage('dateEncaissement') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Catégorie <span class="req">*</span></mat-label>
+          <mat-select formControlName="categorieDepense">
+            @for (cat of categoriesOptions; track cat) {
+              <mat-option [value]="cat">{{ cat }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ getErrorMessage('categorieDepense') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid form-grid--1">
+        <mat-form-field appearance="outline">
+          <mat-label>Libellé <span class="req">*</span></mat-label>
+          <input matInput formControlName="libelleDepense" placeholder="Intitulé court de la dépense" />
+          <mat-error>{{ getErrorMessage('libelleDepense') }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid form-grid--1">
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="descriptionDepense" rows="3" placeholder="Détails optionnels..."></textarea>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- SECTION 2 : Informations financières -->
+    <section class="form-section">
+      <h3 class="section-title"><mat-icon>payments</mat-icon> Informations financières</h3>
+      <div class="form-grid form-grid--2">
+        <mat-form-field appearance="outline">
+          <mat-label>Montant (XOF) <span class="req">*</span></mat-label>
+          <input matInput type="number" formControlName="montantDepense" min="0.01" placeholder="0" />
+          <mat-icon matSuffix>euro_symbol</mat-icon>
+          <mat-error>{{ getErrorMessage('montantDepense') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mode de paiement <span class="req">*</span></mat-label>
+          <mat-select formControlName="modePaiement">
+            @for (mode of paymentModesOptions; track mode) {
+              <mat-option [value]="mode">{{ mode }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ getErrorMessage('modePaiement') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Statut <span class="req">*</span></mat-label>
+          <mat-select formControlName="statutPaiement">
+            @for (s of STATUS_OPTIONS; track s) {
+              <mat-option [value]="s">{{ getStatusLabel(s) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de paiement @if (datePaiementRequired) { <span class="req">*</span> }</mat-label>
+          <input matInput [matDatepicker]="datePaiementPicker" formControlName="datePaiement" />
+          <mat-datepicker-toggle matSuffix [for]="datePaiementPicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePaiementPicker></mat-datepicker>
+          <mat-error>{{ getErrorMessage('datePaiement') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- SECTION 3 : Affectation immobilière -->
+    <section class="form-section">
+      <h3 class="section-title"><mat-icon>apartment</mat-icon> Affectation immobilière</h3>
+      <div class="form-grid form-grid--2">
+        <mat-form-field appearance="outline">
+          <mat-label>Bien immobilier <span class="req">*</span></mat-label>
+          <mat-select formControlName="bienImmobilierId" (selectionChange)="onBienChange($event.value)">
+            @for (bien of biens; track bien.id) {
+              <mat-option [value]="bien.id">{{ getBienLabel(bien) }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ getErrorMessage('bienImmobilierId') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Appartement / Local</mat-label>
+          <mat-select formControlName="appartementLocalId" [disabled]="!appartements.length">
+            <mat-option [value]="null">-- Aucun --</mat-option>
+            @for (app of appartements; track app.id) {
+              <mat-option [value]="app.id">{{ app.libelle }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- SECTION 4 : Fournisseur -->
+    <section class="form-section">
+      <h3 class="section-title"><mat-icon>business</mat-icon> Fournisseur</h3>
+
+      @if (supplierSuggestions.length) {
+        <div class="supplier-suggestions">
+          <span class="supplier-suggestions__label">Suggestions :</span>
+          @for (s of supplierSuggestions; track s.fournisseurNom) {
+            <button type="button" class="supplier-chip" (click)="onSupplierSelect(s)">
+              {{ s.fournisseurNom }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="form-grid form-grid--3">
+        <mat-form-field appearance="outline">
+          <mat-label>Nom du fournisseur</mat-label>
+          <input matInput formControlName="fournisseurNom" placeholder="Raison sociale ou nom" />
+          <mat-icon matSuffix>storefront</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Téléphone</mat-label>
+          <input matInput formControlName="fournisseurTelephone" placeholder="+225 07 00 00 00" />
+          <mat-icon matSuffix>phone</mat-icon>
+          <mat-error>{{ getErrorMessage('fournisseurTelephone') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="fournisseurEmail" placeholder="contact@fournisseur.com" />
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error>{{ getErrorMessage('fournisseurEmail') }}</mat-error>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- SECTION 5 : Justificatif -->
+    <section class="form-section">
+      <h3 class="section-title"><mat-icon>attach_file</mat-icon> Pièce justificative</h3>
+      <div class="upload-zone">
+        @if (!justificatifFile) {
+          <label class="upload-label" for="fileInput">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <span class="upload-text">Cliquez ou déposez un fichier ici</span>
+            <span class="upload-hint">PDF, JPG, JPEG, PNG — max 5 Mo</span>
+          </label>
+          <input id="fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelect($event)" hidden />
+        } @else {
+          <div class="file-preview">
+            @if (justificatifPreviewUrl) {
+              <img [src]="justificatifPreviewUrl" alt="Aperçu" class="file-preview__img" />
+            } @else {
+              <mat-icon class="file-preview__pdf-icon">picture_as_pdf</mat-icon>
+            }
+            <div class="file-preview__info">
+              <span class="file-preview__name">{{ justificatifFile.name }}</span>
+              <span class="file-preview__size">{{ (justificatifFile.size / 1024) | number:'1.0-0' }} Ko</span>
+            </div>
+            <button mat-icon-button type="button" color="warn" (click)="removeFile()">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+  </form>
+
+  <!-- Footer / Actions -->
+  <div class="dialog-footer">
+    <button mat-button type="button" class="btn-cancel" (click)="cancel()">
+      <mat-icon>close</mat-icon> Annuler
+    </button>
+    <div class="dialog-footer__right">
+      <button mat-stroked-button type="button" color="primary" [disabled]="submitting" (click)="saveDraft()">
+        <mat-icon>save_outlined</mat-icon>
+        <span>Enregistrer brouillon</span>
+      </button>
+      <button mat-raised-button type="button" color="primary" [disabled]="submitting" (click)="submitForValidation()">
+        @if (submitting) {
+          <mat-progress-spinner diameter="18" mode="indeterminate" color="accent"></mat-progress-spinner>
+        } @else {
+          <mat-icon>send</mat-icon>
+        }
+        <span>Soumettre</span>
+      </button>
+    </div>
+  </div>
+</div>

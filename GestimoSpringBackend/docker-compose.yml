@@ -1,0 +1,22 @@
+services:
+  gestimodb:
+    image: mysql:8.4
+    container_name: gestimo_mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: gestimoweb
+      MYSQL_DATABASE: dbgestimoweb
+      MYSQL_USER: gestimo
+      MYSQL_PASSWORD: gestimoweb
+    ports:
+      - "3305:3306"
+    volumes:
+      - gestimodb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pgestimoweb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  gestimodb_data:

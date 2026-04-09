@@ -1,0 +1,61 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+# Only exists if Bazel was run
+/bazel-out
+
+# dependencies
+/node_modules
+
+# profiling files
+chrome-profiler-events*.json
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.angular/*
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+*.pack
+.angular/cache/13.3.7/babel-webpack/0372c0531d0f452bf8ee4e7b490c37e8.json
+.angular/cache/13.3.7/babel-webpack/39915e633e11577188e901c13fa1d8fb.json
+.angular/cache/13.3.7/angular-webpack/b88ed7fc8c97ebc712edf55391ac042103e568cc/index.pack.old
+.angular/cache/13.3.7/angular-webpack/b88ed7fc8c97ebc712edf55391ac042103e568cc/index.pack.old
+.angular/cache/13.3.7/angular-webpack/b88ed7fc8c97ebc712edf55391ac042103e568cc/index.pack.old
+.angular/cache/13.3.7/babel-webpack/48c551a307d6bb6f6b039e11215d3334.json
+.angular/cache/13.3.7/babel-webpack/b529f40a126abb923d3f3be6503b69dd.json
+.angular/cache/13.3.7/babel-webpack/f77833a70054c054fce14abff96f62e9.json
+
+*.old
+
+.angular/cache/13.3.7/babel-webpack/b529f40a126abb923d3f3be6503b69dd.json
+
+src/tools/swagger/dist/GestimoSpringBackend-0.0.1-SNAPSHOT.jar

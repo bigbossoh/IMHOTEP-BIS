@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: gestimo_mysql_db_backend
+    environment:
+      MYSQL_ROOT_PASSWORD: gestimoweb   # Mot de passe pour l'utilisateur root
+      MYSQL_DATABASE: dbgestimoweb           # Nom de la base de données
+      MYSQL_USER: user                    # Nom de l'utilisateur
+      MYSQL_PASSWORD: gestimoweb        # Mot de passe de l'utilisateur
+    ports:
+      - "3305:3306"
+    networks:
+      - app_network
+    volumes:
+      - mysql_data:/var/lib/mysql         # Volume pour persister les données
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer_ui
+    ports:
+      - "8081:8080"                      # Redirection du port 8082 vers Adminer
+    networks:
+      - app_network                       # Assurer que Adminer et MySQL sont sur le même réseau
+
+networks:
+  app_network:                            # Créer un réseau dédié pour les services
+    driver: bridge
+
+volumes:
+  mysql_data:                             # Volume pour persister les données MySQL

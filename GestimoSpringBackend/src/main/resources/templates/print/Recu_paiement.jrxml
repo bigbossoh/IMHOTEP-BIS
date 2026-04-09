@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Recu_paiement" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d6b6363b-3e85-4f71-9476-c0aa4af39cf7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables">
+		<![CDATA[Z2VzdGltb3dlYi5xdWl0dGFuY2UgLDE1LDE1LDYwZjE1ZmYxLTRlZTItNDM5Yy05MTczLWQ3NjZm
+NzcwM2M4Nzs=]]>
+	</property>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="565"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="435"/>
+	<parameter name="idQuittance" class="java.lang.String"/>
+	<parameter name="idQuit" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT id,
+	creation_date,
+	id_agence,
+	last_modified_date,
+	annee_loyer,
+	charge_loyer,
+	code_bien,
+	date_paiement,
+	envoi_par_mail,
+	envoi_par_sms,
+	id_appel,
+	id_encaisseemnt,
+	mois_loyer,
+	montant_payer,
+	nom_locataire,
+	nom_proprietaire,
+	observation_quittance,
+	solde_loyer
+FROM gestimoweb.quittance
+WHERE 
+	 gestimoweb.quittance.id = $P!{idQuit}]]>
+	</queryString>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="creation_date" class="java.time.LocalDateTime">
+		<property name="com.jaspersoft.studio.field.name" value="creation_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="creation_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="id_agence" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="last_modified_date" class="java.time.LocalDateTime">
+		<property name="com.jaspersoft.studio.field.name" value="last_modified_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="last_modified_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="annee_loyer" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="annee_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="annee_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="charge_loyer" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="charge_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="charge_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="code_bien" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="code_bien"/>
+		<property name="com.jaspersoft.studio.field.label" value="code_bien"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+		<fieldDescription><![CDATA[Bien Immobilier]]></fieldDescription>
+	</field>
+	<field name="date_paiement" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="date_paiement"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_paiement"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="envoi_par_mail" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="envoi_par_mail"/>
+		<property name="com.jaspersoft.studio.field.label" value="envoi_par_mail"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="envoi_par_sms" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="envoi_par_sms"/>
+		<property name="com.jaspersoft.studio.field.label" value="envoi_par_sms"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="id_appel" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_appel"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_appel"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="id_encaisseemnt" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_encaisseemnt"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_encaisseemnt"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="mois_loyer" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="mois_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="mois_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="montant_payer" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="montant_payer"/>
+		<property name="com.jaspersoft.studio.field.label" value="montant_payer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="nom_locataire" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_locataire"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_locataire"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="nom_proprietaire" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_proprietaire"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_proprietaire"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="observation_quittance" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="observation_quittance"/>
+		<property name="com.jaspersoft.studio.field.label" value="observation_quittance"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<field name="solde_loyer" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="solde_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="solde_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="quittance"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="-10" y="-1" width="560" height="51" uuid="57ffaaa5-dbd7-4806-8ae7-6b9944a502a2">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="40" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[QUITTANCE DE LOYER]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="70" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="40" width="220" height="30" uuid="658cc418-5d4f-4edf-96fc-16af4cda65d7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Bien Immobilier]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="40" width="168" height="30" uuid="c19ba884-014b-4207-b419-232a5a91ab0d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[montant_payer]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="32" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="220" height="30" uuid="cda34ae3-26b1-47ce-8432-8b93bc15af9e"/>
+				<textFieldExpression><![CDATA[$F{code_bien}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="1" width="168" height="30" uuid="9cd85f27-c4e3-4d8d-9186-4452ea660146"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{montant_payer}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="440" y="12" width="100" height="30" uuid="f601de56-bd92-458c-a7c7-5255fefa7313"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="7" y="10" width="100" height="30" uuid="059d0ca4-3571-4f45-a771-7c0114824758"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="46" splitType="Stretch"/>
+	</summary>
+</jasperReport>

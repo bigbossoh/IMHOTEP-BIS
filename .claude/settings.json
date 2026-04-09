@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find e:/My-Personnal-Project/Imhotep/GestimoSpringBackend -type f \\\\\\(-name *.jrxml -o -name *print* -o -name *PDF* \\\\\\))",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d.get\\(''''dependencies'''',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(npm install:*)",
+      "Bash(xargs grep:*)"
+    ]
+  }
+}

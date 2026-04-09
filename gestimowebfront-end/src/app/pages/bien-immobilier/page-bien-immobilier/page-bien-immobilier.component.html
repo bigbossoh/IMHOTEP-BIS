@@ -1,0 +1,832 @@
+<div class="biens-page container-fluid">
+  <div class="biens-page__header">
+    <div>
+      <h1>Biens immobiliers</h1>
+      <p>
+        Centralisez le CRUD des appartements, des villas et des magasins a
+        partir des APIs disponibles.
+      </p>
+    </div>
+
+    <div class="biens-page__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoading || isSaving"
+      >
+        Actualiser
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="exportBiensToExcel()"
+        [disabled]="isLoading || filteredItems.length === 0"
+      >
+        Exporter Excel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="startCreate(activeType)"
+      >
+        Nouveau
+      </button>
+    </div>
+  </div>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <section class="card type-switcher-card">
+    <div class="card-body">
+      <div class="type-switcher">
+        @for (tab of tabs; track tab.type) {
+          <button
+            type="button"
+            class="type-pill"
+            [class.type-pill--active]="activeType === tab.type"
+            (click)="setActiveType(tab.type)"
+          >
+            <strong>{{ tab.label }}</strong>
+            <span>{{ getTypeCount(tab.type) }} element(s)</span>
+          </button>
+        }
+      </div>
+      <p class="type-switcher__hint">{{ currentHint }}</p>
+    </div>
+  </section>
+
+  <div class="biens-layout">
+    <section class="card bien-form-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">
+              {{ isEditMode ? 'Modification' : 'Creation' }}
+            </span>
+            <h2>
+              {{
+                activeType === 'appartement'
+                  ? (isEditMode ? "Modifier un appartement" : "Creer un appartement")
+                  : activeType === 'villa'
+                    ? (isEditMode ? 'Modifier une villa' : 'Creer une villa')
+                    : (isEditMode ? 'Modifier un magasin' : 'Creer un magasin')
+              }}
+            </h2>
+          </div>
+
+          @if (isEditMode || currentForm.dirty) {
+            <button
+              type="button"
+              class="btn btn-link btn-reset"
+              (click)="startCreate(activeType)"
+            >
+              Reinitialiser
+            </button>
+          }
+        </div>
+
+        <p class="bien-form-card__intro">
+          {{ currentHint }}
+        </p>
+
+        @if (formErrorMessage) {
+          <div class="alert alert-warning form-alert">
+            {{ formErrorMessage }}
+          </div>
+        }
+
+        <div [formGroup]="currentForm">
+          @if (activeType === 'appartement') {
+            <div class="form-grid">
+              <div class="form-group form-group--full">
+                <label for="immeubleId">Immeuble</label>
+                <select
+                  id="immeubleId"
+                  class="form-select"
+                  formControlName="immeubleId"
+                  [disabled]="isSaving || immeubles.length === 0"
+                >
+                  <option value="">Selectionner un immeuble</option>
+                  @for (immeuble of immeubles; track immeuble.id ?? $index) {
+                    <option [value]="immeuble.id">
+                      {{
+                        immeuble.nomBaptiserImmeuble ||
+                        immeuble.nomCompletImmeuble ||
+                        immeuble.codeNomAbrvImmeuble
+                      }}
+                    </option>
+                  }
+                </select>
+                @if (
+                  appartementForm.get('immeubleId')?.touched &&
+                  appartementForm.get('immeubleId')?.invalid
+                ) {
+                  <small class="text-danger">L'immeuble est obligatoire.</small>
+                }
+              </div>
+
+              <div class="form-group form-group--full">
+                <label for="idEtageAppartement">Etage</label>
+                <select
+                  id="idEtageAppartement"
+                  class="form-select"
+                  formControlName="idEtageAppartement"
+                  [disabled]="isSaving || appartementEtages.length === 0"
+                >
+                  <option value="">Selectionner un etage</option>
+                  @for (etage of appartementEtages; track etage.id ?? $index) {
+                    <option [value]="etage.id">
+                      {{ etage.nomBaptiserEtage || etage.nomCompletEtage || etage.codeAbrvEtage }}
+                    </option>
+                  }
+                </select>
+                @if (
+                  appartementForm.get('idEtageAppartement')?.touched &&
+                  appartementForm.get('idEtageAppartement')?.invalid
+                ) {
+                  <small class="text-danger">L'etage est obligatoire.</small>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="nomBaptiserBienImmobilierApp">Nom usuel</label>
+                <input
+                  id="nomBaptiserBienImmobilierApp"
+                  type="text"
+                  class="form-control"
+                  formControlName="nomBaptiserBienImmobilier"
+                  placeholder="Nom interne de l'appartement"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="superficieBienApp">Superficie</label>
+                <input
+                  id="superficieBienApp"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  formControlName="superficieBien"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbrPieceApp">Pieces</label>
+                <input
+                  id="nbrPieceApp"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbrPieceApp"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbreChambreApp">Chambres</label>
+                <input
+                  id="nbreChambreApp"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbreChambreApp"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbreSalonApp">Salons</label>
+                <input
+                  id="nbreSalonApp"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbreSalonApp"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbreSalleEauApp">Salles d'eau</label>
+                <input
+                  id="nbreSalleEauApp"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbreSalleEauApp"
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label for="descriptionApp">Description</label>
+                <textarea
+                  id="descriptionApp"
+                  rows="3"
+                  class="form-control"
+                  formControlName="description"
+                  placeholder="Description de l'appartement"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-switches">
+              <label class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  formControlName="occupied"
+                />
+                <span>Appartement occupe</span>
+              </label>
+            </div>
+
+            <div
+              class="bien-preview"
+              [class.bien-preview--empty]="appartementContext === 'Selectionnez un immeuble puis un etage'"
+            >
+              <span class="bien-preview__label">Contexte</span>
+              <strong>{{ appartementContext }}</strong>
+              <small>
+                Le backend utilise l'etage choisi pour generer le code et le nom
+                complet de l'appartement.
+              </small>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="startCreate('appartement')"
+                [disabled]="isSaving"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="submitAppartement()"
+                [disabled]="appartementForm.invalid || isSaving"
+              >
+                {{
+                  isSaving
+                    ? 'Enregistrement...'
+                    : (isEditMode ? 'Mettre a jour' : 'Enregistrer')
+                }}
+              </button>
+            </div>
+          }
+
+          @if (activeType === 'villa') {
+            <div class="form-grid">
+              <div class="form-group form-group--full">
+                <label for="idSiteVilla">Site</label>
+                <select
+                  id="idSiteVilla"
+                  class="form-select"
+                  formControlName="idSite"
+                  [disabled]="isSaving || sites.length === 0"
+                >
+                  <option value="">Selectionner un site</option>
+                  @for (site of sites; track site.id ?? $index) {
+                    <option [value]="site.id">{{ site.nomSite || site.abrSite }}</option>
+                  }
+                </select>
+                @if (villaForm.get('idSite')?.touched && villaForm.get('idSite')?.invalid) {
+                  <small class="text-danger">Le site est obligatoire.</small>
+                }
+              </div>
+
+              <div class="form-group form-group--full">
+                <label for="idUtilisateurVilla">Proprietaire</label>
+                <select
+                  id="idUtilisateurVilla"
+                  class="form-select"
+                  formControlName="idUtilisateur"
+                  [disabled]="isSaving || proprietaires.length === 0"
+                >
+                  <option value="">Selectionner un proprietaire</option>
+                  @for (proprietaire of proprietaires; track proprietaire.id ?? $index) {
+                    <option [value]="proprietaire.id">
+                      {{ getUserLabel(proprietaire) }}
+                    </option>
+                  }
+                </select>
+                @if (
+                  villaForm.get('idUtilisateur')?.touched &&
+                  villaForm.get('idUtilisateur')?.invalid
+                ) {
+                  <small class="text-danger">Le proprietaire est obligatoire.</small>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="nomBaptiserBienImmobilierVilla">Nom usuel</label>
+                <input
+                  id="nomBaptiserBienImmobilierVilla"
+                  type="text"
+                  class="form-control"
+                  formControlName="nomBaptiserBienImmobilier"
+                  placeholder="Nom interne de la villa"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="superficieBienVilla">Superficie</label>
+                <input
+                  id="superficieBienVilla"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  formControlName="superficieBien"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbrePieceVilla">Pieces</label>
+                <input
+                  id="nbrePieceVilla"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbrePieceVilla"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbrChambreVilla">Chambres</label>
+                <input
+                  id="nbrChambreVilla"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbrChambreVilla"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbrSalonVilla">Salons</label>
+                <input
+                  id="nbrSalonVilla"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbrSalonVilla"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nbrSalleEauVilla">Salles d'eau</label>
+                <input
+                  id="nbrSalleEauVilla"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nbrSalleEauVilla"
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label for="descriptionVilla">Description</label>
+                <textarea
+                  id="descriptionVilla"
+                  rows="3"
+                  class="form-control"
+                  formControlName="description"
+                  placeholder="Description de la villa"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-switches">
+              <label class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  formControlName="occupied"
+                />
+                <span>Villa occupee</span>
+              </label>
+            </div>
+
+            <div
+              class="bien-preview"
+              [class.bien-preview--empty]="villaContext.includes('-')"
+            >
+              <span class="bien-preview__label">Contexte</span>
+              <strong>{{ villaContext }}</strong>
+              <small>
+                La villa est rattachee directement a un site et a un
+                proprietaire.
+              </small>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="startCreate('villa')"
+                [disabled]="isSaving"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="submitVilla()"
+                [disabled]="villaForm.invalid || isSaving"
+              >
+                {{
+                  isSaving
+                    ? 'Enregistrement...'
+                    : (isEditMode ? 'Mettre a jour' : 'Enregistrer')
+                }}
+              </button>
+            </div>
+          }
+
+          @if (activeType === 'magasin') {
+            <div class="segmented">
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="magasinLocationMode === 'site'"
+                (click)="setMagasinLocationMode('site')"
+              >
+                Sur site
+              </button>
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="magasinLocationMode === 'immeuble'"
+                (click)="setMagasinLocationMode('immeuble')"
+              >
+                Sous immeuble
+              </button>
+            </div>
+
+            <div class="form-grid">
+              @if (magasinLocationMode === 'site') {
+                <div class="form-group form-group--full">
+                  <label for="idSiteMagasin">Site</label>
+                  <select
+                    id="idSiteMagasin"
+                    class="form-select"
+                    formControlName="idSite"
+                    [disabled]="isSaving || sites.length === 0"
+                  >
+                    <option value="">Selectionner un site</option>
+                    @for (site of sites; track site.id ?? $index) {
+                      <option [value]="site.id">{{ site.nomSite || site.abrSite }}</option>
+                    }
+                  </select>
+                  @if (
+                    magasinForm.get('idSite')?.touched &&
+                    magasinForm.get('idSite')?.invalid
+                  ) {
+                    <small class="text-danger">Le site est obligatoire.</small>
+                  }
+                </div>
+              }
+
+              @if (magasinLocationMode === 'immeuble') {
+                <div class="form-group form-group--full">
+                  <label for="immeubleIdMagasin">Immeuble</label>
+                  <select
+                    id="immeubleIdMagasin"
+                    class="form-select"
+                    formControlName="immeubleId"
+                    [disabled]="isSaving || immeubles.length === 0"
+                  >
+                    <option value="">Selectionner un immeuble</option>
+                    @for (immeuble of immeubles; track immeuble.id ?? $index) {
+                      <option [value]="immeuble.id">
+                        {{
+                          immeuble.nomBaptiserImmeuble ||
+                          immeuble.nomCompletImmeuble ||
+                          immeuble.codeNomAbrvImmeuble
+                        }}
+                      </option>
+                    }
+                  </select>
+                  @if (
+                    magasinForm.get('immeubleId')?.touched &&
+                    magasinForm.get('immeubleId')?.invalid
+                  ) {
+                    <small class="text-danger">L'immeuble est obligatoire.</small>
+                  }
+                </div>
+
+                <div class="form-group form-group--full">
+                  <label for="idEtageMagasin">Etage</label>
+                  <select
+                    id="idEtageMagasin"
+                    class="form-select"
+                    formControlName="idEtage"
+                    [disabled]="isSaving || magasinEtages.length === 0"
+                  >
+                    <option value="">Selectionner un etage</option>
+                    @for (etage of magasinEtages; track etage.id ?? $index) {
+                      <option [value]="etage.id">
+                        {{ etage.nomBaptiserEtage || etage.nomCompletEtage || etage.codeAbrvEtage }}
+                      </option>
+                    }
+                  </select>
+                  @if (
+                    magasinForm.get('idEtage')?.touched &&
+                    magasinForm.get('idEtage')?.invalid
+                  ) {
+                    <small class="text-danger">L'etage est obligatoire.</small>
+                  }
+                </div>
+              }
+
+              <div class="form-group form-group--full">
+                <label for="idUtilisateurMagasin">Proprietaire</label>
+                <select
+                  id="idUtilisateurMagasin"
+                  class="form-select"
+                  formControlName="idUtilisateur"
+                  [disabled]="isSaving || proprietaires.length === 0"
+                >
+                  <option value="">Selectionner un proprietaire</option>
+                  @for (proprietaire of proprietaires; track proprietaire.id ?? $index) {
+                    <option [value]="proprietaire.id">
+                      {{ getUserLabel(proprietaire) }}
+                    </option>
+                  }
+                </select>
+                @if (
+                  magasinForm.get('idUtilisateur')?.touched &&
+                  magasinForm.get('idUtilisateur')?.invalid
+                ) {
+                  <small class="text-danger">Le proprietaire est obligatoire.</small>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="nomBaptiserBienImmobilierMagasin">Nom usuel</label>
+                <input
+                  id="nomBaptiserBienImmobilierMagasin"
+                  type="text"
+                  class="form-control"
+                  formControlName="nomBaptiserBienImmobilier"
+                  placeholder="Nom interne du magasin"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="nombrePieceMagasin">Pieces</label>
+                <input
+                  id="nombrePieceMagasin"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  formControlName="nombrePieceMagasin"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="superficieBienMagasin">Superficie</label>
+                <input
+                  id="superficieBienMagasin"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  formControlName="superficieBien"
+                />
+              </div>
+
+              <div class="form-group form-group--full">
+                <label for="descriptionMagasin">Description</label>
+                <textarea
+                  id="descriptionMagasin"
+                  rows="3"
+                  class="form-control"
+                  formControlName="description"
+                  placeholder="Description du magasin"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="form-switches">
+              <label class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  formControlName="underBuildingMagasin"
+                />
+                <span>Magasin en sous-batiment</span>
+              </label>
+
+              <label class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  formControlName="occupied"
+                />
+                <span>Magasin occupe</span>
+              </label>
+            </div>
+
+            <div
+              class="bien-preview"
+              [class.bien-preview--empty]="
+                magasinContext.includes('-') ||
+                magasinContext === 'Selectionnez un immeuble puis un etage | Proprietaire : -'
+              "
+            >
+              <span class="bien-preview__label">Contexte</span>
+              <strong>{{ magasinContext }}</strong>
+              <small>
+                Le magasin peut etre cree sur un site directement ou au niveau
+                d'un etage d'immeuble.
+              </small>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="startCreate('magasin')"
+                [disabled]="isSaving"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="submitMagasin()"
+                [disabled]="magasinForm.invalid || isSaving"
+              >
+                {{
+                  isSaving
+                    ? 'Enregistrement...'
+                    : (isEditMode ? 'Mettre a jour' : 'Enregistrer')
+                }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="card bien-list-card">
+      <div class="card-body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>{{ currentTypeLabel }}</h2>
+          </div>
+          <span class="bien-count">{{ filteredItems.length }} element(s)</span>
+        </div>
+
+        <div class="bien-toolbar">
+          <div class="search-box">
+            <label for="bienSearch">Recherche</label>
+            <input
+              id="bienSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm"
+              (input)="onSearch($event)"
+              placeholder="Code, nom, emplacement, proprietaire..."
+            />
+          </div>
+
+          <div class="search-box search-box--compact">
+            <label for="bienPageSize">Lignes</label>
+            <select
+              id="bienPageSize"
+              class="form-select"
+              [value]="pageSize"
+              (change)="onPageSizeChange($event)"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }} / page</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (isLoading) {
+          <div class="state-card">Chargement des biens...</div>
+        }
+
+        @if (!isLoading && currentCount === 0) {
+          <div class="state-card">
+            Aucun bien n'est encore enregistre pour cette categorie.
+          </div>
+        }
+
+        @if (!isLoading && currentCount > 0 && filteredItems.length === 0) {
+          <div class="state-card">
+            Aucun bien ne correspond a votre recherche.
+          </div>
+        }
+
+        @if (!isLoading && filteredItems.length > 0) {
+          <div class="table-responsive">
+            <table class="table align-middle bien-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Bien</th>
+                  <th>Emplacement</th>
+                  <th>Proprietaire</th>
+                  <th>Details</th>
+                  <th>Statut</th>
+                  <th class="actions-column">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of paginatedItems; track trackByItem($index, item)) {
+                  <tr>
+                    <td>
+                      <span class="bien-badge">{{ item.code }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ item.name }}</strong>
+                      <div class="row-helper">
+                        {{ item.description || 'Aucune description' }}
+                      </div>
+                    </td>
+                    <td>{{ item.location }}</td>
+                    <td>{{ item.owner }}</td>
+                    <td>{{ item.details }}</td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class.status-badge--occupied]="item.occupied"
+                      >
+                        {{ item.occupied ? 'Occupe' : 'Libre' }}
+                      </span>
+                    </td>
+                    <td class="actions-column">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="editItem(item)"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="deleteItem(item)"
+                        [disabled]="isDeleting(item)"
+                      >
+                        {{ isDeleting(item) ? 'Suppression...' : 'Supprimer' }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination-toolbar">
+            <p class="pagination-summary">
+              Affichage {{ paginationStart }} a {{ paginationEnd }} sur {{ filteredItems.length }} element(s)
+            </p>
+
+            <div class="pagination-controls">
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentPageNumber <= 1"
+                (click)="previousPage()"
+              >
+                Precedent
+              </button>
+
+              @for (page of visiblePages; track page) {
+                <button
+                  type="button"
+                  class="page-btn"
+                  [class.is-active]="page === currentPageNumber"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <button
+                type="button"
+                class="page-btn"
+                [disabled]="currentPageNumber >= totalPages"
+                (click)="nextPage()"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

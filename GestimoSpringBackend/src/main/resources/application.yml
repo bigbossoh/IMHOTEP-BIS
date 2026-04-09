@@ -1,0 +1,79 @@
+server:
+  port: 8287
+  error:
+    include-message: always
+  max-http-request-header-size: 50KB
+
+spring:
+  application:
+    name: gestimo_backend_springboot
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  main:
+    allow-circular-references: true
+
+  mail:
+    host: ${MAIL_HOST:smtp-fr.securemail.pro}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:info@molibetycenter.com}
+    password: ${MAIL_PASSWORD:2024@Seve2024}
+    properties:
+      mail:
+        smtp:
+          trust: ${MAIL_SMTP_TRUST:"*"}
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+          connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
+          timeout: ${MAIL_SMTP_TIMEOUT:3000}
+          writetimeout: ${MAIL_SMTP_WRITE_TIMEOUT:5000}
+
+  jpa:
+    database: MYSQL
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  sql:
+    init:
+      mode: always
+
+  datasource:
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 600000
+      maximum-pool-size: 500
+      max-lifetime: 1800000
+      minimum-idle: 20
+      validation-timeout: 3000
+      idle-timeout: 60000
+
+  servlet:
+    multipart:
+      max-file-size: 528KB
+      max-request-size: 528KB
+
+jwt:
+  secret: ${JWT_SECRET:[a-zA-Z0-9._]^+$GuidelinAurorees8SaisonACfsewwsikkoggishherforAlphabeticalArraNumeralsandOtherSymbo$}
+
+app:
+  password-reset-url: ${PASSWORD_RESET_URL:http://localhost:4200/reset-password}
+  default-user-email: ${DEFAULT_USER_EMAIL:bossohpaulin@gmail.com}
+  user-security:
+    inactivity-disable-days: ${INACTIVE_USER_DISABLE_DAYS:30}
+    inactivity-check-cron: ${INACTIVE_USER_CHECK_CRON:0 0 2 * * *}
+    protected-roles: ${INACTIVE_USER_PROTECTED_ROLES:SUPER_SUPERVISEUR}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: gestimoweb
+    description: This is an application to manage employees
+    version: "1.0"

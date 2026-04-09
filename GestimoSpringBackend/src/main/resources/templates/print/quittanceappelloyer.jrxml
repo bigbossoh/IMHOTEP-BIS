@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.6.final using JasperReports Library version 6.20.6-5c96b6aa8a39ac1dc6b6bea4b81168e16dd39231  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="quittance_appel_loyer" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="934dcdce-7007-457f-953b-e9de15bea315">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DataAdapter.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="248"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="744"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="933"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="53"/>
+	<parameter name="PARAMETER_PERIODE" class="java.lang.String"/>
+	<parameter name="NOM_PROPRIO" class="java.lang.String"/>
+	<parameter name="PARAMETER_AGENCE" class="java.lang.Long"/>
+	<parameter name="LOGO" class="java.io.InputStream"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT
+ dbgestimoweb.appel_loyer.id ,
+  dbgestimoweb.bienimmobilier.type_bien_immobilier ,
+   dbgestimoweb.appel_loyer.id_agence ,
+    dbgestimoweb.appel_loyer.id_createur ,
+     dbgestimoweb.appel_loyer.periode_appel_loyer ,
+      dbgestimoweb.appel_loyer.status_appel_loyer ,
+    dbgestimoweb.appel_loyer.date_paiement_prevu_appel_loyer ,
+     dbgestimoweb.appel_loyer.date_debut_mois_appel_loyer ,
+      dbgestimoweb.appel_loyer.date_fin_mois_appel_loyer ,
+      dbgestimoweb.appel_loyer.mois_uniquement_lettre ,
+       dbgestimoweb.appel_loyer.annee_appel_loyer ,
+        dbgestimoweb.appel_loyer.periode_lettre ,
+        dbgestimoweb.agence_immobiliere.fax_agence ,
+         dbgestimoweb.agence_immobiliere.sigle_agence ,
+          dbgestimoweb.bienimmobilier.code_abrv_bien_immobilier ,
+           dbgestimoweb.bienimmobilier.nom_complet_bien_immobilier ,
+            dbgestimoweb.operation.id as idBailLocation,
+             dbgestimoweb.operation.abrv_code_bail ,
+        dbgestimoweb.appel_loyer.mois_chiffre_appel_loyer,
+    dbgestimoweb.appel_loyer.desc_appel_loyer ,
+     dbgestimoweb.appel_loyer.montant_loyer_baillperiode  as montant_loyer_baillperiode,
+      dbgestimoweb.appel_loyer.solde_appel_loyer ,
+       dbgestimoweb.appel_loyer.is_solder_appel_loyer ,
+        dbgestimoweb.appel_loyer.is_cloturer ,
+        COALESCE(
+         NULLIF(
+          TRIM(
+           CONCAT_WS(
+            ' ',
+            CASE
+             WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.nom, ''))) = 'null' THEN NULL
+             ELSE NULLIF(TRIM(dbgestimoweb.utilisateur.nom), '')
+            END,
+            CASE
+             WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.prenom, ''))) = 'null' THEN NULL
+             ELSE NULLIF(TRIM(dbgestimoweb.utilisateur.prenom), '')
+            END
+           )
+          ),
+          ''
+         ),
+         CASE
+          WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.username, ''))) = 'null' THEN '-'
+          ELSE COALESCE(NULLIF(TRIM(dbgestimoweb.utilisateur.username), ''), '-')
+         END
+        ) as nom ,
+          CASE
+           WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.prenom, ''))) = 'null' THEN ''
+           ELSE COALESCE(TRIM(dbgestimoweb.utilisateur.prenom), '')
+          END as prenom ,
+           CASE
+            WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.genre, ''))) IN ('m', 'masculin', 'homme', 'monsieur') THEN 'Monsieur'
+            WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.genre, ''))) IN ('f', 'feminin', 'féminin', 'femme', 'madame') THEN 'Madame'
+            WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.genre, ''))) = 'mademoiselle' THEN 'Mademoiselle'
+            WHEN LOWER(TRIM(COALESCE(dbgestimoweb.utilisateur.genre, ''))) = 'null' THEN '-'
+            ELSE COALESCE(NULLIF(TRIM(dbgestimoweb.utilisateur.genre), ''), '-')
+           END as genre ,
+            dbgestimoweb.utilisateur.email ,
+             dbgestimoweb.utilisateur.id as idLocataire,
+              dbgestimoweb.agence_immobiliere.nom_agence ,
+  dbgestimoweb.agence_immobiliere.tel_agence ,
+   dbgestimoweb.agence_immobiliere.compte_contribuable ,
+  dbgestimoweb.agence_immobiliere.email_agence ,
+   dbgestimoweb.agence_immobiliere.mobile_agence ,
+   dbgestimoweb.agence_immobiliere.boite_postale_agence ,
+    dbgestimoweb.agence_immobiliere.regime_fiscale_agence ,
+     dbgestimoweb.agence_immobiliere.adresse_agence,
+      dbgestimoweb.appel_loyer.message_reduction
+FROM dbgestimoweb.appel_loyer,
+dbgestimoweb.agence_immobiliere ,
+	dbgestimoweb.operation,
+	dbgestimoweb.utilisateur,
+	dbgestimoweb.bienimmobilier
+WHERE
+ dbgestimoweb.bienimmobilier.id = dbgestimoweb.operation.bien_immobilier_operation_id
+ AND  dbgestimoweb.utilisateur.id_agence = dbgestimoweb.agence_immobiliere.id
+ AND  dbgestimoweb.operation.utilisateur_operation_id= dbgestimoweb.utilisateur.id
+AND	 dbgestimoweb.appel_loyer.bail_location_appel_loyer_id = dbgestimoweb.operation.id
+AND    dbgestimoweb.appel_loyer.periode_appel_loyer = $P{PARAMETER_PERIODE}
+AND dbgestimoweb.appel_loyer.id_agence =$P{PARAMETER_AGENCE}
+ AND dbgestimoweb.appel_loyer.is_cloturer=false
+ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC, dbgestimoweb.bienimmobilier.code_abrv_bien_immobilier  asc]]>
+	</queryString>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="type_bien_immobilier" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="type_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.label" value="type_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="bienimmobilier"/>
+	</field>
+	<field name="id_agence" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="id_createur" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id_createur"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_createur"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="periode_appel_loyer" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="periode_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="periode_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="status_appel_loyer" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="status_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="status_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="date_paiement_prevu_appel_loyer" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="date_paiement_prevu_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_paiement_prevu_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="date_debut_mois_appel_loyer" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="date_debut_mois_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_debut_mois_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="date_fin_mois_appel_loyer" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="date_fin_mois_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="date_fin_mois_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="mois_uniquement_lettre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="mois_uniquement_lettre"/>
+		<property name="com.jaspersoft.studio.field.label" value="mois_uniquement_lettre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="annee_appel_loyer" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="annee_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="annee_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="periode_lettre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="periode_lettre"/>
+		<property name="com.jaspersoft.studio.field.label" value="periode_lettre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="fax_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fax_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="fax_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="sigle_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sigle_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="sigle_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="code_abrv_bien_immobilier" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="code_abrv_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.label" value="code_abrv_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="bienimmobilier"/>
+	</field>
+	<field name="nom_complet_bien_immobilier" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_complet_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_complet_bien_immobilier"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="bienimmobilier"/>
+	</field>
+	<field name="idBailLocation" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="idBailLocation"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="operation"/>
+	</field>
+	<field name="abrv_code_bail" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="abrv_code_bail"/>
+		<property name="com.jaspersoft.studio.field.label" value="abrv_code_bail"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="operation"/>
+	</field>
+	<field name="mois_chiffre_appel_loyer" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="mois_chiffre_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="mois_chiffre_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="desc_appel_loyer" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="desc_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="desc_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="montant_loyer_baillperiode" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="solde_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="montant_loyer_baillperiode"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="solde_appel_loyer" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="solde_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="solde_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="is_solder_appel_loyer" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="is_solder_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.label" value="is_solder_appel_loyer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="is_cloturer" class="java.lang.Boolean">
+		<property name="com.jaspersoft.studio.field.name" value="is_cloturer"/>
+		<property name="com.jaspersoft.studio.field.label" value="is_cloturer"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<field name="nom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="utilisateur"/>
+	</field>
+	<field name="prenom" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="prenom"/>
+		<property name="com.jaspersoft.studio.field.label" value="prenom"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="utilisateur"/>
+	</field>
+	<field name="genre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="genre"/>
+		<property name="com.jaspersoft.studio.field.label" value="genre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="utilisateur"/>
+	</field>
+	<field name="email" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email"/>
+		<property name="com.jaspersoft.studio.field.label" value="email"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="utilisateur"/>
+	</field>
+	<field name="idLocataire" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="idLocataire"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="utilisateur"/>
+	</field>
+	<field name="nom_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nom_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="nom_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="tel_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tel_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="tel_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="compte_contribuable" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="compte_contribuable"/>
+		<property name="com.jaspersoft.studio.field.label" value="compte_contribuable"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="email_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="email_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="mobile_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="mobile_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="mobile_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="boite_postale_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="boite_postale_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="boite_postale_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="regime_fiscale_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="regime_fiscale_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="regime_fiscale_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="adresse_agence" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="adresse_agence"/>
+		<property name="com.jaspersoft.studio.field.label" value="adresse_agence"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="agence_immobiliere"/>
+	</field>
+	<field name="message_reduction" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="message_reduction"/>
+		<property name="com.jaspersoft.studio.field.label" value="message_reduction"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="appel_loyer"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="359" splitType="Stretch">
+			<staticText>
+				<reportElement x="169" y="316" width="79" height="19" uuid="bf1fbf24-c434-4240-ad20-e5f8bdce1980"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Serif" size="12" isBold="true" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Bien loué :	]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="305" y="173" width="245" height="30" uuid="bce6e129-05d0-4149-9feb-d295886ab042"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nom}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="305" y="154" width="97" height="19" uuid="8be9c880-2c43-4883-aa40-59c011d96220"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{genre}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="104" y="121" width="28" height="25" uuid="d2507802-7aa9-4f93-9786-059f9ee3b425"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[N°			]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="130" y="121" width="44" height="25" uuid="6d8010e4-9536-41b3-8cfa-95e863a59957"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sigle_agence}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="171" y="121" width="13" height="25" uuid="1562f1e3-6a2e-4d47-9a8c-044f57d74b1c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+			<textField evaluationTime="Page">
+				<reportElement x="186" y="120" width="41" height="25" uuid="31a2a48e-cc7a-4741-ae6d-07358206ec3c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{type_bien_immobilier}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="223" y="120" width="13" height="25" uuid="1f25f8c8-c263-436b-a505-416957d44fc1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="131" y="10" width="293" height="42" uuid="cbe79adc-84b1-4e2d-beee-ffffe0372768"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="22" isBold="true" isItalic="true" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nom_agence}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="244" y="317" width="311" height="19" uuid="67c12e46-72c9-4f82-9f9b-08ba2754e129"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{code_abrv_bien_immobilier}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="68" y="317" width="100" height="19" uuid="6a5f2632-1ed9-4dc2-93cb-715466ab8d46"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{periode_lettre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="236" y="119" width="100" height="26" uuid="4661c068-03b9-4c77-b0ad-24999c0d8c6e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="-5" y="-2" width="135" height="112" uuid="b7ed7c20-6649-48d5-8543-d3f12a82d7c6"/>
+				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="31" y="120" width="89" height="30" uuid="e63869e1-b4fb-4917-ae9a-73b132850633"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[FACTURE :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="318" width="68" height="17" uuid="eb7decad-c8e2-4e14-917d-df6e08115036"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Période :]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Transparent" x="2" y="257" width="548" height="43" forecolor="#FA071C" backcolor="#FFFFFF" uuid="b5ca87f5-a666-41e7-952d-d0815e88f5f8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
+					<font fontName="Century Schoolbook L" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{message_reduction}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="472" y="7" width="100" height="30" uuid="6113af32-4777-458c-bab0-221dbaf5c162"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<patternExpression><![CDATA["dd / MM / yyyy"]]></patternExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="304" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="-21" width="360" height="20" forecolor="#080707" backcolor="#EDEDED" uuid="f2a72695-81b1-4ffe-a5fd-13e6e1039c38">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<paragraph lineSpacing="Double" leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[Désignation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="360" y="-21" width="185" height="20" forecolor="#080707" backcolor="#EDEDED" uuid="a88c23cb-309d-495a-9cf0-5bd476f604b6">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<paragraph lineSpacing="Double" leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[Montant loyer			]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="85" height="20" uuid="6b6e2174-ba4f-4dda-9647-58622537e7ac">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[Loyer-Période :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="0" width="78" height="20" uuid="73ce304d-e64a-4f94-b35c-5b1dd62301e0"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{date_debut_mois_appel_loyer}]]></textFieldExpression>
+				<patternExpression><![CDATA["dd / MM / yyyy"]]></patternExpression>
+			</textField>
+			<staticText>
+				<reportElement x="159" y="0" width="27" height="20" uuid="45192e0a-c7f4-4285-8cb2-b76b57af76b0"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[au			]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="184" y="0" width="174" height="20" uuid="71f51f8f-59d3-48c9-8ba5-2e16e8dd39f5"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{date_fin_mois_appel_loyer}]]></textFieldExpression>
+				<patternExpression><![CDATA["dd / MM / yyyy"]]></patternExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="33" width="540" height="36" forecolor="#FC201C" uuid="6cba93c5-c790-4c6f-a7ed-9482b884f639"/>
+				<textElement textAlignment="Left" verticalAlignment="Top"/>
+				<text><![CDATA[NB: Le loyer est dû avant le 10 de chaque mois entamé, dans les cas contraire une pénalité de 10% (Dix pour cent) vous sera facturée.				]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="27" y="131" width="58" height="19" uuid="07b27337-732a-427e-9213-f9daf250d61b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Serif" size="12" isBold="false" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Période :			]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="27" y="160" width="108" height="19" uuid="76a277e7-7559-47bf-9541-4fc3f835f11b"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Serif" size="12" isBold="false" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[A payer avant le :		]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="135" y="160" width="113" height="20" uuid="256820d4-50da-4099-9064-840973509019"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{date_paiement_prevu_appel_loyer}]]></textFieldExpression>
+				<patternExpression><![CDATA["dd / MM / yyyy"]]></patternExpression>
+			</textField>
+			<staticText>
+				<reportElement x="27" y="191" width="93" height="14" uuid="46c94be5-bc7c-414f-867d-c2526eac47e9"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Montant du loyer :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="360" y="0" width="185" height="20" uuid="24fd7833-b621-4c03-b710-be48bcac257a">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{montant_loyer_baillperiode}]]></textFieldExpression>
+				<patternExpression><![CDATA["#,##0 F"]]></patternExpression>
+			</textField>
+			<textField>
+				<reportElement x="156" y="191" width="100" height="14" uuid="5b1c1f01-eb0a-4cb8-a41f-f0ade97a4f79"/>
+				<textFieldExpression><![CDATA[$F{montant_loyer_baillperiode}]]></textFieldExpression>
+				<patternExpression><![CDATA["#,##0 F"]]></patternExpression>
+			</textField>
+			<textField>
+				<reportElement x="81" y="131" width="176" height="19" uuid="dc7cdb8f-cbf0-45e0-a932-a55051de0084"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{periode_lettre}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="97" width="156" height="26" uuid="df14868e-a4fa-43f1-8ec9-56781e79fc7b"/>
+				<textElement>
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Résumé facture]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="309" y="146" width="190" height="24" forecolor="#FFFFFF" uuid="2ffbc6fc-7612-4944-a22f-6ae8c75ef152"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="html">
+					<font size="10" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{NOM_PROPRIO}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="430" y="260" width="100" height="20" uuid="08253ea9-6a0c-46c3-a680-94dd83376a03"/>
+				<text><![CDATA[
+					Fait à Abidjan,
+				]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="244" width="126" height="16" uuid="a2aeb56c-cddb-4e91-8dc0-a58954ddc186"/>
+				<textElement>
+					<font size="12" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[SABLIN SEVERIN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="222" width="110" height="25" uuid="de276ffe-b9a1-4ef9-985b-b542dcda7df3"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Fait à Abidjan, le ]]></text>
+			</staticText>
+			<textField evaluationTime="Column" pattern="MMMMM dd, yyyy">
+				<reportElement x="447" y="223" width="108" height="21" uuid="6b67014b-ed65-4f11-9e9b-2023b5c3deed"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<patternExpression><![CDATA["dd / MM / yyyy"]]></patternExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="23" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="44" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="6" width="555" height="14" uuid="3fe094f8-9dd6-4266-bfbf-6f4b71c6f8d5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[
+					"BP : " +
+					(($F{boite_postale_agence} == null || $F{boite_postale_agence}.trim().isEmpty() || "null".equalsIgnoreCase($F{boite_postale_agence}.trim())) ? "-" : $F{boite_postale_agence}.trim()) +
+					" | NCC : " +
+					(($F{compte_contribuable} == null || $F{compte_contribuable}.trim().isEmpty() || "null".equalsIgnoreCase($F{compte_contribuable}.trim())) ? "-" : $F{compte_contribuable}.trim()) +
+					" | Email : " +
+					(($F{email_agence} == null || $F{email_agence}.trim().isEmpty() || "null".equalsIgnoreCase($F{email_agence}.trim())) ? "-" : $F{email_agence}.trim())
+				]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="22" width="555" height="14" uuid="44d017e0-be9a-4bd0-9b84-a97ced827f3b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[
+					"Portable : " +
+					(($F{mobile_agence} == null || $F{mobile_agence}.trim().isEmpty() || "null".equalsIgnoreCase($F{mobile_agence}.trim())) ? "-" : $F{mobile_agence}.trim()) +
+					" | Fixe : " +
+					(($F{tel_agence} == null || $F{tel_agence}.trim().isEmpty() || "null".equalsIgnoreCase($F{tel_agence}.trim())) ? "-" : $F{tel_agence}.trim())
+				]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="47" splitType="Stretch"/>
+	</summary>
+</jasperReport>

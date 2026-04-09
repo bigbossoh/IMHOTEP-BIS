@@ -1,0 +1,247 @@
+<section class="config-page">
+  <header class="config-hero">
+    <div>
+      <span class="config-eyebrow">Administration</span>
+      <h1>Paramétrage des dépenses</h1>
+      <p>
+        Définissez le seuil de validation, la profondeur du circuit, les
+        validateurs et les référentiels utilisés dans le formulaire de dépense.
+      </p>
+    </div>
+
+    <div class="config-hero__summary">
+      <div class="summary-pill">
+        <strong>Seuil</strong>
+        <span>{{ (form.controls.validationThreshold.value || 0) | number : '1.0-0' }} FCFA</span>
+      </div>
+      <div class="summary-pill summary-pill--soft">
+        <strong>Niveaux</strong>
+        <span>{{ levelCount }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="config-layout" *ngIf="!isLoading; else loadingState">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Workflow</span>
+          <h2>Règles générales</h2>
+        </div>
+      </div>
+
+      <form class="config-form" [formGroup]="form">
+        <article class="section-card">
+          <div class="form-grid form-grid--3">
+            <label class="field">
+              <span>Circuit actif</span>
+              <select class="form-select" formControlName="active">
+                <option [ngValue]="true">Oui</option>
+                <option [ngValue]="false">Non</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Seuil de validation</span>
+              <input type="number" min="0" class="form-control" formControlName="validationThreshold" />
+            </label>
+
+            <label class="field">
+              <span>Nombre de niveaux</span>
+              <select class="form-select" formControlName="levelCount">
+                <option [ngValue]="2">2 niveaux</option>
+                <option [ngValue]="3">3 niveaux</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Catégories de dépenses</h3>
+            <p>Ces valeurs alimentent l’autocomplétion du formulaire de création.</p>
+          </div>
+
+          <div class="tag-editor">
+            <input type="text" class="form-control" formControlName="categoryInput" placeholder="Ajouter une catégorie" />
+            <button type="button" class="btn btn-outline-primary" (click)="addCategory()">Ajouter</button>
+          </div>
+
+          <div class="tag-list">
+            <button type="button" class="tag-chip" *ngFor="let category of categories" (click)="removeCategory(category)">
+              {{ category }} <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Modes de paiement</h3>
+            <p>Ces modes sont disponibles dans le formulaire de dépense.</p>
+          </div>
+
+          <div class="tag-editor">
+            <input type="text" class="form-control" formControlName="paymentModeInput" placeholder="Ajouter un mode de paiement" />
+            <button type="button" class="btn btn-outline-primary" (click)="addPaymentMode()">Ajouter</button>
+          </div>
+
+          <div class="tag-list">
+            <button type="button" class="tag-chip" *ngFor="let mode of paymentModes" (click)="removePaymentMode(mode)">
+              {{ mode }} <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </article>
+
+        <article class="section-card">
+          <div class="section-card__head">
+            <h3>Niveaux de validation</h3>
+            <p>Vous pouvez affecter un rôle, un utilisateur précis ou les deux.</p>
+          </div>
+
+          <div class="level-grid">
+            <section class="level-card">
+              <div class="level-card__head">
+                <h4>Niveau 1</h4>
+                <span>{{ form.controls.level1Label.value }}</span>
+              </div>
+              <div class="form-grid form-grid--2">
+                <label class="field">
+                  <span>Actif</span>
+                  <select class="form-select" formControlName="level1Active">
+                    <option [ngValue]="true">Oui</option>
+                    <option [ngValue]="false">Non</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Libellé</span>
+                  <input type="text" class="form-control" formControlName="level1Label" />
+                </label>
+                <label class="field">
+                  <span>Rôle</span>
+                  <input type="text" class="form-control" formControlName="level1RoleName" placeholder="SUPERVISEUR" />
+                </label>
+                <label class="field">
+                  <span>Utilisateur</span>
+                  <select class="form-select" [ngModel]="form.controls.level1UserId.value" (ngModelChange)="onValidatorSelection(1, $event)" [ngModelOptions]="{ standalone: true }">
+                    <option [ngValue]="null">Aucun utilisateur dédié</option>
+                    <option *ngFor="let validator of validators" [ngValue]="validator.id">{{ getUserDisplay(validator) }}</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section class="level-card">
+              <div class="level-card__head">
+                <h4>Niveau 2</h4>
+                <span>{{ form.controls.level2Label.value }}</span>
+              </div>
+              <div class="form-grid form-grid--2">
+                <label class="field">
+                  <span>Actif</span>
+                  <select class="form-select" formControlName="level2Active">
+                    <option [ngValue]="true">Oui</option>
+                    <option [ngValue]="false">Non</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Libellé</span>
+                  <input type="text" class="form-control" formControlName="level2Label" />
+                </label>
+                <label class="field">
+                  <span>Rôle</span>
+                  <input type="text" class="form-control" formControlName="level2RoleName" placeholder="GERANT" />
+                </label>
+                <label class="field">
+                  <span>Utilisateur</span>
+                  <select class="form-select" [ngModel]="form.controls.level2UserId.value" (ngModelChange)="onValidatorSelection(2, $event)" [ngModelOptions]="{ standalone: true }">
+                    <option [ngValue]="null">Aucun utilisateur dédié</option>
+                    <option *ngFor="let validator of validators" [ngValue]="validator.id">{{ getUserDisplay(validator) }}</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section class="level-card" *ngIf="levelCount === 3">
+              <div class="level-card__head">
+                <h4>Niveau 3</h4>
+                <span>{{ form.controls.level3Label.value }}</span>
+              </div>
+              <div class="form-grid form-grid--2">
+                <label class="field">
+                  <span>Actif</span>
+                  <select class="form-select" formControlName="level3Active">
+                    <option [ngValue]="true">Oui</option>
+                    <option [ngValue]="false">Non</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Libellé</span>
+                  <input type="text" class="form-control" formControlName="level3Label" />
+                </label>
+                <label class="field">
+                  <span>Rôle</span>
+                  <input type="text" class="form-control" formControlName="level3RoleName" placeholder="DIRECTEUR" />
+                </label>
+                <label class="field">
+                  <span>Utilisateur</span>
+                  <select class="form-select" [ngModel]="form.controls.level3UserId.value" (ngModelChange)="onValidatorSelection(3, $event)" [ngModelOptions]="{ standalone: true }">
+                    <option [ngValue]="null">Aucun utilisateur dédié</option>
+                    <option *ngFor="let validator of validators" [ngValue]="validator.id">{{ getUserDisplay(validator) }}</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+          </div>
+        </article>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" (click)="saveConfig()" [disabled]="isSaving">
+            <span class="spinner-border spinner-border-sm" *ngIf="isSaving"></span>
+            Enregistrer le paramétrage
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="panel panel--preview">
+      <div class="panel-head">
+        <div>
+          <span class="panel-kicker">Aperçu</span>
+          <h2>Circuit effectif</h2>
+        </div>
+      </div>
+
+      <div class="preview-card">
+        <strong>{{ form.controls.active.value ? 'Workflow activé' : 'Workflow désactivé' }}</strong>
+        <p>
+          Les dépenses supérieures à
+          <span>{{ (form.controls.validationThreshold.value || 0) | number : '1.0-0' }} FCFA</span>
+          suivront le circuit ci-dessous.
+        </p>
+      </div>
+
+      <div class="preview-steps">
+        <article class="preview-step" *ngFor="let level of workflowPreview">
+          <span class="preview-step__index">N{{ level.levelOrder }}</span>
+          <div>
+            <strong>{{ level.levelLabel }}</strong>
+            <p>Rôle : {{ level.validatorRoleName || 'Non défini' }}</p>
+            <small>Utilisateur : {{ level.validatorUserDisplayName || 'Aucun utilisateur dédié' }}</small>
+          </div>
+        </article>
+      </div>
+
+      <div class="preview-card">
+        <strong>Référentiels actifs</strong>
+        <p>{{ categories.length }} catégorie(s) et {{ paymentModes.length }} mode(s) de paiement configurés.</p>
+      </div>
+    </aside>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="loading-state">
+      <div class="spinner-border text-success"></div>
+      <p>Chargement du paramétrage des dépenses...</p>
+    </div>
+  </ng-template>
+</section>

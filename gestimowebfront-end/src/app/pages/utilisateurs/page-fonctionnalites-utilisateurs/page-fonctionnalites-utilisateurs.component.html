@@ -1,0 +1,61 @@
+<section class="user-features-page">
+  <header class="user-features-hero">
+    <div class="user-features-hero__copy">
+      <span class="user-features-eyebrow">Administration</span>
+      <h1>Fonctionnalités utilisateurs</h1>
+      <p>
+        Cette section centralise les usages liés aux comptes, aux rôles et aux
+        accès applicatifs pour l'agence active.
+      </p>
+    </div>
+
+    <div class="user-features-hero__panel">
+      <span class="hero-panel__label">Périmètre</span>
+      <strong>Gestion des utilisateurs</strong>
+      <small>Comptes, droits et organisation des accès</small>
+    </div>
+  </header>
+
+  <section class="user-features-grid">
+    @for (card of cards; track card.route) {
+      <article class="feature-card">
+        <div class="feature-card__top">
+          <span class="feature-card__badge">{{ card.badge }}</span>
+          <i [class]="card.icon" aria-hidden="true"></i>
+        </div>
+        <h2>{{ card.titre }}</h2>
+        <p>{{ card.description }}</p>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="navigate(card.route)"
+          [disabled]="card.route === 'fonctionnalites-utilisateurs'"
+        >
+          @if (card.route === 'fonctionnalites-utilisateurs') {
+            Page courante
+          } @else {
+            Ouvrir
+          }
+        </button>
+      </article>
+    }
+  </section>
+
+  <section class="user-features-note">
+    <div class="section-head">
+      <div>
+        <span class="section-head__kicker">Vue d'ensemble</span>
+        <h2>Ce que couvre ce menu</h2>
+      </div>
+    </div>
+
+    <div class="note-list">
+      @for (point of points; track point) {
+        <div class="note-item">
+          <i class="fas fa-check-circle" aria-hidden="true"></i>
+          <span>{{ point }}</span>
+        </div>
+      }
+    </div>
+  </section>
+</section>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title th:text="'Quittance groupee - ' + ${view.periodeCode}">Quittance groupee</title>
+  <style>
+    @page {
+      margin: 24px;
+      size: A4;
+    }
+
+    body {
+      font-family: "DejaVu Sans", sans-serif;
+      color: #0f172a;
+      font-size: 11px;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .header {
+      display: table;
+      width: 100%;
+      margin-bottom: 18px;
+      border-bottom: 2px solid #1d4ed8;
+      padding-bottom: 12px;
+    }
+
+    .header__logo,
+    .header__left,
+    .header__right {
+      display: table-cell;
+      vertical-align: top;
+    }
+
+    .header__logo {
+      width: 96px;
+      padding-right: 16px;
+    }
+
+    .header__logo-box {
+      width: 84px;
+      height: 84px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header__logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .header__right {
+      text-align: right;
+    }
+
+    .eyebrow {
+      color: #c2410c;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 6px 0 4px;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .muted {
+      color: #475569;
+    }
+
+    .meta-grid {
+      display: table;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .meta-card {
+      display: table-cell;
+      width: 33.33%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .meta-card + .meta-card {
+      margin-left: 12px;
+    }
+
+    .meta-card__label {
+      display: block;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .meta-card__value {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .section {
+      margin-bottom: 16px;
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead th {
+      background: #e2e8f0;
+      color: #0f172a;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: left;
+      padding: 8px 7px;
+      border-bottom: 1px solid #cbd5e1;
+    }
+
+    tbody td {
+      padding: 8px 7px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+      word-wrap: break-word;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    .text-end {
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: #64748b;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .footer__contact {
+      margin-top: 6px;
+      color: #334155;
+      text-align: center;
+    }
+
+    .footer__contact strong {
+      color: #0f172a;
+    }
+
+    .empty {
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header__logo" th:if="${view.agenceLogoDataUrl != null}">
+      <div class="header__logo-box">
+        <img th:src="${view.agenceLogoDataUrl}" alt="Logo agence" />
+      </div>
+    </div>
+    <div class="header__left">
+      <div class="eyebrow">Gestion locative</div>
+      <h1>Quittance groupee</h1>
+      <div class="muted" th:text="${view.agenceNom}">Agence</div>
+      <div class="muted" th:text="${view.agenceAdresse}">Adresse</div>
+      <div class="muted">
+        <span th:text="${view.agencePortable}">Portable</span>
+        <span th:if="${view.agenceTelephoneFixe != 'Non renseigne'}" th:text="' | Fixe : ' + ${view.agenceTelephoneFixe}"></span>
+        <span th:if="${view.agenceEmail != 'Non renseigne'}" th:text="' | ' + ${view.agenceEmail}"></span>
+      </div>
+    </div>
+    <div class="header__right">
+      <div class="eyebrow" th:text="${view.agenceSigle}">SIGLE</div>
+      <div><strong>Periode :</strong> <span th:text="${view.periodeLabel}">Periode</span></div>
+      <div><strong>Reference :</strong> <span th:text="${view.periodeCode}">2026-04</span></div>
+      <div><strong>Edite le :</strong> <span th:text="${view.generationDate}">22 mars 2026</span></div>
+      <div><strong>Operateur :</strong> <span th:text="${view.proprietaireNom}">GESTIMO</span></div>
+    </div>
+  </header>
+
+  <section class="meta-grid">
+    <div class="meta-card">
+      <span class="meta-card__label">Lignes</span>
+      <span class="meta-card__value" th:text="${view.nombreLignes}">0</span>
+    </div>
+    <div class="meta-card">
+      <span class="meta-card__label">Montant facture</span>
+      <span class="meta-card__value" th:text="${view.totalLoyer}">0 FCFA</span>
+    </div>
+    <div class="meta-card">
+      <span class="meta-card__label">Reste a payer</span>
+      <span class="meta-card__value" th:text="${view.totalRestant}">0 FCFA</span>
+    </div>
+  </section>
+
+  <section class="section" th:if="${#lists.isEmpty(view.lignes)}">
+    <div class="empty">
+      Aucun appel de loyer cloturable n'a ete trouve pour cette periode.
+    </div>
+  </section>
+
+  <section class="section" th:if="${!#lists.isEmpty(view.lignes)}">
+    <h2>Detail des appels</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Locataire</th>
+          <th>Bien</th>
+          <th>Bail</th>
+          <th>Periode couverte</th>
+          <th>Echeance</th>
+          <th>Statut</th>
+          <th class="text-end">Loyer</th>
+          <th class="text-end">Paye</th>
+          <th class="text-end">Reste</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="ligne : ${view.lignes}">
+          <td>
+            <strong th:text="${ligne.locataireNom}">Locataire</strong><br />
+            <span class="muted" th:text="${ligne.locataireCivilite}">Civilite</span><br />
+            <span class="muted" th:text="${ligne.typeBien}">Type</span>
+          </td>
+          <td>
+            <strong th:text="${ligne.bienCode}">Code</strong><br />
+            <span class="muted" th:text="${ligne.bienNom}">Bien</span>
+          </td>
+          <td th:text="${ligne.bailCode}">BAIL-1</td>
+          <td>
+            <span th:text="${ligne.dateDebut}">01 avril 2026</span><br />
+            <span class="muted" th:text="${ligne.dateFin}">30 avril 2026</span>
+          </td>
+          <td th:text="${ligne.datePaiementPrevue}">10 avril 2026</td>
+          <td><span class="badge" th:text="${ligne.statut}">Impaye</span></td>
+          <td class="text-end" th:text="${ligne.montantLoyer}">0 FCFA</td>
+          <td class="text-end" th:text="${ligne.montantPaye}">0 FCFA</td>
+          <td class="text-end" th:text="${ligne.montantRestant}">0 FCFA</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>Synthese</h2>
+    <table>
+      <tbody>
+        <tr>
+          <td><strong>Total facture</strong></td>
+          <td class="text-end" th:text="${view.totalLoyer}">0 FCFA</td>
+        </tr>
+        <tr>
+          <td><strong>Total encaisse</strong></td>
+          <td class="text-end" th:text="${view.totalEncaisse}">0 FCFA</td>
+        </tr>
+        <tr>
+          <td><strong>Total restant</strong></td>
+          <td class="text-end" th:text="${view.totalRestant}">0 FCFA</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="footer">
+    Document genere automatiquement par Gestimo pour la periode
+    <span th:text="${view.periodeLabel}">Periode</span>.
+    <div class="footer__contact">
+      <strong>BP :</strong> <span th:text="${view.agenceBoitePostale}">01 BP 0000</span>
+      <span> | </span>
+      <strong>NCC :</strong> <span th:text="${view.agenceNcc}">NCC</span>
+      <span> | </span>
+      <strong>Email :</strong> <span th:text="${view.agenceEmail}">contact@agence.com</span>
+      <span> | </span>
+      <strong>Portable :</strong> <span th:text="${view.agencePortable}">0700000000</span>
+      <span> | </span>
+      <strong>Fixe :</strong> <span th:text="${view.agenceTelephoneFixe}">2700000000</span>
+    </div>
+  </footer>
+</body>
+</html>

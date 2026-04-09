@@ -1,0 +1,353 @@
+.immeubles-page {
+  padding: 1.5rem;
+  --immeuble-border: #dbe5f2;
+  --immeuble-border-strong: #cbd5e1;
+  --immeuble-primary: #0f766e;
+  --immeuble-primary-soft: rgba(15, 118, 110, 0.14);
+  --immeuble-text-soft: #64748b;
+  --immeuble-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
+.immeubles-page__header,
+.card-heading,
+.immeuble-toolbar,
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.immeubles-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.immeubles-page__header h1,
+.card-heading h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.immeubles-page__header p,
+.immeuble-form-card__intro {
+  margin: 0.35rem 0 0;
+  color: var(--immeuble-text-soft);
+}
+
+.immeubles-page__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.page-alert,
+.form-alert {
+  border: 0;
+  border-radius: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.immeubles-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.immeuble-form-card,
+.immeuble-list-card,
+.etages-card {
+  border: 0;
+  border-radius: 1.1rem;
+  box-shadow: var(--immeuble-shadow);
+}
+
+.etages-card {
+  margin-top: 1.25rem;
+}
+
+.card-heading {
+  margin-bottom: 1rem;
+}
+
+.card-heading__eyebrow {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  color: var(--immeuble-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.btn-reset {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-group--full {
+  grid-column: 1 / -1;
+}
+
+.form-group label,
+.search-box label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form-control {
+  min-height: 3rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--immeuble-border-strong);
+  color: #0f172a;
+  box-shadow: none;
+}
+
+textarea.form-control {
+  min-height: 6.4rem;
+}
+
+.form-control:focus {
+  border-color: var(--immeuble-primary);
+  box-shadow: 0 0 0 0.22rem var(--immeuble-primary-soft);
+}
+
+.form-control:disabled {
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+  color: #94a3b8;
+}
+
+/* Select wrapper — chevron unique, sans conflit Bootstrap */
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.select-wrap select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.375rem 2.5rem 0.375rem 0.75rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--immeuble-border-strong);
+  background-color: #fff;
+  color: #0f172a;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.select-wrap select:focus {
+  border-color: var(--immeuble-primary);
+  box-shadow: 0 0 0 0.22rem var(--immeuble-primary-soft);
+}
+
+.select-wrap select:disabled {
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.select-wrap:has(select:disabled)::after {
+  color: #94a3b8;
+}
+
+.form-switches {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--immeuble-border);
+  background: #f8fafc;
+}
+
+.immeuble-preview {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1rem;
+  border: 1px solid var(--immeuble-border);
+  background:
+    radial-gradient(circle at top right, rgba(13, 148, 136, 0.16), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.immeuble-preview--empty {
+  background:
+    radial-gradient(circle at top right, rgba(148, 163, 184, 0.1), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.immeuble-preview__label {
+  color: var(--immeuble-primary);
+  font-size: 0.77rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.immeuble-preview strong {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.immeuble-preview small {
+  color: var(--immeuble-text-soft);
+}
+
+.form-actions {
+  margin-top: 1.25rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.immeuble-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: var(--immeuble-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.immeuble-toolbar {
+  margin-bottom: 1rem;
+}
+
+.search-box {
+  width: min(100%, 360px);
+}
+
+.state-card {
+  border: 1px dashed var(--immeuble-border-strong);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--immeuble-text-soft);
+}
+
+.immeuble-table,
+.etage-table {
+  margin-bottom: 0;
+}
+
+.immeuble-table thead th,
+.etage-table thead th {
+  border-top: 0;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.immeuble-table tbody td,
+.etage-table tbody td {
+  vertical-align: middle;
+}
+
+.immeuble-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.row-helper {
+  margin-top: 0.18rem;
+  color: var(--immeuble-text-soft);
+  font-size: 0.86rem;
+}
+
+.row-selected {
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.actions-column {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.actions-column .btn + .btn {
+  margin-left: 0.45rem;
+}
+
+@media (max-width: 1100px) {
+  .immeubles-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .immeubles-page {
+    padding: 1rem;
+  }
+
+  .immeubles-page__header,
+  .card-heading,
+  .immeuble-toolbar,
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .immeubles-page__actions,
+  .immeubles-page__actions .btn,
+  .form-actions .btn,
+  .search-box {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .immeuble-count {
+    align-self: flex-start;
+  }
+
+  .actions-column {
+    min-width: 170px;
+  }
+}

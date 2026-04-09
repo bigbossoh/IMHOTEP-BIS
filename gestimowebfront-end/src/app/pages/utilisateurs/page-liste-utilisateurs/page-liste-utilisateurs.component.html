@@ -1,0 +1,509 @@
+<div class="users-page container-fluid">
+  <div class="page-header">
+    <div>
+      <h1>Utilisateurs</h1>
+      <p>Gérer les locataires, propriétaires, gérants et superviseurs par agence.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="refreshUsers()">
+        Actualiser
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        [disabled]="filteredUsers().length === 0"
+        (click)="exportUsersToExcel()"
+      >
+        Exporter Excel
+      </button>
+
+      <!-- Import Excel -->
+      <label class="btn btn-outline-success mb-0" [class.disabled]="isImporting()">
+        <input
+          type="file"
+          accept=".xlsx,.xls"
+          class="d-none"
+          [disabled]="isImporting()"
+          (change)="onImportFileSelected($event)"
+        />
+        {{ isImporting() ? 'Import en cours...' : 'Importer Excel' }}
+      </label>
+
+      <button type="button" class="btn btn-primary" (click)="openCreateForm()">
+        Nouvel utilisateur
+      </button>
+    </div>
+  </div>
+
+  @if (importResult()) {
+    <div class="alert mt-3" [class.alert-success]="importResult()!.errors === 0" [class.alert-warning]="importResult()!.errors > 0">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <strong>Résultat de l'import :</strong>
+          {{ importResult()!.success }} importé(s) sur {{ importResult()!.total }} ligne(s).
+          @if (importResult()!.errors > 0) {
+            <span class="text-danger"> {{ importResult()!.errors }} erreur(s).</span>
+            <ul class="mt-1 mb-0">
+              @for (err of importResult()!.rowErrors; track err.row) {
+                <li><small>Ligne {{ err.row }} : {{ err.message }}</small></li>
+              }
+            </ul>
+          }
+        </div>
+        <button type="button" class="btn btn-sm btn-link p-0 ml-2" (click)="dismissImportResult()">Fermer</button>
+      </div>
+    </div>
+  }
+
+  <div class="role-overview">
+    <article class="role-card role-card--tenant">
+      <span>Locataires</span>
+      <strong>{{ roleCounts().LOCATAIRE }}</strong>
+    </article>
+    <article class="role-card role-card--owner">
+      <span>Propriétaires</span>
+      <strong>{{ roleCounts().PROPRIETAIRE }}</strong>
+    </article>
+    <article class="role-card role-card--manager">
+      <span>Gérants</span>
+      <strong>{{ roleCounts().GERANT }}</strong>
+    </article>
+    <article class="role-card role-card--supervisor">
+      <span>Superviseurs</span>
+      <strong>{{ roleCounts().SUPERVISEUR }}</strong>
+    </article>
+    <article class="role-card role-card--super-supervisor">
+      <span>Super-superviseurs</span>
+      <strong>{{ roleCounts().SUPER_SUPERVISEUR }}</strong>
+    </article>
+  </div>
+
+  @if (isFormVisible()) {
+    <div class="user-form-card card">
+      <div class="card-body">
+        <div class="form-header">
+          <div>
+            <h2>{{ formTitle }}</h2>
+            <p>Les champs marqués <span class="required-star">*</span> sont obligatoires.</p>
+          </div>
+          <button type="button" class="btn btn-link" (click)="closeForm()">Fermer</button>
+        </div>
+
+        @if (metadataErrorMessage()) {
+          <div class="alert alert-warning form-alert">{{ metadataErrorMessage() }}</div>
+        }
+
+        <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+
+          <!-- Ligne principale : Nom, Prénoms, Rôle, Agence -->
+          <div class="form-grid form-grid--4">
+            <div class="form-group">
+              <label for="nom">Nom <span class="required-star">*</span></label>
+              <input
+                id="nom"
+                type="text"
+                class="form-control"
+                formControlName="nom"
+                placeholder="Nom de famille"
+              />
+              @if (nomControl?.touched && nomControl?.invalid) {
+                <small class="text-danger">Le nom est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="prenom">Prénoms</label>
+              <input
+                id="prenom"
+                type="text"
+                class="form-control"
+                formControlName="prenom"
+                placeholder="Prénoms"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="roleUsed">Rôle <span class="required-star">*</span></label>
+              <div class="select-wrap">
+                <select id="roleUsed" formControlName="roleUsed">
+                  @for (role of roleOptions; track role.value) {
+                    <option [value]="role.value">{{ role.label }}</option>
+                  }
+                </select>
+              </div>
+              @if (roleControl?.touched && roleControl?.invalid) {
+                <small class="text-danger">Le rôle est obligatoire.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="idAgence">Agence <span class="required-star">*</span></label>
+              <div class="select-wrap">
+                <select
+                  id="idAgence"
+                  formControlName="idAgence"
+                  (change)="onAgenceSelectionChange($event)"
+                >
+                  <option value="">Sélectionner une agence</option>
+                  @for (agence of agencies(); track agence.idAgence ?? agence.id ?? $index) {
+                    <option [value]="agence.idAgence ?? agence.id">
+                      {{ getAgenceLabel(agence) }}
+                    </option>
+                  }
+                </select>
+              </div>
+              @if (agenceControl?.touched && agenceControl?.invalid) {
+                <small class="text-danger">L'agence est obligatoire.</small>
+              }
+            </div>
+          </div>
+
+          <!-- Connexion et civilité -->
+          <div class="form-grid form-grid--3">
+            <div class="form-group">
+              <label for="email">Email <span class="required-star">*</span></label>
+              <input
+                id="email"
+                type="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="adresse@email.com"
+              />
+              @if (emailControl?.touched && emailControl?.hasError('required')) {
+                <small class="text-danger">L'email est obligatoire.</small>
+              }
+              @if (emailControl?.touched && emailControl?.hasError('email')) {
+                <small class="text-danger">L'adresse email n'est pas valide.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="password">
+                {{ isEditionMode ? 'Nouveau mot de passe' : 'Mot de passe' }}
+                @if (!isEditionMode) { <span class="required-star">*</span> }
+              </label>
+              <input
+                id="password"
+                type="password"
+                class="form-control"
+                formControlName="password"
+                [placeholder]="isEditionMode ? 'Laisser vide pour conserver' : 'Mot de passe initial'"
+              />
+              @if (passwordControl?.touched && passwordControl?.hasError('required')) {
+                <small class="text-danger">Le mot de passe est obligatoire.</small>
+              }
+              @if (passwordControl?.touched && passwordControl?.hasError('minlength')) {
+                <small class="text-danger">Au moins 4 caractères.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="genre">Civilité</label>
+              <div class="select-wrap">
+                <select id="genre" formControlName="genre">
+                  <option value="">Non renseignée</option>
+                  @for (civilite of civiliteOptions; track civilite.value) {
+                    <option [value]="civilite.value">{{ civilite.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations personnelles -->
+          <div class="form-grid form-grid--3">
+            <div class="form-group">
+              <label for="nationalite">Nationalité</label>
+              <input
+                id="nationalite"
+                type="text"
+                class="form-control"
+                formControlName="nationalite"
+                placeholder="Nationalité"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="lieuNaissance">Lieu de naissance</label>
+              <input
+                id="lieuNaissance"
+                type="text"
+                class="form-control"
+                formControlName="lieuNaissance"
+                placeholder="Lieu de naissance"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="dateDeNaissance">Date de naissance</label>
+              <input
+                id="dateDeNaissance"
+                type="date"
+                class="form-control"
+                formControlName="dateDeNaissance"
+              />
+            </div>
+          </div>
+
+          <!-- Pièce d'identité -->
+          <div class="form-grid form-grid--4">
+            <div class="form-group">
+              <label for="typePieceIdentite">Type de pièce</label>
+              <input
+                id="typePieceIdentite"
+                type="text"
+                class="form-control"
+                formControlName="typePieceIdentite"
+                placeholder="CNI, passeport..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="numeroPieceIdentite">Numéro de pièce</label>
+              <input
+                id="numeroPieceIdentite"
+                type="text"
+                class="form-control"
+                formControlName="numeroPieceIdentite"
+                placeholder="Numéro de pièce"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="dateDebutPiece">Début validité</label>
+              <input
+                id="dateDebutPiece"
+                type="date"
+                class="form-control"
+                formControlName="dateDebutPiece"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="dateFinPiece">Fin validité</label>
+              <input
+                id="dateFinPiece"
+                type="date"
+                class="form-control"
+                formControlName="dateFinPiece"
+              />
+            </div>
+          </div>
+
+          <div class="form-switches">
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" formControlName="active" />
+              <span>Compte actif</span>
+            </label>
+            <label class="form-check">
+              <input type="checkbox" class="form-check-input" formControlName="nonLocked" />
+              <span>Compte non verrouillé</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="userForm.invalid || isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Enregistrement...' : (isEditionMode ? 'Modifier' : 'Créer') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <div class="user-list-card card">
+    <div class="card-body">
+      <div class="list-header">
+        <div>
+          <h2>Liste des utilisateurs</h2>
+          <p>{{ filteredUsers().length }} utilisateur(s) affiché(s)</p>
+        </div>
+        <div class="filters">
+          <div class="search-box">
+            <label for="userSearch">Recherche</label>
+            <input
+              id="userSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm()"
+              (input)="onSearch($event)"
+              placeholder="Nom, prénom, email..."
+            />
+          </div>
+
+          <div class="search-box search-box--compact">
+            <label for="roleFilter">Rôle</label>
+            <div class="select-wrap">
+              <select
+                id="roleFilter"
+                [value]="roleFilter()"
+                (change)="onRoleFilterChange($event)"
+              >
+                <option value="ALL">Tous les rôles</option>
+                <option value="LOCATAIRE">Locataires</option>
+                <option value="PROPRIETAIRE">Propriétaires</option>
+                <option value="GERANT">Gérants</option>
+                <option value="SUPERVISEUR">Superviseurs</option>
+                <option value="SUPER_SUPERVISEUR">Super-superviseurs</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="search-box search-box--compact">
+            <label for="pageSize">Lignes</label>
+            <div class="select-wrap">
+              <select
+                id="pageSize"
+                [value]="pageSize()"
+                (change)="onPageSizeChange($event)"
+              >
+                @for (size of pageSizeOptions; track size) {
+                  <option [value]="size">{{ size }} / page</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-state">Chargement des utilisateurs...</div>
+      }
+
+      @if (!isLoading() && loadErrorMessage()) {
+        <div class="alert alert-danger load-error">{{ loadErrorMessage() }}</div>
+      }
+
+      @if (!isLoading() && !loadErrorMessage() && filteredUsers().length === 0) {
+        <div class="empty-state">
+          <h3>Aucun utilisateur à afficher</h3>
+          <p>Aucun utilisateur trouvé pour les critères sélectionnés.</p>
+        </div>
+      }
+
+      @if (!isLoading() && filteredUsers().length > 0) {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Nom & Prénoms</th>
+                <th>Rôle</th>
+                <th>Agence</th>
+                <th>Email</th>
+                <th>État</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of paginatedUsers(); track user.id ?? user.utilisateurIdApp ?? $index) {
+                <tr>
+                  <td>
+                    <strong>{{ getDisplayName(user) }}</strong>
+                    @if (user.hasActiveBail) {
+                      <div class="row-helper">Bail en cours</div>
+                    }
+                  </td>
+                  <td>
+                    <span [class]="getRoleBadgeClass(user.roleUsed)">
+                      {{ getRoleLabel(user.roleUsed) }}
+                    </span>
+                  </td>
+                  <td>{{ getAgenceNameByIdAgence(user.idAgence) }}</td>
+                  <td>{{ user.email || '-' }}</td>
+                  <td>
+                    <span
+                      class="badge badge-status"
+                      [class.badge-status--active]="user.active"
+                      [class.badge-status--inactive]="!user.active"
+                    >
+                      {{ user.active ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </td>
+                  <td class="actions-column">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="openEditForm(user)"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      [disabled]="!user.active || deactivatingUserId() === user.id"
+                      (click)="deactivateUser(user)"
+                    >
+                      {{
+                        deactivatingUserId() === user.id
+                          ? 'Désactivation...'
+                          : 'Désactiver'
+                      }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger-soft"
+                      [disabled]="!canDeleteUser(user) || deletingUserId() === user.id"
+                      [title]="getDeleteButtonTitle(user)"
+                      (click)="deleteUser(user)"
+                    >
+                      {{
+                        deletingUserId() === user.id
+                          ? 'Suppression...'
+                          : 'Supprimer'
+                      }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-toolbar">
+          <p class="pagination-summary">
+            Affichage {{ paginationStart() }} à {{ paginationEnd() }} sur {{ filteredUsers().length }} utilisateur(s)
+          </p>
+
+          <div class="pagination-controls">
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPageNumber() <= 1"
+              (click)="previousPage()"
+            >
+              Précédent
+            </button>
+
+            @for (page of visiblePages(); track page) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.is-active]="page === currentPageNumber()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+
+            <button
+              type="button"
+              class="page-btn"
+              [disabled]="currentPageNumber() >= totalPages()"
+              (click)="nextPage()"
+            >
+              Suivant
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

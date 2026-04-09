@@ -1,0 +1,67 @@
+<div class="col">
+  <div class="row m-3">
+    <div class="col-md-8 p-0">
+      <h1>Liste de loyers par bail</h1>
+    </div>
+    <div class="col-md-4 text-right">
+      <app-boutton-action-baux (bauxEmmitter)="onActionEmmit($event)"></app-boutton-action-baux>
+    </div>
+  </div>
+  @if (bauxState$ | async; as state) {
+    @switch (state.dataState) {
+      @case (BauxStateEnum.LOADED) {
+        @for (item of state.baux; track item) {
+          <div class="col m-3">
+            <div class="accordion" id="accordionExample{{ item.id }}">
+              <div class="card mb-2">
+                <div class="card-header" id="headingOne">
+                  <h2 class="mb-0">
+                    <button (click)="afficheLesAppels(item.id)" class="btn btn-link btn-block text-left" type="button"
+                      data-toggle="collapse" [attr.data-target]="'#collapseOne' + item.id" aria-expanded="true"
+                      aria-controls="collapseOne">
+                      <app-app-detail-bail [bail]="item"> </app-app-detail-bail>
+                    </button>
+                  </h2>
+                </div>
+                <div id="collapseOne{{ item.id }}" class="collapse" aria-labelledby="headingOne"
+                  [attr.data-parent]="'#accordionExample' + item.id" style="max-height: 300px; overflow-y: scroll">
+                  <div class="card-body">
+                    @if (appelloyerState$ | async; as stateAppel) {
+                      @switch (stateAppel.dataState) {
+                        @case (AppelLoyerStateEnum.LOADED) {
+                          <app-app-detail-bail-loyer [appelLoyerDto]="stateAppel.appelloyers">
+                          </app-app-detail-bail-loyer>
+                        }
+                      }
+                    }
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-12 text-center">
+                      <app-pagination></app-pagination>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="row">
+                <div class="col-md-6 text-left">
+                  <h5>Nombre de loyers(s) ici</h5>
+                </div>
+                <div class="col-md-6 text-right">
+                  <h5></h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    }
+  }
+
+  <div class="row mb-3">
+    <div class="col-md-12 text-center">
+
+    </div>
+  </div>
+</div>
