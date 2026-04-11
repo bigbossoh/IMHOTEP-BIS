@@ -59,6 +59,3 @@ Thumbs.db
 .angular/cache/13.3.7/babel-webpack/b529f40a126abb923d3f3be6503b69dd.json
 
 src/tools/swagger/dist/GestimoSpringBackend-0.0.1-SNAPSHOT.jar
-environment.prod.ts
-environment.ts
-api-configuration.ts

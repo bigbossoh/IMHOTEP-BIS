@@ -175,6 +175,12 @@ npm start
 
 Application accessible sur `http://localhost:4200`.
 
+## Déploiement production (VPS)
+
+Un `docker-compose.yml` est disponible à la racine du dépôt pour déployer MySQL + backend + frontend.
+
+Voir : `docs/deploy-vps.md`.
+
 ## Documentation détaillée
 
 - documentation backend complète : `docs/backend-reference.md`

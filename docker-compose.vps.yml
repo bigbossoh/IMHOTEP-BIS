@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: gestimoweb
+      MYSQL_DATABASE: dbgestimoweb
+      MYSQL_USER: gestimo
+      MYSQL_PASSWORD: gestimoweb
+      TZ: Africa/Abidjan
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -pgestimoweb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: astairenazaire/imhotep-bis-backend:latest
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+      MYSQL_USER: gestimo
+      MYSQL_PASSWORD: gestimoweb
+      JWT_SECRET: change_me_in_prod
+      PASSWORD_RESET_URL: http://51.75.142.41/reset-password
+      DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
+      DEFAULT_AGENCY_ID: "1"
+      TZ: Africa/Abidjan
+    volumes:
+      - backend_data:/home/spring/gestimoweb
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8287"
+
+  frontend:
+    image: astairenazaire/imhotep-bis-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  backend_data:
+

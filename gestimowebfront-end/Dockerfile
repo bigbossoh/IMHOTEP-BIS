@@ -1,15 +1,13 @@
-FROM node:16.13.0-alpine as builder
+FROM node:22-alpine AS builder
 
-COPY . /app
 WORKDIR /app
-
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
 RUN npm run build
 
-
-FROM nginx:1.17.10-alpine
+FROM nginx:1.27-alpine
 EXPOSE 80
-# COPY src/nginx/etc/conf.d/default.conf /etc/nginx/conf/default.conf
-# COPY /app/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist/GestimoWebFront usr/share/nginx/html
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist/GestimoWebFront/browser/ /usr/share/nginx/html/
 

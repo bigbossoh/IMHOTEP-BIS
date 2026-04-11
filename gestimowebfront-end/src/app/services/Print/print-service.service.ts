@@ -1,4 +1,3 @@
-import { AgenceRequestDto } from 'src/gs-api/src/models';
 import { ApiConfiguration } from './../../../gs-api/src/api-configuration';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
@@ -34,24 +33,7 @@ export class PrintServiceService {
   }
 
   private getPrintApiRootCandidates(): string[] {
-    const configuredRootUrl = this.apiConfig.rootUrl;
-    const protocol =
-      typeof window !== 'undefined' && window.location.protocol === 'https:'
-        ? 'https:'
-        : 'http:';
-    const hostname =
-      typeof window !== 'undefined' && window.location.hostname
-        ? window.location.hostname
-        : 'localhost';
-
-    return Array.from(
-      new Set([
-        configuredRootUrl,
-        `${protocol}//${hostname}:8287/`,
-        'http://127.0.0.1:8287/',
-        'http://localhost:8287/',
-      ])
-    );
+    return [this.apiConfig.rootUrl];
   }
 
   private shouldRetryWithAnotherRoot(error: unknown): boolean {
@@ -140,7 +122,8 @@ export class PrintServiceService {
       idAgence
     );
   }
-  savelogo(body: any) {
+
+  savelogo(body: any): Observable<unknown> {
     // console.log('');
     // ABJECT WHICH PASS BODY PARAMETERS
     var myFormData = new FormData();
@@ -148,19 +131,15 @@ export class PrintServiceService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'multipart/form-data');
     headers.append('Accept', 'application/json');
-    var leBody = body.logoAgence;
     myFormData.append('imageFile', body.logoAgence, body.id);
     myFormData.append('idAgence', body.idAgence);
-    return this.http
-      .post(
-        this.apiConfig.rootUrl +
-          'http://localhost:5000/gestimoweb/api/v1/agences/saveagencelogo',
-        myFormData
-      )
-      .subscribe((respons) => {
-        console.log('la reponse est la suivante ::: ');
-        console.log(respons);
-      });
+
+    const url = this.buildApiUrl(
+      this.apiConfig.rootUrl ?? '/',
+      'gestimoweb/api/v1/agences/saveagencelogo'
+    );
+
+    return this.http.post(url, myFormData, { headers });
   }
   saveAgenceLogo(idAgence: any, file: any) {}
 }

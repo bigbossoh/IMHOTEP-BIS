@@ -13,10 +13,10 @@ spring:
     allow-circular-references: true
 
   mail:
-    host: ${MAIL_HOST:smtp-fr.securemail.pro}
+    host: ${MAIL_HOST:}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:info@molibetycenter.com}
-    password: ${MAIL_PASSWORD:2024@Seve2024}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -58,10 +58,23 @@ jwt:
 app:
   password-reset-url: ${PASSWORD_RESET_URL:http://localhost:4200/reset-password}
   default-user-email: ${DEFAULT_USER_EMAIL:bossohpaulin@gmail.com}
+  default-agency-id: ${DEFAULT_AGENCY_ID:}
   user-security:
     inactivity-disable-days: ${INACTIVE_USER_DISABLE_DAYS:30}
     inactivity-check-cron: ${INACTIVE_USER_CHECK_CRON:0 0 2 * * *}
     protected-roles: ${INACTIVE_USER_PROTECTED_ROLES:SUPER_SUPERVISEUR}
+  sms:
+    orange:
+      enabled: ${SMS_ORANGE_ENABLED:false}
+      client-id: ${SMS_ORANGE_CLIENT_ID:}
+      client-secret: ${SMS_ORANGE_CLIENT_SECRET:}
+      token-url: ${SMS_ORANGE_TOKEN_URL:https://api.orange.com/oauth/v3/token}
+      send-url-template: ${SMS_ORANGE_SEND_URL_TEMPLATE:https://api.orange.com/smsmessaging/v1/outbound/tel:%s/requests}
+      default-sender: ${SMS_ORANGE_DEFAULT_SENDER:}
+      country-prefix: ${SMS_ORANGE_COUNTRY_PREFIX:+225}
+      connect-timeout-ms: ${SMS_ORANGE_CONNECT_TIMEOUT_MS:10000}
+      read-timeout-ms: ${SMS_ORANGE_READ_TIMEOUT_MS:10000}
+      persist-messages: ${SMS_ORANGE_PERSIST_MESSAGES:true}
 
 management:
   endpoints:

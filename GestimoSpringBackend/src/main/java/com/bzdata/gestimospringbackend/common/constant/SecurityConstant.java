@@ -21,6 +21,7 @@ public class SecurityConstant {
             "/swagger-ui/**", "/v3/api-docs/**", "/**/print/**", "/**/magasin/**","/**/etablissement/**",
              "/**/bienImmobilier/**","/**/suiviedepense/**","/**/droitAccess/**","/**/appartement/**","/**/image/**","/**/cloturecaisse/**","/**/reservation/**",
              "/**/public/**", "/**/utilisateur/password-reset/**"
+             
     };
     // public static final String[] PUBLIC_URLS = { "**" };
     // "/**/utilisateurs/singup",

@@ -27,11 +27,12 @@ public class MessageEnvoyerServiceImp implements MessageEnvoyerService {
     @Override
     public boolean saveMesageEnvoyer(MessageEnvoyer messageEnvoyer) {
 
-        if (messageEnvoyer.getId()==0) {
-            messageEnvoyerRepository.save(messageEnvoyer);
-            return true;
+        if (messageEnvoyer == null) {
+            return false;
         }
-        return false;
+
+        messageEnvoyerRepository.save(messageEnvoyer);
+        return true;
     }
     @Override
     public List<MessageEnvoyerDto> listMessageEnvoyerAUnLocataire(String login) {

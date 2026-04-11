@@ -90,6 +90,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": ["unwet-joel-concentratedly.ngrok-free.dev"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "GestimoWebFront:build:production"

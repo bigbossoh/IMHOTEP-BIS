@@ -7,7 +7,9 @@ import com.bzdata.gestimospringbackend.common.security.filter.JwtAuthenticationE
 import com.bzdata.gestimospringbackend.common.security.filter.JwtAuthorizationFilter;
 import com.bzdata.gestimospringbackend.common.security.service.ApplicationUserDetailsService;
 import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -47,6 +53,9 @@ public class SecurityConfiguration {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .logout(AbstractHttpConfigurer::disable)
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -56,7 +65,13 @@ public class SecurityConfiguration {
                     .authenticationEntryPoint(jwtAuthenticationEntryPoint)
             )
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers(publicRequestMatchers).permitAll().anyRequest().authenticated()
+                auth
+                    .requestMatchers(CorsUtils::isPreFlightRequest)
+                    .permitAll()
+                    .requestMatchers(publicRequestMatchers)
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(
@@ -65,6 +80,39 @@ public class SecurityConfiguration {
             );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+        @Value(
+            "${app.cors.allowed-origin-patterns:http://localhost:4200,http://127.0.0.1:4200,http://51.75.142.41}"
+        ) String allowedOriginPatterns
+    ) {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(false);
+        corsConfiguration.setAllowedOriginPatterns(splitCsv(allowedOriginPatterns));
+        corsConfiguration.setAllowedMethods(
+            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
+        corsConfiguration.setAllowedHeaders(
+            List.of(
+                "Origin",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Jwt-Token",
+                "Authorization",
+                "Content-Disposition"
+            )
+        );
+        corsConfiguration.setExposedHeaders(
+            List.of("Jwt-Token", "Authorization", "Content-Disposition")
+        );
+        corsConfiguration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+        return source;
     }
 
     @Bean
@@ -80,5 +128,17 @@ public class SecurityConfiguration {
         AuthenticationConfiguration authConfiguration
     ) throws Exception {
         return authConfiguration.getAuthenticationManager();
+    }
+
+    private List<String> splitCsv(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays
+            .stream(value.split(","))
+            .map(String::trim)
+            .filter(token -> !token.isEmpty())
+            .toList();
     }
 }
