@@ -3,6 +3,7 @@ import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { UserService } from '../user/user.service';
+import { ApiConfiguration } from '../../../gs-api/src/api-configuration';
 
 export interface AuditEntry {
   id: string;
@@ -23,8 +24,6 @@ export type AuditEntryCreate = Omit<
   'id' | 'timestamp' | 'userId' | 'userName'
 >;
 
-const API_ROOT = 'http://localhost:8287/gestimoweb/api/v1/audit';
-
 @Injectable({ providedIn: 'root' })
 export class AuditService {
 
@@ -32,11 +31,21 @@ export class AuditService {
   // (évite la boucle infinie : AuditInterceptor → AuditService → AuditInterceptor)
   private http: HttpClient;
 
-  constructor(handler: HttpBackend, private userService: UserService) {
+  constructor(
+    handler: HttpBackend,
+    private userService: UserService,
+    private apiConfig: ApiConfiguration
+  ) {
     this.http = new HttpClient(handler);
   }
 
   // ─── Ajout d'une entrée ───────────────────────────────────────────────────
+
+  private getApiRoot(): string {
+    const rootUrl = this.apiConfig.rootUrl ?? '';
+    const normalizedRootUrl = rootUrl.endsWith('/') ? rootUrl : `${rootUrl}/`;
+    return `${normalizedRootUrl}gestimoweb/api/v1/audit`;
+  }
 
   addEntry(entry: AuditEntryCreate): void {
     const user = this.userService.getUserFromLocalCache();
@@ -50,7 +59,7 @@ export class AuditService {
         : 'Inconnu',
     };
     this.http
-      .post(API_ROOT, payload, { headers: this.getHeaders() })
+      .post(this.getApiRoot(), payload, { headers: this.getHeaders() })
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
@@ -61,7 +70,9 @@ export class AuditService {
     const user = this.userService.getUserFromLocalCache();
     const idAgence = user?.idAgence ?? 0;
     return this.http
-      .get<AuditEntry[]>(`${API_ROOT}/agence/${idAgence}`, { headers: this.getHeaders() })
+      .get<AuditEntry[]>(`${this.getApiRoot()}/agence/${idAgence}`, {
+        headers: this.getHeaders(),
+      })
       .pipe(catchError(() => of([])));
   }
 
@@ -71,7 +82,9 @@ export class AuditService {
     const user = this.userService.getUserFromLocalCache();
     const idAgence = user?.idAgence ?? 0;
     return this.http
-      .delete<void>(`${API_ROOT}/agence/${idAgence}`, { headers: this.getHeaders() })
+      .delete<void>(`${this.getApiRoot()}/agence/${idAgence}`, {
+        headers: this.getHeaders(),
+      })
       .pipe(catchError(() => of(undefined)));
   }
 

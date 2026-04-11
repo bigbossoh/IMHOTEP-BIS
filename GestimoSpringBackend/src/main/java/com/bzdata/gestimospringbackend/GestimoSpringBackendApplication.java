@@ -2,7 +2,6 @@ package com.bzdata.gestimospringbackend;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -20,9 +19,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import com.bzdata.gestimospringbackend.Models.Commune;
 import com.bzdata.gestimospringbackend.Models.Pays;
@@ -90,6 +86,9 @@ public class GestimoSpringBackendApplication {
   @Value("${app.default-user-email:bossohpaulin@gmail.com}")
   private String defaultUserEmail;
 
+  @Value("${app.default-agency-id:}")
+  private String defaultAgencyIdOverride;
+
   public static void main(String[] args) {
     SpringApplication.run(GestimoSpringBackendApplication.class, args);
     new File(FOLDER_PATH).mkdirs();
@@ -98,56 +97,6 @@ public class GestimoSpringBackendApplication {
   @Bean
   PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
-
-  @Bean
-  public CorsFilter corsFilter() {
-    UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.setAllowCredentials(true);
-    corsConfiguration.setAllowedOriginPatterns(
-      Arrays.asList(
-        "*",
-        "http://angular-front-end-gestimoweb.s3-website-us-east-1.amazonaws.com:4200",
-        "http://localhost:4200"
-      )
-    );
-    corsConfiguration.setAllowedHeaders(
-      Arrays.asList(
-        "Origin",
-        "Access-Control-Allow-Origin",
-        "Content-Type",
-        "Content-Disposition",
-        "Accept",
-        "Jwt-Token",
-        "Authorization",
-        "Origin, Accept",
-        "X-Requested-With",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers"
-      )
-    );
-    corsConfiguration.setExposedHeaders(
-      Arrays.asList(
-        "Origin",
-        "Content-Type",
-        "Accept",
-        "Jwt-Token",
-        "Content-Disposition",
-        "Authorization",
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Credentials"
-      )
-    );
-    corsConfiguration.setAllowedMethods(
-      Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
-    );
-    urlBasedCorsConfigurationSource.registerCorsConfiguration(
-      "/**",
-      corsConfiguration
-    );
-    return new CorsFilter(urlBasedCorsConfigurationSource);
   }
 
   @Bean
@@ -569,22 +518,43 @@ public class GestimoSpringBackendApplication {
   private Long resolveDefaultAgencyId(
     AgenceImmobiliereRepository agenceImmobiliereRepository
   ) {
-    return agenceImmobiliereRepository
-      .findAll()
+    if (StringUtils.isNotBlank(defaultAgencyIdOverride)) {
+      try {
+        Long override = Long.valueOf(defaultAgencyIdOverride.trim());
+        if (agenceImmobiliereRepository.existsById(override)) {
+          return override;
+        }
+        log.warn(
+          "app.default-agency-id={} ignore (agence inexistante)",
+          defaultAgencyIdOverride
+        );
+      } catch (NumberFormatException e) {
+        log.warn(
+          "app.default-agency-id={} ignore (valeur invalide)",
+          defaultAgencyIdOverride
+        );
+      }
+    }
+
+    List<AgenceImmobiliere> agencies = agenceImmobiliereRepository.findAll();
+
+    Optional<Long> byDefaultName = agencies
       .stream()
       .filter(agence ->
         DEFAULT_AGENCY_NAME.equalsIgnoreCase(agence.getNomAgence()) ||
         DEFAULT_AGENCY_SIGLE.equalsIgnoreCase(agence.getSigleAgence())
       )
       .findFirst()
+      .map(agence -> agence.getIdAgence() != null ? agence.getIdAgence() : agence.getId());
+    if (byDefaultName.isPresent()) {
+      return byDefaultName.get();
+    }
+
+    return agencies
+      .stream()
       .map(agence -> agence.getIdAgence() != null ? agence.getIdAgence() : agence.getId())
-      .orElseGet(() ->
-        agenceImmobiliereRepository
-          .findAll()
-          .stream()
-          .findFirst()
-          .map(agence -> agence.getIdAgence() != null ? agence.getIdAgence() : agence.getId())
-          .orElse(1L)
-      );
+      .filter(id -> id != null)
+      .min(Long::compareTo)
+      .orElse(1L);
   }
 }

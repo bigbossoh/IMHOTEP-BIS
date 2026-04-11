@@ -1,6 +1,7 @@
 package com.bzdata.gestimospringbackend.Services.Impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.bzdata.gestimospringbackend.DTOs.OperationDto;
@@ -37,7 +38,7 @@ final BailMapperImpl bailMapperImpl;
 
         return bailLocationRepository.findAll().stream()
                 .map(bailMapperImpl::fromOperation)
-                .filter(agence->agence.getIdAgence()==idAgence)
+                .filter(operation -> Objects.equals(operation.getIdAgence(), idAgence))
                 .collect(Collectors.toList());
 
     }

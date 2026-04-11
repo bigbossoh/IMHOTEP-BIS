@@ -891,8 +891,8 @@ export class AppelsLoyersComponent implements OnInit {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 0) {
         return (
-          "Le navigateur n'arrive pas a joindre l'API locale de generation PDF sur http://localhost:8287. " +
-          'Verifiez que le backend est demarre et que le navigateur n est pas en mode hors connexion.'
+          "Le navigateur n'arrive pas a joindre l'API de generation PDF. " +
+          "Verifiez que le backend est demarre et que le navigateur n'est pas en mode hors connexion."
         );
       }
 

@@ -1,20 +1,20 @@
-FROM openjdk:8-jdk-alpine
-# ADD target/Gestimo*.jar app.jar
-RUN mkdir -p /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend
-RUN mkdir -p /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend/src/main/resources/etats/templates/print
-WORKDIR /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend
-COPY . /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend/
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
-# RUN addgroup seve; adduser --ingroup seve --disabled-password seve
-# RUN apk --update add fontconfig ttf-dejavu
-# RUN mvn clean install
-RUN apk add --no-cache msttcorefonts-installer fontconfig
-RUN update-ms-fonts
+WORKDIR /workspace
+COPY pom.xml .
+COPY src ./src
+RUN mvn -DskipTests package
 
-# RUN mvn clean install
-# VOLUME /usr/GestimoSpringBackend/
-VOLUME /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend/
+FROM eclipse-temurin:17-jre-jammy
 
-# WORKDIR /usr/GestimoSpringBackend
-WORKDIR /home/zrango-gonquet-astaire-nazaire/spring-project/GestimoSpringBackend
-ENTRYPOINT ["java","-jar","target/GestimoSpringBackend-0.0.1-SNAPSHOT.jar"]
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends fontconfig fonts-dejavu-core \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -ms /bin/bash spring
+WORKDIR /app
+COPY --from=build /workspace/target/*.jar /app/app.jar
+
+USER spring
+EXPOSE 8287
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
