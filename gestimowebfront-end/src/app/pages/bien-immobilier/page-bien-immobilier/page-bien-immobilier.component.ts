@@ -1122,12 +1122,12 @@ export class PageBienImmobilierComponent implements OnInit {
 
     if (item.type === 'villa') {
       return this.http.delete<boolean>(
-        `${this.apiService.rootUrl}gestimoweb/api/v1/villa/delete/${item.id}`
+        `${this.apiService.rootUrl}api/v1/villa/delete/${item.id}`
       );
     }
 
     return this.http.delete<boolean>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/magasin/delete/${item.id}`
+      `${this.apiService.rootUrl}api/v1/magasin/delete/${item.id}`
     );
   }
 

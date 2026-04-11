@@ -46,67 +46,67 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         RequestMatcher[] publicRequestMatchers = Arrays
-            .stream(PUBLIC_URLS)
-            .map(AntPathRequestMatcher::new)
-            .toArray(RequestMatcher[]::new);
+                .stream(PUBLIC_URLS)
+                .map(AntPathRequestMatcher::new)
+                .toArray(RequestMatcher[]::new);
 
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .logout(AbstractHttpConfigurer::disable)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .exceptionHandling(exceptionHandling ->
-                exceptionHandling
-                    .accessDeniedHandler(jwtAccessDeniedHandler)
-                    .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-            )
-            .authorizeHttpRequests(auth ->
-                auth
-                    .requestMatchers(CorsUtils::isPreFlightRequest)
-                    .permitAll()
-                    .requestMatchers(publicRequestMatchers)
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated()
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(
-                jwtAuthorizationFilter,
-                UsernamePasswordAuthenticationFilter.class
-            );
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(session
+                        -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(exceptionHandling
+                        -> exceptionHandling
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
+                .authorizeHttpRequests(auth
+                        -> auth
+                        .requestMatchers(CorsUtils::isPreFlightRequest)
+                        .permitAll()
+                        .requestMatchers(publicRequestMatchers)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(
+                        jwtAuthorizationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-        @Value(
-            "${app.cors.allowed-origin-patterns:http://localhost:4200,http://127.0.0.1:4200,http://51.75.142.41}"
-        ) String allowedOriginPatterns
+            @Value(
+                    "${app.cors.allowed-origin-patterns:http://localhost:4200,http://127.0.0.1:4200,http://51.75.142.41,http://gestimoweb.com,http://gestimoweb.com:80,http://:8080,http://gestimoweb.com:8080,http://gestimoweb.com:8287,https://localhost:4200,https://127.0.0.1:4200,https://51.75.142.41,https://gestimoweb.com,https://gestimoweb.com:80,https://:8080,https://gestimoweb.com:8080,https://gestimoweb.com:8287,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287,http://www.gestimoweb.com,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287 }"
+            ) String allowedOriginPatterns
     ) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(false);
         corsConfiguration.setAllowedOriginPatterns(splitCsv(allowedOriginPatterns));
         corsConfiguration.setAllowedMethods(
-            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );
         corsConfiguration.setAllowedHeaders(
-            List.of(
-                "Origin",
-                "Content-Type",
-                "Accept",
-                "X-Requested-With",
-                "Jwt-Token",
-                "Authorization",
-                "Content-Disposition"
-            )
+                List.of(
+                        "Origin",
+                        "Content-Type",
+                        "Accept",
+                        "X-Requested-With",
+                        "Jwt-Token",
+                        "Authorization",
+                        "Content-Disposition"
+                )
         );
         corsConfiguration.setExposedHeaders(
-            List.of("Jwt-Token", "Authorization", "Content-Disposition")
+                List.of("Jwt-Token", "Authorization", "Content-Disposition")
         );
         corsConfiguration.setMaxAge(3600L);
 
@@ -125,7 +125,7 @@ public class SecurityConfiguration {
 
     @Bean
     public AuthenticationManager authenticationManager(
-        AuthenticationConfiguration authConfiguration
+            AuthenticationConfiguration authConfiguration
     ) throws Exception {
         return authConfiguration.getAuthenticationManager();
     }
@@ -136,9 +136,9 @@ public class SecurityConfiguration {
         }
 
         return Arrays
-            .stream(value.split(","))
-            .map(String::trim)
-            .filter(token -> !token.isEmpty())
-            .toList();
+                .stream(value.split(","))
+                .map(String::trim)
+                .filter(token -> !token.isEmpty())
+                .toList();
     }
 }

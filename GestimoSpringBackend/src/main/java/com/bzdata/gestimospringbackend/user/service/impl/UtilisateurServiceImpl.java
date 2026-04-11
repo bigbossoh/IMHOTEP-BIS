@@ -51,6 +51,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.security.SecureRandom;
 import java.util.UUID;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UtilisateurServiceImpl implements UtilisateurService {
 
-  private static final Duration PASSWORD_RESET_TOKEN_TTL = Duration.ofMinutes(30);
+  private static final Duration PASSWORD_RESET_TOKEN_TTL = Duration.ofMinutes(15);
   private static final String DEFAULT_USER_AGENCY_NAME = "RESIDENCE SEVE";
   private static final String DEFAULT_USER_AGENCY_SIGLE = "SEVE";
   private static final String SECONDARY_USER_AGENCY_NAME = "MOLIBETY";
@@ -651,28 +652,23 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     invaliderTokensActifs(utilisateur);
 
+    String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+
     PasswordResetToken passwordResetToken = new PasswordResetToken();
-    passwordResetToken.setToken(UUID.randomUUID().toString());
+    passwordResetToken.setToken(otp);
     passwordResetToken.setExpiryDate(Instant.now().plus(PASSWORD_RESET_TOKEN_TTL));
     passwordResetToken.setUsed(false);
     passwordResetToken.setUtilisateur(utilisateur);
     passwordResetTokenRepository.save(passwordResetToken);
 
-    String resetLink = buildPasswordResetLink(passwordResetToken.getToken());
-    String message =
-      "Bonjour " +
-      buildDisplayName(utilisateur) +
-      ",<br/><br/>Utilisez le lien ci-dessous pour reinitialiser votre mot de passe :<br/>" +
-      "<a href=\"" +
-      resetLink +
-      "\">Changer mon mot de passe</a><br/><br/>" +
-      "Ce lien expire dans 30 minutes.<br/><br/>Si vous n'etes pas a l'origine de cette demande, ignorez ce message.";
+    String displayName = buildDisplayName(utilisateur).toUpperCase();
+    String emailBody = buildOtpEmailBody(displayName, otp);
 
     mailService.sendMail(
       new NotificationEmail(
-        "Reinitialisation du mot de passe",
+        "\uD83D\uDD10 Réinitialisation de mot de passe",
         recipientEmail,
-        mailContentBuilder.build(message)
+        mailContentBuilder.build(emailBody)
       )
     );
   }
@@ -688,7 +684,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
       !StringUtils.hasText(requestDto.getConfirmPassword())
     ) {
       throw new InvalidOperationException(
-        "Le token, le nouveau mot de passe et la confirmation sont obligatoires",
+        "Le code OTP, le nouveau mot de passe et la confirmation sont obligatoires",
         ErrorCodes.PASSWORD_RESET_REQUEST_NOT_VALID
       );
     }
@@ -700,25 +696,33 @@ public class UtilisateurServiceImpl implements UtilisateurService {
       );
     }
 
+    String otp = requestDto.getToken().trim();
+    if (!otp.matches("\\d{6}")) {
+      throw new InvalidOperationException(
+        "Le code OTP doit être composé de 6 chiffres",
+        ErrorCodes.PASSWORD_RESET_TOKEN_NOT_FOUND
+      );
+    }
+
     PasswordResetToken passwordResetToken = passwordResetTokenRepository
-      .findByToken(requestDto.getToken().trim())
+      .findByToken(otp)
       .orElseThrow(() ->
         new InvalidOperationException(
-          "Le lien de reinitialisation est introuvable",
+          "Code OTP invalide ou introuvable",
           ErrorCodes.PASSWORD_RESET_TOKEN_NOT_FOUND
         )
       );
 
     if (passwordResetToken.isUsed()) {
       throw new InvalidOperationException(
-        "Ce lien de reinitialisation a deja ete utilise",
+        "Ce code OTP a déjà été utilisé",
         ErrorCodes.PASSWORD_RESET_TOKEN_ALREADY_USED
       );
     }
 
     if (passwordResetToken.getExpiryDate().isBefore(Instant.now())) {
       throw new InvalidOperationException(
-        "Ce lien de reinitialisation a expire",
+        "Ce code OTP a expiré. Veuillez en demander un nouveau",
         ErrorCodes.PASSWORD_RESET_TOKEN_EXPIRED
       );
     }
@@ -1207,9 +1211,24 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     passwordResetTokenRepository.saveAll(activeTokens);
   }
 
-  private String buildPasswordResetLink(String token) {
-    String separator = passwordResetUrl.contains("?") ? "&" : "?";
-    return passwordResetUrl + separator + "token=" + token;
+  private String buildOtpEmailBody(String displayName, String otp) {
+    return
+      "<div style='font-family:Arial,sans-serif;max-width:520px;margin:0 auto;'>" +
+      "  <div style='background:#4f46e5;padding:28px 32px;border-radius:12px 12px 0 0;text-align:center;'>" +
+      "    <h2 style='color:#ffffff;margin:0;font-size:20px;'>&#128272; Réinitialisation de mot de passe</h2>" +
+      "  </div>" +
+      "  <div style='background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;'>" +
+      "    <p style='color:#374151;font-size:15px;margin:0 0 16px;'>Bonjour <strong>" + displayName + "</strong>,</p>" +
+      "    <p style='color:#374151;font-size:14px;margin:0 0 24px;'>Vous avez demandé la réinitialisation de votre mot de passe sur l'application <strong>Gestimo</strong>.</p>" +
+      "    <p style='color:#374151;font-size:14px;margin:0 0 8px;'>Voici votre code de vérification à 6 chiffres :</p>" +
+      "    <div style='background:#f3f4f6;border:2px dashed #4f46e5;border-radius:10px;padding:20px;text-align:center;margin:0 0 24px;'>" +
+      "      <span style='font-size:40px;font-weight:800;letter-spacing:12px;color:#1e1b4b;font-family:monospace;'>" + otp + "</span>" +
+      "    </div>" +
+      "    <p style='color:#6b7280;font-size:13px;margin:0 0 24px;'>&#9201; Ce code est valable pendant <strong>15 minutes</strong>.</p>" +
+      "    <hr style='border:none;border-top:1px solid #e5e7eb;margin:0 0 20px;'/>" +
+      "    <p style='color:#9ca3af;font-size:12px;margin:0;'>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email. Votre mot de passe ne sera pas modifié.</p>" +
+      "  </div>" +
+      "</div>";
   }
 
   private String buildDisplayName(Utilisateur utilisateur) {

@@ -3,36 +3,37 @@ services:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-gestimoweb}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-dbgestimoweb}
-      MYSQL_USER: ${MYSQL_USER:-gestimo}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gestimoweb}
-      TZ: ${TZ:-Africa/Abidjan}
+      MYSQL_ROOT_PASSWORD: gestimoweb
+      MYSQL_DATABASE: dbgestimoweb
+      MYSQL_USER: gestimo
+      MYSQL_PASSWORD: gestimoweb
+      TZ: Africa/Abidjan
+    ports:
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -pgestimoweb"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   backend:
-    image: astairenazaire/imhotep-bis-backend:${APP_VERSION:-latest}
+    image: bigbossoh/imhotep-backend:latest
     restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
-      MYSQL_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-dbgestimoweb}?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
-      MYSQL_USER: ${MYSQL_USER:-gestimo}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gestimoweb}
-      JWT_SECRET: ${JWT_SECRET:-change_me_in_prod}
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      PASSWORD_RESET_URL: ${PASSWORD_RESET_URL:-http://51.75.142.41/reset-password}
-      DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL:-bossohpaulin@gmail.com}
-      DEFAULT_AGENCY_ID: ${DEFAULT_AGENCY_ID:-}
-      TZ: ${TZ:-Africa/Abidjan}
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+      MYSQL_USER: gestimo
+      MYSQL_PASSWORD: gestimoweb
+      JWT_SECRET: "[a-zA-Z0-9._]^+$GuidelinAurorees8SaisonACfsewwsikkoggishherforAlphabeticalArraNumeralsandOtherSymbo$"
+      MAIL_HOST: smtp-fr.securemail.pro
+      MAIL_PORT: 587
+      MAIL_USERNAME: info@molibetycenter.com
+      MAIL_PASSWORD: 2024@Seve2024
+      PASSWORD_RESET_URL: http://51.75.142.41/reset-password
+      DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
+      TZ: Africa/Abidjan
     volumes:
       - backend_data:/home/spring/gestimoweb
     depends_on:
@@ -42,10 +43,10 @@ services:
       - "8287"
 
   frontend:
-    image: astairenazaire/imhotep-bis-frontend:${APP_VERSION:-latest}
+    image: bigbossoh/imhotep-frontend:latest
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT:-80}:80"
+      - "80:80"
     depends_on:
       - backend
 

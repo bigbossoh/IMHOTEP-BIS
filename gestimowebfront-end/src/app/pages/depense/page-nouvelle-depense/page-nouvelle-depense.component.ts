@@ -181,7 +181,7 @@ export class PageNouvelleDepenseComponent implements OnInit, OnDestroy {
     if (!bienId) return;
     this.http
       .get<any[]>(
-        `${this.apiService.rootUrl}gestimoweb/api/v1/appartement/all/${this.user?.idAgence}`
+        `${this.apiService.rootUrl}api/v1/appartement/all/${this.user?.idAgence}`
       )
       .subscribe({
         next: (list) => {

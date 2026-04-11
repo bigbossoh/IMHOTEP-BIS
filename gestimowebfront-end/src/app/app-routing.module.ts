@@ -1,4 +1,5 @@
 import { PageReglementReservationIndividuelComponent } from './pages/residence/page-reglement-reservation-individuel/page-reglement-reservation-individuel.component';
+import { PageAideComponent } from './pages/page-aide/page-aide.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PageLoginComponent } from './pages/page-login/page-login.component';
@@ -317,6 +318,11 @@ const routes: Routes = [
       {
         path: 'audit',
         component: PageAuditComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'aide',
+        component: PageAideComponent,
         canActivate: [ApplicationGuardService],
       },
     ],

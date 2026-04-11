@@ -592,34 +592,30 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
 
   @Override
   public double payeParPeriode(String periode, Long idAgence, Long chapitre) {
+    // Calcul par appel : max(0, montantLoyerBailLPeriode - soldeAppelLoyer)
+    // Évite un résultat négatif lorsque le solde dépasse le montant de base
+    // (ex : réduction de loyer appliquée après un paiement partiel)
     if (chapitre == null || chapitre == 0) {
-      List<Double> soldeImpaye = appelLoyerRepository
+      return appelLoyerRepository
         .findAll()
         .stream()
         .filter(period ->
           period.getPeriodeAppelLoyer().equals(periode) &&
           Objects.equals(period.getIdAgence(), idAgence) &&
-          period.isCloturer() == false
+          !period.isCloturer()
         )
-        .map(AppelLoyer::getMontantLoyerBailLPeriode)
-        .collect(Collectors.toList());
-      double totalMontantLoyerParPeriodeParAgence = soldeImpaye
-        .stream()
-        .mapToDouble(Double::doubleValue)
+        .mapToDouble(appel ->
+          Math.max(0, appel.getMontantLoyerBailLPeriode() - Math.max(0, appel.getSoldeAppelLoyer()))
+        )
         .sum();
-
-      return (
-        totalMontantLoyerParPeriodeParAgence -
-        impayeParPeriode(periode, idAgence, chapitre)
-      );
     } else {
-      List<Double> soldeImpaye = appelLoyerRepository
+      return appelLoyerRepository
         .findAll()
         .stream()
         .filter(period ->
           period.getPeriodeAppelLoyer().equals(periode) &&
           Objects.equals(period.getIdAgence(), idAgence) &&
-          period.isCloturer() == false &&
+          !period.isCloturer() &&
           Objects.equals(
             period
             .getBailLocationAppelLoyer()
@@ -629,17 +625,10 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
             chapitre
           )
         )
-        .map(AppelLoyer::getMontantLoyerBailLPeriode)
-        .collect(Collectors.toList());
-      double totalMontantLoyerParPeriodeParAgence = soldeImpaye
-        .stream()
-        .mapToDouble(Double::doubleValue)
+        .mapToDouble(appel ->
+          Math.max(0, appel.getMontantLoyerBailLPeriode() - Math.max(0, appel.getSoldeAppelLoyer()))
+        )
         .sum();
-
-      return (
-        totalMontantLoyerParPeriodeParAgence -
-        impayeParPeriode(periode, idAgence, chapitre)
-      );
     }
   }
 
@@ -682,52 +671,42 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
 
   @Override
   public double payeParAnnee(int annee, Long idAgence, Long chapitre) {
+    // Calcul par appel : max(0, montantLoyerBailLPeriode - soldeAppelLoyer)
+    // Évite un résultat négatif lorsque le solde dépasse le montant de base
     if (chapitre == 0) {
-      List<Double> soldeImpaye = appelLoyerRepository
+      return appelLoyerRepository
         .findAll()
         .stream()
         .filter(period ->
-          period.getAnneeAppelLoyer() == (annee) &&
+          period.getAnneeAppelLoyer() == annee &&
           Objects.equals(period.getIdAgence(), idAgence) &&
-          period.isCloturer() == false
+          !period.isCloturer()
         )
-        .map(AppelLoyer::getMontantLoyerBailLPeriode)
-        .collect(Collectors.toList());
-      double totalMontantLoyerParPeriodeParAgence = soldeImpaye
-        .stream()
-        .mapToDouble(Double::doubleValue)
+        .mapToDouble(appel ->
+          Math.max(0, appel.getMontantLoyerBailLPeriode() - Math.max(0, appel.getSoldeAppelLoyer()))
+        )
         .sum();
-
-      return (
-        totalMontantLoyerParPeriodeParAgence -
-        impayeParAnnee(annee, idAgence, chapitre)
-      );
     } else {
-      List<Double> soldeImpaye = appelLoyerRepository
+      return appelLoyerRepository
         .findAll()
         .stream()
         .filter(period ->
-          period.getAnneeAppelLoyer() == (annee) &&
+          period.getAnneeAppelLoyer() == annee &&
           Objects.equals(period.getIdAgence(), idAgence) &&
-          period
-            .getBailLocationAppelLoyer()
-            .getBienImmobilierOperation()
-            .getChapitre()
-            .getId() ==
-          chapitre &&
-          period.isCloturer() == false
+          !period.isCloturer() &&
+          Objects.equals(
+            period
+              .getBailLocationAppelLoyer()
+              .getBienImmobilierOperation()
+              .getChapitre()
+              .getId(),
+            chapitre
+          )
         )
-        .map(AppelLoyer::getMontantLoyerBailLPeriode)
-        .collect(Collectors.toList());
-      double totalMontantLoyerParPeriodeParAgence = soldeImpaye
-        .stream()
-        .mapToDouble(Double::doubleValue)
+        .mapToDouble(appel ->
+          Math.max(0, appel.getMontantLoyerBailLPeriode() - Math.max(0, appel.getSoldeAppelLoyer()))
+        )
         .sum();
-
-      return (
-        totalMontantLoyerParPeriodeParAgence -
-        impayeParAnnee(annee, idAgence, chapitre)
-      );
     }
   }
 
@@ -1121,12 +1100,12 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
     Long idAgence,
     Long chapitre
   ) {
-    double impayer = impayeParPeriode(periode, idAgence, chapitre);
-    double payer = payeParPeriode(periode, idAgence, chapitre);
+    double impayer = Math.max(0, impayeParPeriode(periode, idAgence, chapitre));
+    double payer   = Math.max(0, payeParPeriode(periode, idAgence, chapitre));
     double totalLoyer = impayer + payer;
     double recou = 0;
     if (totalLoyer > 0) {
-      recou = (payer / totalLoyer) * 100;
+      recou = Math.min(100, Math.max(0, (payer / totalLoyer) * 100));
     }
     StatistiquePeriodeDto statistiquePeriodeDto = new StatistiquePeriodeDto();
     statistiquePeriodeDto.setImpayer(impayer);
@@ -1144,12 +1123,12 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
     Long idAgence,
     Long chapitre
   ) {
-    double impayer = impayeParAnnee(annee, idAgence, chapitre);
-    double payer = payeParAnnee(annee, idAgence, chapitre);
+    double impayer = Math.max(0, impayeParAnnee(annee, idAgence, chapitre));
+    double payer   = Math.max(0, payeParAnnee(annee, idAgence, chapitre));
     double totalLoyer = impayer + payer;
     double recou = 0;
     if (totalLoyer > 0) {
-      recou = (payer / totalLoyer) * 100;
+      recou = Math.min(100, Math.max(0, (payer / totalLoyer) * 100));
     }
     StatistiquePeriodeDto statistiquePeriodeDto = new StatistiquePeriodeDto();
     statistiquePeriodeDto.setImpayer(impayer);

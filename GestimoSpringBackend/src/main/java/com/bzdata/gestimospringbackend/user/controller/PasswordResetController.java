@@ -27,7 +27,7 @@ public class PasswordResetController {
   ) {
     utilisateurService.demanderReinitialisationMotDePasse(request);
     return ResponseEntity.ok(
-      "Si un compte correspond a cet identifiant, un email de reinitialisation a ete envoye."
+      "Si un compte correspond à cet identifiant, un code OTP à 6 chiffres a été envoyé à l'adresse email associée."
     );
   }
 
@@ -36,6 +36,6 @@ public class PasswordResetController {
     @RequestBody PasswordResetConfirmationRequestDto request
   ) {
     utilisateurService.reinitialiserMotDePasse(request);
-    return ResponseEntity.ok("Le mot de passe a ete reinitialise avec succes.");
+    return ResponseEntity.ok("Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.");
   }
 }

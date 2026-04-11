@@ -89,7 +89,7 @@ public class AuthenticationController {
             audit.setUserId(loginUser.getId());
             audit.setUserName(buildDisplayName(loginUser));
             audit.setMethod("POST");
-            audit.setUrl("/gestimoweb/api/v1/auth/login");
+            audit.setUrl("/api/v1/auth/login");
             audit.setAction("Connexion");
             audit.setModule("Authentification");
             audit.setStatus(OK.value());

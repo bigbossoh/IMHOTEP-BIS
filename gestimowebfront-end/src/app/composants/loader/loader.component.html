@@ -1,1 +1,5 @@
-
+@if (isLoading$ | async) {
+  <div class="nav-loader-bar">
+    <div class="nav-loader-bar__progress"></div>
+  </div>
+}

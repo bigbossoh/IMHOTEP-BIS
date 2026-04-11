@@ -1,0 +1,158 @@
+<div class="aide-page container-fluid">
+
+  <!-- ══════════════════════════════════════════════════════════
+       EN-TÊTE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="aide-header">
+    <div class="aide-header__copy">
+      <span class="aide-eyebrow">Paramétrage</span>
+      <h1>Manuel d'utilisation</h1>
+      <p>Consultez ici toutes les fonctionnalités de Gestimo et apprenez à les utiliser étape par étape.</p>
+    </div>
+    <div class="aide-header__actions no-print">
+      <button type="button" class="aide-btn aide-btn--ghost" (click)="printManual()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Imprimer le manuel
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       BARRE DE RECHERCHE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="aide-search-bar no-print">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input
+      type="search"
+      placeholder="Rechercher une fonctionnalité…"
+      [(ngModel)]="searchTerm"
+      class="aide-search-input"
+    />
+    @if (searchTerm) {
+      <button type="button" class="aide-search-clear" (click)="clearSearch()" title="Effacer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    }
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SOMMAIRE (navigation rapide)
+  ══════════════════════════════════════════════════════════ -->
+  @if (!searchTerm) {
+    <nav class="aide-toc no-print">
+      <p class="aide-toc__label">Sommaire</p>
+      <div class="aide-toc__pills">
+        @for (section of sections; track section.id) {
+          <button type="button" class="aide-toc__pill" (click)="scrollToSection(section.id)">
+            <i class="{{ section.icon }}"></i>
+            {{ section.titre }}
+          </button>
+        }
+      </div>
+    </nav>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTIONS
+  ══════════════════════════════════════════════════════════ -->
+  @if (filteredSections.length === 0) {
+    <div class="aide-empty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <p>Aucun résultat pour <strong>« {{ searchTerm }} »</strong></p>
+      <span>Essayez un autre mot-clé ou <button type="button" class="aide-link-btn" (click)="clearSearch()">réinitialisez la recherche</button>.</span>
+    </div>
+  }
+
+  @for (section of filteredSections; track section.id) {
+    <section class="aide-section" [id]="section.id">
+
+      <!-- En-tête de section -->
+      <div class="aide-section__header" (click)="toggleSection(section.id)" [class.open]="isActive(section.id)">
+        <div class="aide-section__header-left">
+          <div class="aide-section__icon-wrap">
+            <i class="{{ section.icon }}"></i>
+          </div>
+          <div>
+            <h2 class="aide-section__titre">{{ section.titre }}</h2>
+            <p class="aide-section__desc">{{ section.description }}</p>
+          </div>
+        </div>
+        <div class="aide-section__caret no-print">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Corps de section -->
+      <div class="aide-section__body" [class.open]="isActive(section.id) || !!searchTerm">
+        <div class="aide-cards-grid">
+          @for (f of section.fonctionnalites; track f.titre) {
+            <div class="aide-card">
+              <h3 class="aide-card__titre">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ f.titre }}
+              </h3>
+              <p class="aide-card__desc">{{ f.description }}</p>
+
+              @if (f.etapes && f.etapes.length) {
+                <div class="aide-steps">
+                  <p class="aide-steps__label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Comment faire ?
+                  </p>
+                  <ol class="aide-steps__list">
+                    @for (etape of f.etapes; track $index) {
+                      <li>{{ etape }}</li>
+                    }
+                  </ol>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+    </section>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════
+       PIED DE PAGE DU MANUEL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="aide-footer">
+    <div class="aide-footer__logo">
+      <img src="assets/logoGestimo.png" alt="Gestimo" width="40" />
+      <div>
+        <strong>Gestimo</strong>
+        <span>Plateforme de gestion immobilière intelligente</span>
+      </div>
+    </div>
+    <p class="aide-footer__note">
+      Pour toute question ou signalement d'anomalie, contactez l'administrateur de votre agence.<br/>
+      Ce manuel est mis à jour automatiquement avec chaque nouvelle version de l'application.
+    </p>
+  </div>
+
+</div>

@@ -31,7 +31,7 @@ Cette documentation décrit le backend tel qu'il est implémenté dans `GestimoS
 
 ### 1.3 Préfixe d'API
 
-Le préfixe global est défini par `APP_ROOT = gestimoweb/api/v1`.
+Le préfixe global est défini par `APP_ROOT = api/v1`.
 
 ### 1.4 Organisation du code
 
@@ -52,7 +52,7 @@ Cette cohabitation est importante pour votre chantier de nettoyage, car elle int
 
 ### 2.1 Flux de login
 
-1. le frontend poste `username` / `password` vers `POST /gestimoweb/api/v1/auth/login` ;
+1. le frontend poste `username` / `password` vers `POST /api/v1/auth/login` ;
 2. `AuthenticationController` utilise `AuthenticationManager` ;
 3. `ApplicationUserDetailsService` charge l'utilisateur ;
 4. `JWTTokenProvider` génère le JWT ;

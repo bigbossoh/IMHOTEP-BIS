@@ -11,7 +11,7 @@
   },
   "basePath" : "http://localhost:8282/",
   "paths" : {
-    "gestimoweb/api/v1/agences/all/{idAgence}" : {
+    "api/v1/agences/all/{idAgence}" : {
       "get" : {
         "operationId" : "getAllAgenceByOrderAgence",
         "parameters" : [ {
@@ -34,7 +34,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/agences/deleteagence/{id}" : {
+    "api/v1/agences/deleteagence/{id}" : {
       "delete" : {
         "operationId" : "deleteAgenceByIdAgence",
         "parameters" : [ {
@@ -54,7 +54,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/agences/getagencebyemail/{email}" : {
+    "api/v1/agences/getagencebyemail/{email}" : {
       "get" : {
         "operationId" : "getAgenceByEmailAgence",
         "parameters" : [ {
@@ -73,7 +73,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/agences/getagencebyid/{id}" : {
+    "api/v1/agences/getagencebyid/{id}" : {
       "get" : {
         "operationId" : "getAgenceByIDAgence",
         "parameters" : [ {
@@ -93,7 +93,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/agences/signup" : {
+    "api/v1/agences/signup" : {
       "post" : {
         "operationId" : "authenticateAgence",
         "parameters" : [ {
@@ -114,7 +114,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/all/{id}" : {
+    "api/v1/appartement/all/{id}" : {
       "get" : {
         "operationId" : "findAllAppartement",
         "parameters" : [ {
@@ -137,7 +137,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/alllmeublelibre/{idAgence}" : {
+    "api/v1/appartement/alllmeublelibre/{idAgence}" : {
       "get" : {
         "operationId" : "findAllAppartementLibre",
         "parameters" : [ {
@@ -160,7 +160,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/allmeuble/{id}" : {
+    "api/v1/appartement/allmeuble/{id}" : {
       "get" : {
         "operationId" : "findAllAppartementMeuble",
         "parameters" : [ {
@@ -183,7 +183,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/delete/{id}" : {
+    "api/v1/appartement/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteAppartement",
         "parameters" : [ {
@@ -203,7 +203,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/findById/{id}" : {
+    "api/v1/appartement/findById/{id}" : {
       "get" : {
         "operationId" : "findByIDAppartement",
         "parameters" : [ {
@@ -223,7 +223,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/findByIdEtage/{id}" : {
+    "api/v1/appartement/findByIdEtage/{id}" : {
       "get" : {
         "operationId" : "findByIdEtageAppartement",
         "parameters" : [ {
@@ -246,7 +246,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/findByName/{name}" : {
+    "api/v1/appartement/findByName/{name}" : {
       "get" : {
         "operationId" : "findByNameAppartement",
         "parameters" : [ {
@@ -265,7 +265,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/findallappartementbyidcategorie/{id}" : {
+    "api/v1/appartement/findallappartementbyidcategorie/{id}" : {
       "get" : {
         "operationId" : "findAllAppartementByIdCategorie",
         "parameters" : [ {
@@ -288,7 +288,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/save" : {
+    "api/v1/appartement/save" : {
       "post" : {
         "operationId" : "saveAppartement",
         "parameters" : [ {
@@ -309,7 +309,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appartement/saveForCategorie" : {
+    "api/v1/appartement/saveForCategorie" : {
       "post" : {
         "operationId" : "saveForCategorie",
         "parameters" : [ {
@@ -330,7 +330,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/clotureOfAppelDtoByID/{id}" : {
+    "api/v1/appelloyer/clotureOfAppelDtoByID/{id}" : {
       "get" : {
         "operationId" : "deleteAppelDto",
         "parameters" : [ {
@@ -350,7 +350,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAllAppelloyerByPeriode/{periode}/{idAgence}" : {
+    "api/v1/appelloyer/findAllAppelloyerByPeriode/{periode}/{idAgence}" : {
       "get" : {
         "operationId" : "AppelLoyersParPeriode",
         "parameters" : [ {
@@ -378,7 +378,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAllAppelsLoyer/{idAgence}" : {
+    "api/v1/appelloyer/findAllAppelsLoyer/{idAgence}" : {
       "get" : {
         "operationId" : "listTousAppelsLoyers",
         "parameters" : [ {
@@ -401,7 +401,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAllPeriodeAppel/{idAgence}" : {
+    "api/v1/appelloyer/findAllPeriodeAppel/{idAgence}" : {
       "get" : {
         "operationId" : "findAllPeriode",
         "parameters" : [ {
@@ -424,7 +424,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAllPeriodeByAnnee/{annee}/{idAgence}" : {
+    "api/v1/appelloyer/findAllPeriodeByAnnee/{annee}/{idAgence}" : {
       "get" : {
         "operationId" : "findAllPeriodeByAnnee",
         "parameters" : [ {
@@ -453,7 +453,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/{annee}/{idAgence}" : {
+    "api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/{annee}/{idAgence}" : {
       "get" : {
         "operationId" : "findAllPeriodeChiffreEtLettreByAnnee",
         "parameters" : [ {
@@ -482,7 +482,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAppelloyer/{id}" : {
+    "api/v1/appelloyer/findAppelloyer/{id}" : {
       "get" : {
         "operationId" : "AppelLoyersParId",
         "parameters" : [ {
@@ -502,7 +502,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAppelsByIdBail/{idBail}" : {
+    "api/v1/appelloyer/findAppelsByIdBail/{idBail}" : {
       "get" : {
         "operationId" : "listDesLoyersParBail",
         "parameters" : [ {
@@ -525,7 +525,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findAppelsImpayerByIdBail/{id}" : {
+    "api/v1/appelloyer/findAppelsImpayerByIdBail/{id}" : {
       "get" : {
         "operationId" : "listDesLoyersImpayerParBail",
         "parameters" : [ {
@@ -548,7 +548,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/findByIdAndBail/{idBien}/{periode}" : {
+    "api/v1/appelloyer/findByIdAndBail/{idBien}/{periode}" : {
       "get" : {
         "operationId" : "findByIdAndBail",
         "parameters" : [ {
@@ -573,7 +573,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/getFirstLoyerImpayerByBien/{id}" : {
+    "api/v1/appelloyer/getFirstLoyerImpayerByBien/{id}" : {
       "get" : {
         "operationId" : "getFirstLoyerImpayerByBien",
         "parameters" : [ {
@@ -593,7 +593,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/impayeParAnnee/{annee}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/impayeParAnnee/{annee}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "impayeLoyerParAnnee",
         "parameters" : [ {
@@ -626,7 +626,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/impayeParMois/{periode}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/impayeParMois/{periode}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "impayeLoyerParMoisAppelLoyer",
         "parameters" : [ {
@@ -658,7 +658,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/listMessageEnvoyerAUnLocataire/{login}" : {
+    "api/v1/appelloyer/listMessageEnvoyerAUnLocataire/{login}" : {
       "get" : {
         "operationId" : "listMessageEnvoyerAUnLocataire",
         "parameters" : [ {
@@ -680,7 +680,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/listOfDistinctAnneeAppel/{idAgence}" : {
+    "api/v1/appelloyer/listOfDistinctAnneeAppel/{idAgence}" : {
       "get" : {
         "operationId" : "listOfDistinctAnneeAppel",
         "parameters" : [ {
@@ -704,7 +704,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/{idBien}/{periode}" : {
+    "api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/{idBien}/{periode}" : {
       "get" : {
         "operationId" : "listeDesloyerSuperieurAUnePeriode",
         "parameters" : [ {
@@ -732,7 +732,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/miseAjourDesUnlockDesBaux/{idAgence}" : {
+    "api/v1/appelloyer/miseAjourDesUnlockDesBaux/{idAgence}" : {
       "get" : {
         "operationId" : "miseAjourDesUnlockDesBaux",
         "parameters" : [ {
@@ -752,7 +752,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/nombreImpayerLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/nombreImpayerLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "nombreImpayerLoyerParMois",
         "parameters" : [ {
@@ -784,7 +784,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/nombrePayerLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/nombrePayerLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "nombrePayerLoyerParMois",
         "parameters" : [ {
@@ -816,7 +816,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/payeParAnnee/{annee}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/payeParAnnee/{annee}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "payeLoyerParAnnee",
         "parameters" : [ {
@@ -849,7 +849,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/payeParMois/{periode}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/payeParMois/{periode}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "payeLoyerParMois",
         "parameters" : [ {
@@ -881,7 +881,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/reductionLoyerByPeriode" : {
+    "api/v1/appelloyer/reductionLoyerByPeriode" : {
       "post" : {
         "operationId" : "ReductionLoyerByPeriode",
         "parameters" : [ {
@@ -905,7 +905,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/save" : {
+    "api/v1/appelloyer/save" : {
       "post" : {
         "operationId" : "saveAppelLoyers",
         "parameters" : [ {
@@ -929,7 +929,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/staisiqueLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/staisiqueLoyerParMois/{periode}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "staisiqueLoyerParMois",
         "parameters" : [ {
@@ -960,7 +960,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/statistiqueLoyerParAnnee/{annee}/{idAgence}/{chapitre}" : {
+    "api/v1/appelloyer/statistiqueLoyerParAnnee/{annee}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "statistiqueLoyerParAnnee",
         "parameters" : [ {
@@ -992,7 +992,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/appelloyer/supprimerPaiementAppel/{idPeriode}/{idBail}" : {
+    "api/v1/appelloyer/supprimerPaiementAppel/{idPeriode}/{idBail}" : {
       "get" : {
         "operationId" : "supprimerPaiementAppel",
         "parameters" : [ {
@@ -1021,7 +1021,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/auth/accountVerification/{token}" : {
+    "api/v1/auth/accountVerification/{token}" : {
       "get" : {
         "operationId" : "verifyAccount",
         "parameters" : [ {
@@ -1040,7 +1040,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/auth/login" : {
+    "api/v1/auth/login" : {
       "post" : {
         "operationId" : "login",
         "parameters" : [ {
@@ -1061,7 +1061,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/bailLocataireetbien/{locataire}/{bien}" : {
+    "api/v1/bail/bailLocataireetbien/{locataire}/{bien}" : {
       "get" : {
         "operationId" : "bailByLocataireEtBien",
         "parameters" : [ {
@@ -1087,7 +1087,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/clotureBail/{id}" : {
+    "api/v1/bail/clotureBail/{id}" : {
       "post" : {
         "operationId" : "clotureBail",
         "parameters" : [ {
@@ -1110,7 +1110,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/findoperationbyid/{id}" : {
+    "api/v1/bail/findoperationbyid/{id}" : {
       "get" : {
         "operationId" : "findOperationById",
         "parameters" : [ {
@@ -1130,7 +1130,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/getallbailbybien/{id}" : {
+    "api/v1/bail/getallbailbybien/{id}" : {
       "get" : {
         "operationId" : "listDesBauxPourUnBienImmobilier",
         "parameters" : [ {
@@ -1153,7 +1153,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/getallbailbylocataire/{id}" : {
+    "api/v1/bail/getallbailbylocataire/{id}" : {
       "get" : {
         "operationId" : "listDesBauxPourUnLocataire",
         "parameters" : [ {
@@ -1176,7 +1176,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/nombrebailactif/{idAgence}" : {
+    "api/v1/bail/nombrebailactif/{idAgence}" : {
       "get" : {
         "operationId" : "nombrebailactif",
         "parameters" : [ {
@@ -1197,7 +1197,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/nombrebailnonactif/{idAgence}" : {
+    "api/v1/bail/nombrebailnonactif/{idAgence}" : {
       "get" : {
         "operationId" : "nombrebailnonactif",
         "parameters" : [ {
@@ -1218,7 +1218,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/save" : {
+    "api/v1/bail/save" : {
       "post" : {
         "operationId" : "modifierUnBail",
         "parameters" : [ {
@@ -1239,7 +1239,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bail/supprimerBail/{id}" : {
+    "api/v1/bail/supprimerBail/{id}" : {
       "post" : {
         "operationId" : "supprimerBail",
         "parameters" : [ {
@@ -1259,7 +1259,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/all/{idAgence}" : {
+    "api/v1/bailappartement/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllBailAppartement",
         "parameters" : [ {
@@ -1282,7 +1282,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/alloperation/{idAgence}" : {
+    "api/v1/bailappartement/alloperation/{idAgence}" : {
       "get" : {
         "operationId" : "findAllOperations",
         "parameters" : [ {
@@ -1305,7 +1305,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/delete/{id}" : {
+    "api/v1/bailappartement/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteBailAppartement",
         "parameters" : [ {
@@ -1325,7 +1325,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/findById/{id}" : {
+    "api/v1/bailappartement/findById/{id}" : {
       "get" : {
         "operationId" : "findByIDBailAppartement",
         "parameters" : [ {
@@ -1345,7 +1345,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/findByName/{name}" : {
+    "api/v1/bailappartement/findByName/{name}" : {
       "get" : {
         "operationId" : "findByNameBailAppartement",
         "parameters" : [ {
@@ -1364,7 +1364,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailappartement/save" : {
+    "api/v1/bailappartement/save" : {
       "post" : {
         "operationId" : "saveBailAppartement",
         "parameters" : [ {
@@ -1385,7 +1385,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailmagasin/all/{idAgence}" : {
+    "api/v1/bailmagasin/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllBailMagasin",
         "parameters" : [ {
@@ -1408,7 +1408,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailmagasin/delete/{id}" : {
+    "api/v1/bailmagasin/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteBailMagasin",
         "parameters" : [ {
@@ -1428,7 +1428,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailmagasin/findById/{id}" : {
+    "api/v1/bailmagasin/findById/{id}" : {
       "get" : {
         "operationId" : "findByIDBailMagasin",
         "parameters" : [ {
@@ -1448,7 +1448,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailmagasin/findByName/{name}" : {
+    "api/v1/bailmagasin/findByName/{name}" : {
       "get" : {
         "operationId" : "findByNameBailMagasin",
         "parameters" : [ {
@@ -1467,7 +1467,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailmagasin/save" : {
+    "api/v1/bailmagasin/save" : {
       "post" : {
         "operationId" : "saveBailMagasin",
         "parameters" : [ {
@@ -1488,7 +1488,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailvilla/all/{idAgence}" : {
+    "api/v1/bailvilla/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllBailVilla",
         "parameters" : [ {
@@ -1511,7 +1511,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailvilla/delete/{id}" : {
+    "api/v1/bailvilla/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteBailVilla",
         "parameters" : [ {
@@ -1531,7 +1531,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailvilla/findById/{id}" : {
+    "api/v1/bailvilla/findById/{id}" : {
       "get" : {
         "operationId" : "findBailVillaByID",
         "parameters" : [ {
@@ -1551,7 +1551,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailvilla/findByName/{name}" : {
+    "api/v1/bailvilla/findByName/{name}" : {
       "get" : {
         "operationId" : "findBailVillaByName",
         "parameters" : [ {
@@ -1570,7 +1570,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bailvilla/save" : {
+    "api/v1/bailvilla/save" : {
       "post" : {
         "operationId" : "saveBailVilla",
         "parameters" : [ {
@@ -1591,7 +1591,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bienImmobilier/all/{idAgence}/{chapitre}" : {
+    "api/v1/bienImmobilier/all/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "findAllBien",
         "parameters" : [ {
@@ -1620,7 +1620,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bienImmobilier/allBienOccuper/{idAgence}/{chapitre}" : {
+    "api/v1/bienImmobilier/allBienOccuper/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "findAllBienOqp",
         "parameters" : [ {
@@ -1649,7 +1649,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/bienImmobilier/rattacherUnBienAUnChapitre/{idBien}/{chapitre}" : {
+    "api/v1/bienImmobilier/rattacherUnBienAUnChapitre/{idBien}/{chapitre}" : {
       "get" : {
         "operationId" : "rattacherUnBienAUnChapitre",
         "parameters" : [ {
@@ -1675,7 +1675,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/all/{idAgence}" : {
+    "api/v1/categoriechambre/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllCategorieChambre",
         "parameters" : [ {
@@ -1698,7 +1698,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/delete/{id}" : {
+    "api/v1/categoriechambre/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteCategoryChambre",
         "parameters" : [ {
@@ -1715,7 +1715,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/findById/{id}" : {
+    "api/v1/categoriechambre/findById/{id}" : {
       "get" : {
         "operationId" : "findCategorieChambreByID",
         "parameters" : [ {
@@ -1735,7 +1735,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/findCategorieByIdAppartement/{idAppart}" : {
+    "api/v1/categoriechambre/findCategorieByIdAppartement/{idAppart}" : {
       "get" : {
         "operationId" : "findCategorieByIdAppartement",
         "parameters" : [ {
@@ -1755,7 +1755,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/saveOrUpdateCategoryChambre" : {
+    "api/v1/categoriechambre/saveOrUpdateCategoryChambre" : {
       "post" : {
         "operationId" : "saveOrUpdateCategoryChambre",
         "parameters" : [ {
@@ -1776,7 +1776,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/categoriechambre/saveorupdate" : {
+    "api/v1/categoriechambre/saveorupdate" : {
       "post" : {
         "operationId" : "saveorupdateCategoryChambre",
         "parameters" : [ {
@@ -1797,7 +1797,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}" : {
+    "api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}" : {
       "get" : {
         "operationId" : "countInitClotureByCaissiaireAndChampitre",
         "parameters" : [ {
@@ -1849,7 +1849,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseAgence" : {
+    "api/v1/cloturecaisse/findAllCloturerCaisseAgence" : {
       "get" : {
         "operationId" : "findAllCloturerCaisseAgence",
         "responses" : {
@@ -1865,7 +1865,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}" : {
+    "api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}" : {
       "get" : {
         "operationId" : "findAllCloturerCaisseByDateAndChapitre",
         "parameters" : [ {
@@ -1899,7 +1899,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}" : {
+    "api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}" : {
       "get" : {
         "operationId" : "findNonCloturerByDateAndCaisseAndChapitre",
         "parameters" : [ {
@@ -1933,7 +1933,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/cloturecaisse/savecloturecaisse" : {
+    "api/v1/cloturecaisse/savecloturecaisse" : {
       "post" : {
         "operationId" : "saveClotureCaisse",
         "parameters" : [ {
@@ -1954,7 +1954,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/all" : {
+    "api/v1/commune/all" : {
       "get" : {
         "operationId" : "findAllCommune",
         "responses" : {
@@ -1970,7 +1970,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/delete/{id}" : {
+    "api/v1/commune/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteCommune",
         "parameters" : [ {
@@ -1990,7 +1990,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/findById/{id}" : {
+    "api/v1/commune/findById/{id}" : {
       "get" : {
         "operationId" : "findCommuneByID",
         "parameters" : [ {
@@ -2010,7 +2010,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/findByIdVille/{id}" : {
+    "api/v1/commune/findByIdVille/{id}" : {
       "get" : {
         "operationId" : "findCommuneByIdPays",
         "parameters" : [ {
@@ -2033,7 +2033,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/findByName/{name}" : {
+    "api/v1/commune/findByName/{name}" : {
       "get" : {
         "operationId" : "findCommuneByName",
         "parameters" : [ {
@@ -2052,7 +2052,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/commune/save" : {
+    "api/v1/commune/save" : {
       "post" : {
         "operationId" : "saveCommune",
         "parameters" : [ {
@@ -2073,7 +2073,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/droitAccess/" : {
+    "api/v1/droitAccess/" : {
       "get" : {
         "operationId" : "findAllDroitAccess",
         "responses" : {
@@ -2089,7 +2089,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/droitAccess/save" : {
+    "api/v1/droitAccess/save" : {
       "post" : {
         "operationId" : "saveDroitAccess",
         "parameters" : [ {
@@ -2111,7 +2111,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/droitAccess/{droitAccessid}" : {
+    "api/v1/droitAccess/{droitAccessid}" : {
       "get" : {
         "operationId" : "findByIdDroitAccess",
         "parameters" : [ {
@@ -2146,7 +2146,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/allEncaissementByIdLocatire/{idLocatire}" : {
+    "api/v1/encaissement/allEncaissementByIdLocatire/{idLocatire}" : {
       "get" : {
         "operationId" : "findAllEncaissementByIdLocatire",
         "parameters" : [ {
@@ -2169,7 +2169,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/allencaissementByIdBien/{id}" : {
+    "api/v1/encaissement/allencaissementByIdBien/{id}" : {
       "get" : {
         "operationId" : "findAllEncaissementByIdBienImmobilier",
         "parameters" : [ {
@@ -2192,7 +2192,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/findAllEncaissementPrincipal/{idAgence}" : {
+    "api/v1/encaissement/findAllEncaissementPrincipal/{idAgence}" : {
       "get" : {
         "operationId" : "listTousEncaissementsPrincipal",
         "parameters" : [ {
@@ -2215,7 +2215,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/findByIdEncaissement/{id}" : {
+    "api/v1/encaissement/findByIdEncaissement/{id}" : {
       "get" : {
         "operationId" : "findByIdEncaissement",
         "parameters" : [ {
@@ -2235,7 +2235,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/getTotalEncaissementparPeriode/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/getTotalEncaissementparPeriode/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "getTotalEncaissementparPeriode",
         "parameters" : [ {
@@ -2268,7 +2268,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "getTotalEncaissementsEtMontantsDeLoyerParMois",
         "parameters" : [ {
@@ -2305,7 +2305,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/getTotalEncaissementsParMois/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/getTotalEncaissementsParMois/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "getTotalEncaissementsParMois",
         "parameters" : [ {
@@ -2339,7 +2339,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "listeEncaisseLoyerEntreDeuxDate",
         "parameters" : [ {
@@ -2372,7 +2372,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/{idEncaiss}/{idChapitre}/{debut}/{fin}" : {
+    "api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/{idEncaiss}/{idChapitre}/{debut}/{fin}" : {
       "get" : {
         "operationId" : "listeEncaissementEntreDeuxDateParChapitreEtCaisse",
         "parameters" : [ {
@@ -2411,7 +2411,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/{agence}/{periode}" : {
+    "api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/{agence}/{periode}" : {
       "get" : {
         "operationId" : "listeLocataireImpayerParAgenceEtPeriode",
         "parameters" : [ {
@@ -2439,7 +2439,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/miseAJourEncaissementCloturer/{idEncaiss}" : {
+    "api/v1/encaissement/miseAJourEncaissementCloturer/{idEncaiss}" : {
       "get" : {
         "operationId" : "miseAJourEncaissementCloturer",
         "parameters" : [ {
@@ -2459,7 +2459,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/saveencaissement" : {
+    "api/v1/encaissement/saveencaissement" : {
       "post" : {
         "operationId" : "saveEncaissement",
         "parameters" : [ {
@@ -2480,7 +2480,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/saveencaissementavecretour" : {
+    "api/v1/encaissement/saveencaissementavecretour" : {
       "post" : {
         "operationId" : "saveEncaissementAvecretourDeListe",
         "parameters" : [ {
@@ -2504,7 +2504,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/saveencaissementmasse" : {
+    "api/v1/encaissement/saveencaissementmasse" : {
       "post" : {
         "operationId" : "saveEncaissementMasse",
         "parameters" : [ {
@@ -2528,7 +2528,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/saveencaissementmasseavecretour" : {
+    "api/v1/encaissement/saveencaissementmasseavecretour" : {
       "post" : {
         "operationId" : "saveEncaissementMasseAvecretourDeListe",
         "parameters" : [ {
@@ -2552,7 +2552,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "sommeEncaissementParAgenceEtParPeriode",
         "parameters" : [ {
@@ -2583,7 +2583,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}" : {
+    "api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}" : {
       "get" : {
         "operationId" : "sommeLoyerParAgenceEtParPeriode",
         "parameters" : [ {
@@ -2614,7 +2614,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/totalencaissement/{id}" : {
+    "api/v1/encaissement/totalencaissement/{id}" : {
       "get" : {
         "operationId" : "totalencaissementParIdAppelLoyer",
         "parameters" : [ {
@@ -2635,7 +2635,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/encaissement/totalencaissementjournalier/{jour}/{idAgence}/{chapitre}" : {
+    "api/v1/encaissement/totalencaissementjournalier/{jour}/{idAgence}/{chapitre}" : {
       "get" : {
         "operationId" : "totalEncaissementParJour",
         "parameters" : [ {
@@ -2667,7 +2667,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/envoimail/sendmailgrouper/{periode}/{idAgence}" : {
+    "api/v1/envoimail/sendmailgrouper/{periode}/{idAgence}" : {
       "post" : {
         "operationId" : "sendMailGrouperWithAttachment",
         "parameters" : [ {
@@ -2692,7 +2692,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/envoimail/sendquittancebymail/{id}" : {
+    "api/v1/envoimail/sendquittancebymail/{id}" : {
       "post" : {
         "operationId" : "sendMailQuittanceWithAttachment",
         "parameters" : [ {
@@ -2712,7 +2712,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/especeencaissement/save" : {
+    "api/v1/especeencaissement/save" : {
       "post" : {
         "operationId" : "saveEspeceEncaissement",
         "parameters" : [ {
@@ -2733,7 +2733,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etablissement/getDefaultEtable/{id}" : {
+    "api/v1/etablissement/getDefaultEtable/{id}" : {
       "get" : {
         "operationId" : "getDefaultEtable",
         "parameters" : [ {
@@ -2753,7 +2753,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/all/{idAgence}" : {
+    "api/v1/etage/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllEtage",
         "parameters" : [ {
@@ -2776,7 +2776,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/delete/{id}" : {
+    "api/v1/etage/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteEtage",
         "parameters" : [ {
@@ -2796,7 +2796,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/findById/{id}" : {
+    "api/v1/etage/findById/{id}" : {
       "get" : {
         "operationId" : "findEtageByID",
         "parameters" : [ {
@@ -2816,7 +2816,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/findByIdImmeuble/{id}" : {
+    "api/v1/etage/findByIdImmeuble/{id}" : {
       "get" : {
         "operationId" : "affichageDesEtageParImmeuble",
         "parameters" : [ {
@@ -2839,7 +2839,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/findByName/{name}" : {
+    "api/v1/etage/findByName/{name}" : {
       "get" : {
         "operationId" : "findEtageByName",
         "parameters" : [ {
@@ -2858,7 +2858,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/etage/save" : {
+    "api/v1/etage/save" : {
       "post" : {
         "operationId" : "saveEtage",
         "parameters" : [ {
@@ -2879,7 +2879,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/groupeDroit/" : {
+    "api/v1/groupeDroit/" : {
       "get" : {
         "operationId" : "findAllGroupeDroit",
         "responses" : {
@@ -2895,7 +2895,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/groupeDroit/save" : {
+    "api/v1/groupeDroit/save" : {
       "post" : {
         "operationId" : "saveGroupeDroit",
         "parameters" : [ {
@@ -2917,7 +2917,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/groupeDroit/{groupedroitid}" : {
+    "api/v1/groupeDroit/{groupedroitid}" : {
       "get" : {
         "operationId" : "findByIdGroupeDroit",
         "parameters" : [ {
@@ -2952,7 +2952,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/image/imagesbybien/{id}" : {
+    "api/v1/image/imagesbybien/{id}" : {
       "get" : {
         "operationId" : "telechagerImage",
         "parameters" : [ {
@@ -2975,7 +2975,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/image/upload/{id}/{name}" : {
+    "api/v1/image/upload/{id}/{name}" : {
       "post" : {
         "summary" : "Téléchargder une image",
         "description" : "",
@@ -3006,7 +3006,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/affichetoutlesimmeubles/{idAgence}" : {
+    "api/v1/immeuble/affichetoutlesimmeubles/{idAgence}" : {
       "get" : {
         "operationId" : "affichageDesImmeubles",
         "parameters" : [ {
@@ -3029,7 +3029,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/all/{idAgence}" : {
+    "api/v1/immeuble/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllImmeuble",
         "parameters" : [ {
@@ -3052,7 +3052,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/deleteImmeuble/{id}" : {
+    "api/v1/immeuble/deleteImmeuble/{id}" : {
       "delete" : {
         "operationId" : "deleteImmeuble",
         "parameters" : [ {
@@ -3072,7 +3072,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/findById/{id}" : {
+    "api/v1/immeuble/findById/{id}" : {
       "get" : {
         "operationId" : "findImmeubleByID",
         "parameters" : [ {
@@ -3092,7 +3092,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/findByIdSite/{id}" : {
+    "api/v1/immeuble/findByIdSite/{id}" : {
       "get" : {
         "operationId" : "findImmeubleByIdSite",
         "parameters" : [ {
@@ -3115,7 +3115,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/findByName/{name}" : {
+    "api/v1/immeuble/findByName/{name}" : {
       "get" : {
         "operationId" : "findImmeubleByName",
         "parameters" : [ {
@@ -3134,7 +3134,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/immeuble/saveImeubleEtage" : {
+    "api/v1/immeuble/saveImeubleEtage" : {
       "post" : {
         "operationId" : "saveImmeubleEtage",
         "parameters" : [ {
@@ -3155,7 +3155,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/all/{idAgence}" : {
+    "api/v1/magasin/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllMagasin",
         "parameters" : [ {
@@ -3178,7 +3178,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/alllibre/{idAgence}" : {
+    "api/v1/magasin/alllibre/{idAgence}" : {
       "get" : {
         "operationId" : "findAllMagasinLibre",
         "parameters" : [ {
@@ -3201,7 +3201,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/findAllMagasinByIdEtage/{id}" : {
+    "api/v1/magasin/findAllMagasinByIdEtage/{id}" : {
       "get" : {
         "operationId" : "findAllMagasinByEtage",
         "parameters" : [ {
@@ -3224,7 +3224,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/findAllMagasinByIdSite/{idSite}" : {
+    "api/v1/magasin/findAllMagasinByIdSite/{idSite}" : {
       "get" : {
         "operationId" : "findAllMagasinByIdSite",
         "parameters" : [ {
@@ -3247,7 +3247,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/findByName/{name}" : {
+    "api/v1/magasin/findByName/{name}" : {
       "get" : {
         "operationId" : "findByNameMagasinDto",
         "parameters" : [ {
@@ -3266,7 +3266,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/findmagasinById/{id}" : {
+    "api/v1/magasin/findmagasinById/{id}" : {
       "get" : {
         "operationId" : "findByIDMagasin",
         "parameters" : [ {
@@ -3286,7 +3286,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/magasin/savemagasin" : {
+    "api/v1/magasin/savemagasin" : {
       "post" : {
         "operationId" : "saveMagasinReturnDto",
         "parameters" : [ {
@@ -3307,7 +3307,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/montantloyerbail/findMontantByBail/{id}" : {
+    "api/v1/montantloyerbail/findMontantByBail/{id}" : {
       "get" : {
         "operationId" : "findByIDMontantLoyerBail",
         "parameters" : [ {
@@ -3330,7 +3330,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/pays/all" : {
+    "api/v1/pays/all" : {
       "get" : {
         "operationId" : "findAllPays",
         "responses" : {
@@ -3346,7 +3346,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/pays/delete/{id}" : {
+    "api/v1/pays/delete/{id}" : {
       "delete" : {
         "operationId" : "deletePays",
         "parameters" : [ {
@@ -3366,7 +3366,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/pays/findById/{id}" : {
+    "api/v1/pays/findById/{id}" : {
       "get" : {
         "operationId" : "findPaysByID",
         "parameters" : [ {
@@ -3386,7 +3386,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/pays/findByName/{name}" : {
+    "api/v1/pays/findByName/{name}" : {
       "get" : {
         "operationId" : "findPaysByName",
         "parameters" : [ {
@@ -3405,7 +3405,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/pays/save" : {
+    "api/v1/pays/save" : {
       "post" : {
         "operationId" : "savePays",
         "parameters" : [ {
@@ -3426,7 +3426,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prestation/all" : {
+    "api/v1/prestation/all" : {
       "get" : {
         "operationId" : "findAllServiceAdditionnelPrestation",
         "responses" : {
@@ -3442,7 +3442,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prestation/delete/{id}" : {
+    "api/v1/prestation/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteServiceAdditionnelPrestation",
         "parameters" : [ {
@@ -3459,7 +3459,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prestation/findById/{id}" : {
+    "api/v1/prestation/findById/{id}" : {
       "get" : {
         "operationId" : "findServiceAdditionnelByIDPrestation",
         "parameters" : [ {
@@ -3479,7 +3479,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prestation/saveorupdate" : {
+    "api/v1/prestation/saveorupdate" : {
       "post" : {
         "operationId" : "saveorupdatePrestation",
         "parameters" : [ {
@@ -3500,7 +3500,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/print/quittance/{id}" : {
+    "api/v1/print/quittance/{id}" : {
       "get" : {
         "operationId" : "sampleQuitance",
         "parameters" : [ {
@@ -3524,7 +3524,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/print/quittancegrouper/{periode}/{idAgence}/{proprio}" : {
+    "api/v1/print/quittancegrouper/{periode}/{idAgence}/{proprio}" : {
       "get" : {
         "operationId" : "quittancePeriode",
         "produces" : [ "application/pdf" ],
@@ -3555,7 +3555,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/print/recuReservationParIdReservation/{idReservation}/{idAgence}/{proprio}" : {
+    "api/v1/print/recuReservationParIdReservation/{idReservation}/{idAgence}/{proprio}" : {
       "get" : {
         "operationId" : "recuReservationParIdReservation",
         "produces" : [ "application/pdf" ],
@@ -3587,7 +3587,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/print/recupaiment/{idEncaissement}" : {
+    "api/v1/print/recupaiment/{idEncaissement}" : {
       "get" : {
         "operationId" : "recuPaiment",
         "produces" : [ "application/pdf" ],
@@ -3608,7 +3608,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/print/recureservation/{idEncaissement}/{idAgence}/{proprio}" : {
+    "api/v1/print/recureservation/{idEncaissement}/{idAgence}/{proprio}" : {
       "get" : {
         "operationId" : "recuReservation",
         "produces" : [ "application/pdf" ],
@@ -3640,7 +3640,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prixparcategorie/listDesPrixParCategori/{idCategorie}" : {
+    "api/v1/prixparcategorie/listDesPrixParCategori/{idCategorie}" : {
       "get" : {
         "operationId" : "listDesPrixParCategori",
         "parameters" : [ {
@@ -3663,7 +3663,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/prixparcategorie/saveOrUpDatePrixParCategorie" : {
+    "api/v1/prixparcategorie/saveOrUpDatePrixParCategorie" : {
       "post" : {
         "operationId" : "saveOrUpDatePrixParCategorie",
         "parameters" : [ {
@@ -3684,7 +3684,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/all/{idAgence}" : {
+    "api/v1/quartier/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllQuartiers",
         "parameters" : [ {
@@ -3707,7 +3707,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/delete/{id}" : {
+    "api/v1/quartier/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteQuartier",
         "parameters" : [ {
@@ -3727,7 +3727,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/findById/{id}" : {
+    "api/v1/quartier/findById/{id}" : {
       "get" : {
         "operationId" : "findByIDQuartiers",
         "parameters" : [ {
@@ -3747,7 +3747,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/findByIdCommune/{id}" : {
+    "api/v1/quartier/findByIdCommune/{id}" : {
       "get" : {
         "operationId" : "findAllQuartierByIdCommune",
         "parameters" : [ {
@@ -3770,7 +3770,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/findByName/{name}" : {
+    "api/v1/quartier/findByName/{name}" : {
       "get" : {
         "operationId" : "findByNameQuartier",
         "parameters" : [ {
@@ -3789,7 +3789,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/quartier/save" : {
+    "api/v1/quartier/save" : {
       "post" : {
         "operationId" : "saveQuartier",
         "parameters" : [ {
@@ -3810,7 +3810,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/allreservation" : {
+    "api/v1/reservation/allreservation" : {
       "get" : {
         "operationId" : "allreservation",
         "responses" : {
@@ -3826,7 +3826,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/allreservationparagence/{idAgence}" : {
+    "api/v1/reservation/allreservationparagence/{idAgence}" : {
       "get" : {
         "operationId" : "allreservationparagence",
         "parameters" : [ {
@@ -3849,7 +3849,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/delete/{id}" : {
+    "api/v1/reservation/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteReservation",
         "parameters" : [ {
@@ -3866,7 +3866,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/findAllEncaissementReservationByIdBien/{idReser}" : {
+    "api/v1/reservation/findAllEncaissementReservationByIdBien/{idReser}" : {
       "get" : {
         "operationId" : "findAllEncaissementReservationByIdBien",
         "parameters" : [ {
@@ -3889,7 +3889,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/findPeriodeReservationByIdBien/{idBien}" : {
+    "api/v1/reservation/findPeriodeReservationByIdBien/{idBien}" : {
       "get" : {
         "operationId" : "findPeriodeReservationByIdBien",
         "parameters" : [ {
@@ -3909,7 +3909,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/findReservationById/{id}" : {
+    "api/v1/reservation/findReservationById/{id}" : {
       "get" : {
         "operationId" : "findCategorieChambreByIDReservation",
         "parameters" : [ {
@@ -3929,7 +3929,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/listeDesReservationOuvertParAgence/{idAgence}" : {
+    "api/v1/reservation/listeDesReservationOuvertParAgence/{idAgence}" : {
       "get" : {
         "operationId" : "listeDesReservationOuvertParAgence",
         "parameters" : [ {
@@ -3952,7 +3952,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/saveencaissementreservation" : {
+    "api/v1/reservation/saveencaissementreservation" : {
       "post" : {
         "operationId" : "saveencaissementreservation",
         "parameters" : [ {
@@ -3976,7 +3976,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/saveorupdate" : {
+    "api/v1/reservation/saveorupdate" : {
       "post" : {
         "operationId" : "saveorupdateRes",
         "parameters" : [ {
@@ -3997,7 +3997,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/saveorupdategood" : {
+    "api/v1/reservation/saveorupdategood" : {
       "post" : {
         "operationId" : "saveorupdategood",
         "parameters" : [ {
@@ -4018,7 +4018,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/reservation/saveorupdatereservation" : {
+    "api/v1/reservation/saveorupdatereservation" : {
       "post" : {
         "operationId" : "saveorupdatereservation",
         "parameters" : [ {
@@ -4039,7 +4039,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/serviceadditionnel/all" : {
+    "api/v1/serviceadditionnel/all" : {
       "get" : {
         "operationId" : "findAllServiceAdditionnelPrestationAdditionnel",
         "responses" : {
@@ -4055,7 +4055,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/serviceadditionnel/delete/{id}" : {
+    "api/v1/serviceadditionnel/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteServiceAdditionnelPrestationAdditionnel",
         "parameters" : [ {
@@ -4072,7 +4072,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/serviceadditionnel/findById/{id}" : {
+    "api/v1/serviceadditionnel/findById/{id}" : {
       "get" : {
         "operationId" : "findServiceAdditionnelByIDPrestationAdditionnel",
         "parameters" : [ {
@@ -4092,7 +4092,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/serviceadditionnel/saveorupdate" : {
+    "api/v1/serviceadditionnel/saveorupdate" : {
       "post" : {
         "operationId" : "saveorupdatePrestationAdditionnel",
         "parameters" : [ {
@@ -4113,7 +4113,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/all/{idAgence}" : {
+    "api/v1/sites/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllSites",
         "parameters" : [ {
@@ -4136,7 +4136,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/delete/{id}" : {
+    "api/v1/sites/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteSite",
         "parameters" : [ {
@@ -4156,7 +4156,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/findById/{id}" : {
+    "api/v1/sites/findById/{id}" : {
       "get" : {
         "operationId" : "findSiteByID",
         "parameters" : [ {
@@ -4176,7 +4176,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/findByName/{name}" : {
+    "api/v1/sites/findByName/{name}" : {
       "get" : {
         "operationId" : "findSiteByName",
         "parameters" : [ {
@@ -4195,7 +4195,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/save" : {
+    "api/v1/sites/save" : {
       "post" : {
         "operationId" : "saveSites",
         "parameters" : [ {
@@ -4216,7 +4216,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/sites/savesite" : {
+    "api/v1/sites/savesite" : {
       "post" : {
         "operationId" : "saveSite",
         "parameters" : [ {
@@ -4237,7 +4237,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/allSuivieDepense/{idAgence}" : {
+    "api/v1/suiviedepense/allSuivieDepense/{idAgence}" : {
       "get" : {
         "operationId" : "getAllEncaissementSuivieDepenseParAgence",
         "parameters" : [ {
@@ -4260,7 +4260,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/{datePriseEnCompteEncaii}/{idCaiss}/{idChapitre}" : {
+    "api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/{datePriseEnCompteEncaii}/{idCaiss}/{idChapitre}" : {
       "get" : {
         "operationId" : "countSuiviNonCloturerParCaisseEtChapitreAvantDate",
         "parameters" : [ {
@@ -4292,7 +4292,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/{codeTransaction}" : {
+    "api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/{codeTransaction}" : {
       "get" : {
         "operationId" : "getSuivieDepenseByCodeTransaction",
         "parameters" : [ {
@@ -4311,7 +4311,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/getSuivieDepenseById/{id}" : {
+    "api/v1/suiviedepense/getSuivieDepenseById/{id}" : {
       "get" : {
         "operationId" : "getSuivieDepenseById",
         "parameters" : [ {
@@ -4331,7 +4331,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/listSortieDeuxDate/{idAgence}/{debut}/{fin}" : {
+    "api/v1/suiviedepense/listSortieDeuxDate/{idAgence}/{debut}/{fin}" : {
       "get" : {
         "operationId" : "listSortieDeuxDate",
         "parameters" : [ {
@@ -4364,7 +4364,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/{idcaisse}/{dateDepriseEnCompte}/{idChapitre}" : {
+    "api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/{idcaisse}/{dateDepriseEnCompte}/{idChapitre}" : {
       "get" : {
         "operationId" : "listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate",
         "parameters" : [ {
@@ -4398,7 +4398,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/{idcaisse}/{dateDebut}/{dateFin}/{idChapitre}" : {
+    "api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/{idcaisse}/{dateDebut}/{dateFin}/{idChapitre}" : {
       "get" : {
         "operationId" : "listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate",
         "parameters" : [ {
@@ -4437,7 +4437,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/saveSuivieDepense" : {
+    "api/v1/suiviedepense/saveSuivieDepense" : {
       "post" : {
         "operationId" : "saveSuivieDepense",
         "parameters" : [ {
@@ -4461,7 +4461,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/suprimerSuiviParId/{id}/{idAgence}" : {
+    "api/v1/suiviedepense/suprimerSuiviParId/{id}/{idAgence}" : {
       "post" : {
         "operationId" : "suprimerSuiviParId",
         "parameters" : [ {
@@ -4490,7 +4490,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/suiviedepense/totalSortieDeuxDate/{idAgence}/{debut}/{fin}" : {
+    "api/v1/suiviedepense/totalSortieDeuxDate/{idAgence}/{debut}/{fin}" : {
       "get" : {
         "operationId" : "totalSortieDeuxDate",
         "parameters" : [ {
@@ -4520,7 +4520,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/all/{idAgence}" : {
+    "api/v1/utilisateur/all/{idAgence}" : {
       "get" : {
         "operationId" : "getAllUtilisateursByOrder",
         "parameters" : [ {
@@ -4543,7 +4543,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/clienthotel/all/{idAgence}" : {
+    "api/v1/utilisateur/clienthotel/all/{idAgence}" : {
       "get" : {
         "operationId" : "listOfAllUtilisateurClientHotelOrderbyNameByAgence",
         "parameters" : [ {
@@ -4566,7 +4566,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/gerants/all/{idAgence}" : {
+    "api/v1/utilisateur/gerants/all/{idAgence}" : {
       "get" : {
         "operationId" : "getAllGerantsByOrder",
         "parameters" : [ {
@@ -4589,7 +4589,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/getAllutilisateurbyAgence/{idAgence}" : {
+    "api/v1/utilisateur/getAllutilisateurbyAgence/{idAgence}" : {
       "get" : {
         "operationId" : "getUtilisateurByAgence",
         "parameters" : [ {
@@ -4612,7 +4612,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/getutilisateurbyemail/{email}" : {
+    "api/v1/utilisateur/getutilisateurbyemail/{email}" : {
       "get" : {
         "operationId" : "getUtilisateurByEmail",
         "parameters" : [ {
@@ -4631,7 +4631,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/getutilisateurbyid/{id}" : {
+    "api/v1/utilisateur/getutilisateurbyid/{id}" : {
       "get" : {
         "operationId" : "getUtilisateurByID",
         "parameters" : [ {
@@ -4651,7 +4651,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/getutilisateurbyusername/{username}" : {
+    "api/v1/utilisateur/getutilisateurbyusername/{username}" : {
       "get" : {
         "operationId" : "getUtilisateurByUsername",
         "parameters" : [ {
@@ -4670,7 +4670,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/locataires/all/{idAgence}" : {
+    "api/v1/utilisateur/locataires/all/{idAgence}" : {
       "get" : {
         "operationId" : "getAllLocatairesByOrder",
         "parameters" : [ {
@@ -4693,7 +4693,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/locataires/ayanbail/{idAgence}" : {
+    "api/v1/utilisateur/locataires/ayanbail/{idAgence}" : {
       "get" : {
         "operationId" : "getAllLocatairesAvecBail",
         "parameters" : [ {
@@ -4716,7 +4716,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/proprietaires/all/{idAgence}" : {
+    "api/v1/utilisateur/proprietaires/all/{idAgence}" : {
       "get" : {
         "operationId" : "getAllProprietaireByOrder",
         "parameters" : [ {
@@ -4739,7 +4739,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/save" : {
+    "api/v1/utilisateur/save" : {
       "post" : {
         "operationId" : "saveUtilisateur",
         "parameters" : [ {
@@ -4760,7 +4760,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/utilisateur/superviseurs/all" : {
+    "api/v1/utilisateur/superviseurs/all" : {
       "get" : {
         "operationId" : "getAllSuperviseursByOrder",
         "responses" : {
@@ -4776,7 +4776,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/villa/all/{idAgence}" : {
+    "api/v1/villa/all/{idAgence}" : {
       "get" : {
         "operationId" : "findAllVilla",
         "parameters" : [ {
@@ -4799,7 +4799,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/villa/alllibre/{idAgence}" : {
+    "api/v1/villa/alllibre/{idAgence}" : {
       "get" : {
         "operationId" : "findAllVillaLibre",
         "parameters" : [ {
@@ -4822,7 +4822,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/villa/findVillaById/{id}" : {
+    "api/v1/villa/findVillaById/{id}" : {
       "get" : {
         "operationId" : "findVillaById",
         "parameters" : [ {
@@ -4842,7 +4842,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/villa/save" : {
+    "api/v1/villa/save" : {
       "post" : {
         "operationId" : "saveVilla",
         "parameters" : [ {
@@ -4863,7 +4863,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/all" : {
+    "api/v1/ville/all" : {
       "get" : {
         "operationId" : "findAllVilles",
         "responses" : {
@@ -4879,7 +4879,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/delete/{id}" : {
+    "api/v1/ville/delete/{id}" : {
       "delete" : {
         "operationId" : "deleteVille",
         "parameters" : [ {
@@ -4899,7 +4899,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/findById/{id}" : {
+    "api/v1/ville/findById/{id}" : {
       "get" : {
         "operationId" : "findByIdVille",
         "parameters" : [ {
@@ -4919,7 +4919,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/findByIdPays/{id}" : {
+    "api/v1/ville/findByIdPays/{id}" : {
       "get" : {
         "operationId" : "findAllVilleByIdPays",
         "parameters" : [ {
@@ -4942,7 +4942,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/findByName/{name}" : {
+    "api/v1/ville/findByName/{name}" : {
       "get" : {
         "operationId" : "findVilleByNameVille",
         "parameters" : [ {
@@ -4961,7 +4961,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/findByPays" : {
+    "api/v1/ville/findByPays" : {
       "get" : {
         "operationId" : "findAllVilleByPaysObject",
         "parameters" : [ {
@@ -4985,7 +4985,7 @@
         }
       }
     },
-    "gestimoweb/api/v1/ville/save" : {
+    "api/v1/ville/save" : {
       "post" : {
         "operationId" : "saveVille",
         "parameters" : [ {

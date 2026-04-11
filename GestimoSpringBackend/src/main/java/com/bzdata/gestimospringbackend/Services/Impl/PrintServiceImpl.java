@@ -64,6 +64,7 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -87,6 +88,12 @@ public class PrintServiceImpl implements PrintService {
 
   static final Locale FRENCH_LOCALE = Locale.FRANCE;
   static final ZoneId DEFAULT_ZONE = ZoneId.systemDefault();
+
+  /** Injecte le locale français dans les paramètres Jasper pour avoir les séparateurs de milliers corrects (espace). */
+  private static Map<String, Object> withFrenchLocale(Map<String, Object> parameters) {
+    parameters.put(JRParameter.REPORT_LOCALE, FRENCH_LOCALE);
+    return parameters;
+  }
 
   ResourceLoader resourceLoader;
   final DataSource dataSourceSQL;
@@ -147,7 +154,7 @@ public class PrintServiceImpl implements PrintService {
 
     JasperPrint print = JasperFillManager.fillReport(
       jasperReport,
-      parameters,
+      withFrenchLocale(parameters),
       dataSourceSQL.getConnection()
     );
     JasperExportManager.exportReportToPdfFile(
@@ -209,7 +216,7 @@ public class PrintServiceImpl implements PrintService {
       JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
       JasperPrint print = JasperFillManager.fillReport(
         jasperReport,
-        parameters,
+        withFrenchLocale(parameters),
         dataSourceSQL.getConnection()
       );
       log.info("Rapport genere pour periode={} agence={} : {} page(s)", periode, idAgence, print.getPages().size());
@@ -258,7 +265,7 @@ public class PrintServiceImpl implements PrintService {
       }
       JasperPrint print = JasperFillManager.fillReport(
         jasperReport,
-        parameters,
+        withFrenchLocale(parameters),
         dataSourceSQL.getConnection()
       );
       JasperExportManager.exportReportToPdfFile(
@@ -345,7 +352,7 @@ public class PrintServiceImpl implements PrintService {
       }
       JasperPrint print = JasperFillManager.fillReport(
         jasperReport,
-        parameters,
+        withFrenchLocale(parameters),
         dataSourceSQL.getConnection()
       );
       JasperExportManager.exportReportToPdfFile(
@@ -383,7 +390,7 @@ public class PrintServiceImpl implements PrintService {
       }
       JasperPrint print = JasperFillManager.fillReport(
         jasperReport,
-        parameters,
+        withFrenchLocale(parameters),
         dataSourceSQL.getConnection()
       );
       JasperExportManager.exportReportToPdfFile(
@@ -485,7 +492,7 @@ public class PrintServiceImpl implements PrintService {
       }
       JasperPrint print = JasperFillManager.fillReport(
         jasperReport,
-        parameters,
+        withFrenchLocale(parameters),
         dataSourceSQL.getConnection()
       );
       JasperExportManager.exportReportToPdfFile(

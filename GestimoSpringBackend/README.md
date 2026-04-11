@@ -9,7 +9,7 @@ Le backend Spring Boot du projet Gestimo est désormais documenté au niveau dé
 
 ## Résumé rapide
 
-Ce module expose l'API `gestimoweb/api/v1` et gère :
+Ce module expose l'API `api/v1` et gère :
 
 - authentification JWT ;
 - utilisateurs, agences, rôles, droits, établissements ;

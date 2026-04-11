@@ -167,6 +167,7 @@ WHERE
 			<textField>
 				<reportElement x="220" y="1" width="168" height="30" uuid="9cd85f27-c4e3-4d8d-9186-4452ea660146"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<patternExpression><![CDATA["#,##0 F"]]></patternExpression>
 				<textFieldExpression><![CDATA[$F{montant_payer}]]></textFieldExpression>
 			</textField>
 		</band>

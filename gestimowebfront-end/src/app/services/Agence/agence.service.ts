@@ -18,13 +18,13 @@ export class AgenceService {
 
   public getAllAgences(): Observable<AgenceImmobilierDTO[]> {
     return this.http.get<AgenceImmobilierDTO[]>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/agences/all`
+      `${this.apiService.rootUrl}api/v1/agences/all`
     );
   }
 
   public saveAgence(agenceDto:AgenceRequestDto):Observable<AgenceImmobilierDTO>{
     return this.http.post<AgenceImmobilierDTO>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/agences/signup`,
+      `${this.apiService.rootUrl}api/v1/agences/signup`,
       agenceDto
     );
   }
@@ -41,14 +41,14 @@ export class AgenceService {
     }
 
     return this.http.post<AgenceImmobilierDTO>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/agences/${idAgence}/logo`,
+      `${this.apiService.rootUrl}api/v1/agences/${idAgence}/logo`,
       formData
     );
   }
 
   public deleteAgence(idAgence: number): Observable<string> {
     return this.http.delete(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/agences/deleteagence/${idAgence}`,
+      `${this.apiService.rootUrl}api/v1/agences/deleteagence/${idAgence}`,
       { responseType: 'text' }
     );
   }

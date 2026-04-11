@@ -1,20 +1,17 @@
-# ===========================
-# PROD profile
-# ===========================
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: gestimo
+    password: gestimoweb
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate
 
 app:
-  password-reset-url: ${PASSWORD_RESET_URL}
+  password-reset-url: http://51.75.142.41/reset-password
 
 logging:
   level:

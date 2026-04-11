@@ -150,7 +150,7 @@ public class GestimoSpringBackendApplication {
         "molibety@gestimo.local",
         "CI-MOLIBETY-001"
       );
-      Long defaultAgencyId = resolveDefaultAgencyId(agenceImmobiliereRepository);
+      //Long defaultAgencyId = resolveDefaultAgencyId(agenceImmobiliereRepository);
 
       Long couchDefaultChapitre = defaultChapitreRepository.count();
       System.out.println(couchDefaultChapitre);
@@ -441,7 +441,7 @@ public class GestimoSpringBackendApplication {
           utilisateur.setActivated(true);
           utilisateur.setUsername(defaultUserEmail);
           utilisateur.setPassword(mdp);
-          utilisateur.setIdAgence(defaultAgencyId);
+          utilisateur.setIdAgence(1L);
           utilisateur.setJoinDate(new Date());
           utilisateur.setRoleUsed(ROLE_SUPER_SUPERVISEUR.name());
           utilisateur.setAuthorities(ROLE_SUPER_SUPERVISEUR.getAuthorities());
@@ -452,7 +452,7 @@ public class GestimoSpringBackendApplication {
           userPrincipalSuperviseur.getIdAgence() == null ||
           !agenceImmobiliereRepository.existsById(userPrincipalSuperviseur.getIdAgence())
         ) {
-          userPrincipalSuperviseur.setIdAgence(defaultAgencyId);
+          userPrincipalSuperviseur.setIdAgence(1L);
           userPrincipalSuperviseur.setUsername(userPrincipalSuperviseur.getEmail());
           utilisateurRepository.save(userPrincipalSuperviseur);
         } else if (
