@@ -1,0 +1,9 @@
+# Fichier de secrets local — ne jamais committer
+.env
+
+# Logs
+*.log
+
+# Répertoires OS
+.DS_Store
+Thumbs.db

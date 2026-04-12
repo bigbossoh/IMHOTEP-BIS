@@ -88,14 +88,14 @@ export class PrintServiceService {
   }
 
   printQuittanceById(id: number): Observable<Blob> {
-    return this.requestBlobWithFallback('gestimoweb/api/v1/print/quittance', id);
+    return this.requestBlobWithFallback('api/v1/print/quittance', id);
   }
   printBail(idBail: number): Observable<Blob> {
-    return this.requestBlobWithFallback('gestimoweb/api/v1/print/bail', idBail);
+    return this.requestBlobWithFallback('api/v1/print/bail', idBail);
   }
   recureservation(  idEncaissement:any,  idAgence:any,proprio:any){
     return this.requestBlobWithFallback(
-      'gestimoweb/api/v1/print/recureservation',
+      'api/v1/print/recureservation',
       idEncaissement,
       idAgence,
       proprio
@@ -103,7 +103,7 @@ export class PrintServiceService {
   }
   recureservationparid(  idReservation:any,  idAgence:any,proprio:any){
     return this.requestBlobWithFallback(
-      'gestimoweb/api/v1/print/recuReservationParIdReservation',
+      'api/v1/print/recuReservationParIdReservation',
       idReservation,
       idAgence,
       proprio
@@ -111,13 +111,13 @@ export class PrintServiceService {
   }
   printRecuEncaissement(idEncaissement: any): Observable<Blob> {
     return this.requestBlobWithFallback(
-      'gestimoweb/api/v1/print/recupaiment',
+      'api/v1/print/recupaiment',
       idEncaissement
     );
   }
   printQuittanceByPeriode(periode: string, idAgence: any): Observable<Blob> {
     return this.requestBlobWithFallback(
-      'gestimoweb/api/v1/print/quittancegrouper',
+      'api/v1/print/quittancegrouper',
       periode,
       idAgence
     );
@@ -136,7 +136,7 @@ export class PrintServiceService {
 
     const url = this.buildApiUrl(
       this.apiConfig.rootUrl ?? '/',
-      'gestimoweb/api/v1/agences/saveagencelogo'
+      'api/v1/agences/saveagencelogo'
     );
 
     return this.http.post(url, myFormData, { headers });

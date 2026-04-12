@@ -2,7 +2,6 @@ package com.bzdata.gestimospringbackend.Services.Impl;
 
 
 import com.bzdata.gestimospringbackend.Models.NotificationEmail;
-import com.bzdata.gestimospringbackend.exceptions.GestimoWebExceptionGlobal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,25 +19,36 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.host:}")
+    private String mailHost;
+
+    @Value("${spring.mail.username:}")
     private String mailFrom;
 
     @Async
-    public void sendMail(NotificationEmail notificationEmail){
-        MimeMessagePreparator messagePreparator=mimeMessage -> {
-            MimeMessageHelper messageHelper=new MimeMessageHelper(mimeMessage);
+    public void sendMail(NotificationEmail notificationEmail) {
+        if (mailHost == null || mailHost.isBlank()) {
+            log.warn("[MAIL] Serveur SMTP non configuré (spring.mail.host vide). " +
+                     "Email NON envoyé à {} — sujet : {}", notificationEmail.getRecipient(), notificationEmail.getSubject());
+            return;
+        }
+
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             messageHelper.setFrom(mailFrom);
             messageHelper.setTo(notificationEmail.getRecipient());
             messageHelper.setSubject(notificationEmail.getSubject());
             messageHelper.setText(notificationEmail.getBody(), true);
         };
-        try{
+
+        try {
             mailSender.send(messagePreparator);
-            log.info("Email sent to {}", notificationEmail.getRecipient());
-        }catch (MailException e){
-            log.error("Exception occured when sending mail", e);
-            throw  new GestimoWebExceptionGlobal("Une exception est arrivé pendant l'envoi du mail à "
-                    +notificationEmail.getRecipient());
+            log.info("[MAIL] Email envoyé à {}", notificationEmail.getRecipient());
+        } catch (MailException e) {
+            log.error("[MAIL] Échec de l'envoi à {} : {}", notificationEmail.getRecipient(), e.getMessage());
+            throw new RuntimeException(
+                "Échec de l'envoi du mail à " + notificationEmail.getRecipient() +
+                ". Vérifiez la configuration SMTP (host, port, username, password).", e);
         }
     }
 }

@@ -8,6 +8,8 @@ services:
       MYSQL_USER: ${MYSQL_USER:-gestimo}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gestimoweb}
       TZ: ${TZ:-Africa/Abidjan}
+    ports:
+      - "3305:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -27,13 +29,12 @@ services:
       MYSQL_USER: ${MYSQL_USER:-gestimo}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-gestimoweb}
       JWT_SECRET: ${JWT_SECRET:-change_me_in_prod}
-      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_HOST: ${MAIL_HOST:-smtp-fr.securemail.pro}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       PASSWORD_RESET_URL: ${PASSWORD_RESET_URL:-http://51.75.142.41/reset-password}
       DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL:-bossohpaulin@gmail.com}
-      DEFAULT_AGENCY_ID: ${DEFAULT_AGENCY_ID:-}
       TZ: ${TZ:-Africa/Abidjan}
     volumes:
       - backend_data:/home/spring/gestimoweb

@@ -47,9 +47,13 @@ export class PageLoginComponent implements OnInit {
           this.showLoading = false;
         },
         (errorResponse: HttpErrorResponse) => {
-        console.log(errorResponse.message);
-
-          this.sendErrorNotification(NotificationType.ERROR, errorResponse.error.message);
+          const errorBody = errorResponse.error;
+          const errorMsg = errorBody?.message
+            || errorBody?.messages
+            || errorBody?.errorMessage
+            || (Array.isArray(errorBody?.errors) && errorBody.errors[0])
+            || 'Email ou mot de passe incorrect.';
+          this.sendErrorNotification(NotificationType.ERROR, errorMsg);
           this.showLoading = false;
         }
       )

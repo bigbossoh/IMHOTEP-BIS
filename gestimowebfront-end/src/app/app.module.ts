@@ -179,6 +179,7 @@ import { PageReglementReservationIndividuelComponent } from './pages/residence/p
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableExporterDirective } from './directives/mat-table-exporter.directive';
 import { PageAuditComponent } from './pages/audit/page-audit.component';
+import { PageAideComponent } from './pages/page-aide/page-aide.component';
 import { PageRapportBiensDisponiblesComponent } from './pages/bien-immobilier/page-rapport-biens-disponibles/page-rapport-biens-disponibles.component';
 import { PageFonctionnalitesUtilisateursComponent } from './pages/utilisateurs/page-fonctionnalites-utilisateurs/page-fonctionnalites-utilisateurs.component';
 import { AuditInterceptor } from './interceptor/audit.interceptor';
@@ -275,6 +276,7 @@ import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-
     PageReglementReservationIndividuelComponent,
     MatTableExporterDirective,
     PageAuditComponent,
+    PageAideComponent,
   ],
   imports: [
     CanvasJSAngularChartsModule,

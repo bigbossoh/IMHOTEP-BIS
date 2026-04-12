@@ -33,7 +33,7 @@ private readonly serverUrl = environment.serverUrl;
 
    public getMonitoringOverview(idAgence: number): Observable<MonitoringOverview> {
     return this.http.get<MonitoringOverview>(
-      this.buildApiUrl(`gestimoweb/api/v1/monitoring/overview/${idAgence}`)
+      this.buildApiUrl(`api/v1/monitoring/overview/${idAgence}`)
     );
    }
 

@@ -44,7 +44,7 @@ export class AuditService {
   private getApiRoot(): string {
     const rootUrl = this.apiConfig.rootUrl ?? '';
     const normalizedRootUrl = rootUrl.endsWith('/') ? rootUrl : `${rootUrl}/`;
-    return `${normalizedRootUrl}gestimoweb/api/v1/audit`;
+    return `${normalizedRootUrl}api/v1/audit`;
   }
 
   addEntry(entry: AuditEntryCreate): void {

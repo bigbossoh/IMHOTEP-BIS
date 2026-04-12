@@ -1,13 +1,9 @@
-# ===========================
-# DEV profile
-# ===========================
-
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL:jdbc:mysql://localhost:3305/dbgestimoweb?serverTimezone=UTC}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:gestimoweb}
+    url: jdbc:mysql://localhost:3305/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: gestimoweb
   jpa:
     show-sql: false
     hibernate:

@@ -307,6 +307,12 @@ export class MenuComponent implements OnInit {
           icon: 'fas fa-history',
           url: 'audit',
         },
+        {
+          id: '117',
+          titre: "Aide / Manuel d'utilisation",
+          icon: 'fas fa-question-circle',
+          url: 'aide',
+        },
       ],
     },
   ];

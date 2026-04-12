@@ -28,7 +28,7 @@ export class TachesPlanifieesService {
 
   public getConfiguration(idAgence: number): Observable<ScheduledTaskConfig> {
     return this.http.get<ScheduledTaskConfig>(
-      `${this.apiBaseUrl}/gestimoweb/api/v1/taches-planifiees/agence/${idAgence}`
+      `${this.apiBaseUrl}/api/v1/taches-planifiees/agence/${idAgence}`
     );
   }
 
@@ -36,14 +36,14 @@ export class TachesPlanifieesService {
     payload: ScheduledTaskConfig
   ): Observable<ScheduledTaskConfig> {
     return this.http.post<ScheduledTaskConfig>(
-      `${this.apiBaseUrl}/gestimoweb/api/v1/taches-planifiees/save`,
+      `${this.apiBaseUrl}/api/v1/taches-planifiees/save`,
       payload
     );
   }
 
   public runNow(idAgence: number): Observable<boolean> {
     return this.http.post<boolean>(
-      `${this.apiBaseUrl}/gestimoweb/api/v1/taches-planifiees/run-now/${idAgence}`,
+      `${this.apiBaseUrl}/api/v1/taches-planifiees/run-now/${idAgence}`,
       {}
     );
   }

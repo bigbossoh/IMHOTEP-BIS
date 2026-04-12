@@ -117,7 +117,7 @@ export class UserService {
 
   public login(authRequestDto: AuthRequestDto): Observable<any> {
     return this.http.post<UtilisateurRequestDto>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/auth/login`,
+      `${this.apiService.rootUrl}api/v1/auth/login`,
       authRequestDto,
       { observe: 'response' }
     );
@@ -125,7 +125,7 @@ export class UserService {
 
   public requestPasswordReset(identifier: string): Observable<string> {
     return this.http.post(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/password-reset/request`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/password-reset/request`,
       { identifier },
       { responseType: 'text' }
     );
@@ -137,7 +137,7 @@ export class UserService {
     confirmPassword: string;
   }): Observable<string> {
     return this.http.post(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/password-reset/confirm`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/password-reset/confirm`,
       payload,
       { responseType: 'text' }
     );
@@ -147,13 +147,13 @@ export class UserService {
     idUtilisateur: number
   ): Observable<EtablissementUtilisateurDto> {
     return this.http.get<EtablissementUtilisateurDto>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/etablissement/getDefaultEtable/${idUtilisateur}`
+      `${this.apiService.rootUrl}api/v1/etablissement/getDefaultEtable/${idUtilisateur}`
     );
   }
 
   public getAllEstablishments(): Observable<EstablishmentOption[]> {
     return this.http.get<EstablishmentOption[]>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/establishments`
+      `${this.apiService.rootUrl}api/v1/establishments`
     );
   }
 
@@ -161,7 +161,7 @@ export class UserService {
     idEtablissement: number
   ): Observable<DepartmentOption[]> {
     return this.http.get<DepartmentOption[]>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/establishments/${idEtablissement}/departments`
+      `${this.apiService.rootUrl}api/v1/establishments/${idEtablissement}/departments`
     );
   }
 
@@ -169,7 +169,7 @@ export class UserService {
     payload: UserEstablishmentAssignmentPayload
   ): Observable<EtablissementUtilisateurDto> {
     return this.http.post<EtablissementUtilisateurDto>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/affecter-etablissement`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/affecter-etablissement`,
       payload
     );
   }
@@ -177,7 +177,7 @@ export class UserService {
   public getDefaultChapitre(id: any): Observable<any> {
   return  this.http.get<any>(
       this.apiService.rootUrl +
-        'gestimoweb/api/v1/etablissement/getDefaultEtable/' +
+        'api/v1/etablissement/getDefaultEtable/' +
         id,
       { observe: 'response' }
     );
@@ -195,7 +195,7 @@ export class UserService {
     idAgence: number
   ): Observable<UtilisateurAfficheDto[]> {
     return this.http.get<UtilisateurAfficheDto[]>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/all/${idAgence}`
+      `${this.apiService.rootUrl}api/v1/utilisateur/all/${idAgence}`
     );
   }
 
@@ -203,7 +203,7 @@ export class UserService {
     idAgence: number
   ): Observable<LocataireEncaisDTO[]> {
     return this.http.get<LocataireEncaisDTO[]>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/locataires/compte-client/${idAgence}`
+      `${this.apiService.rootUrl}api/v1/utilisateur/locataires/compte-client/${idAgence}`
     );
   }
 
@@ -211,7 +211,7 @@ export class UserService {
     formData: UtilisateurRequestDto
   ): Observable<UtilisateurAfficheDto> {
     return this.http.post<UtilisateurAfficheDto>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/save`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/save`,
       formData
     );
   }
@@ -222,14 +222,14 @@ export class UserService {
 
   public deactivateUser(idUtilisateur: number): Observable<UtilisateurAfficheDto> {
     return this.http.put<UtilisateurAfficheDto>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/desactiver/${idUtilisateur}`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/desactiver/${idUtilisateur}`,
       {}
     );
   }
 
   public deleteUser(idUtilisateur: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/${idUtilisateur}`
+      `${this.apiService.rootUrl}api/v1/utilisateur/${idUtilisateur}`
     );
   }
 
@@ -257,7 +257,7 @@ export class UserService {
     formData.append('idAgence', idAgence.toString());
     formData.append('idCreateur', idCreateur.toString());
     return this.http.post<ImportResult>(
-      `${this.apiService.rootUrl}gestimoweb/api/v1/utilisateur/import/excel`,
+      `${this.apiService.rootUrl}api/v1/utilisateur/import/excel`,
       formData
     );
   }

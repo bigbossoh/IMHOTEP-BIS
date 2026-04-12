@@ -44,6 +44,11 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/profil']);
   }
 
+  goToAide(menu?: HTMLDetailsElement): void {
+    menu?.removeAttribute('open');
+    this.router.navigate(['/aide']);
+  }
+
   logoutUser(menu?: HTMLDetailsElement): void {
     menu?.removeAttribute('open');
     this.userService.logOut();

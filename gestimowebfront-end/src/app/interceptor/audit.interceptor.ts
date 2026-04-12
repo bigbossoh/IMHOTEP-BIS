@@ -32,7 +32,7 @@ export class AuditInterceptor implements HttpInterceptor {
 
     const shouldTrace =
       TRACED_METHODS.includes(method) &&
-      (url.includes('gestimoweb/api/v1') || url.includes('/auth/login')) &&
+      (url.includes('api/v1') || url.includes('/auth/login')) &&
       !EXCLUDED_URLS.some((ex) => url.includes(ex));
 
     if (!shouldTrace) {

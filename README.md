@@ -25,9 +25,9 @@ Le dépôt est organisé en deux modules :
 
 ### 1. Authentification
 
-Le backend expose l'API sous le préfixe `gestimoweb/api/v1`.
+Le backend expose l'API sous le préfixe `api/v1`.
 
-- le login passe par `POST /gestimoweb/api/v1/auth/login` ;
+- le login passe par `POST /api/v1/auth/login` ;
 - le backend renvoie l'utilisateur connecté dans le corps de réponse et le JWT dans l'en-tête `Jwt-Token` ;
 - le frontend stocke le token dans `localStorage` puis l'envoie ensuite dans l'en-tête `Authorization: Bearer ...` via `AuthInterceptor`.
 

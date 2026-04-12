@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     if (
       httpRequest.url.includes(
-        `${this.apiService.rootUrl}gestimoweb/api/v1/auth/login`
+        `${this.apiService.rootUrl}api/v1/auth/login`
       )
     ) {
       return httpHandler.handle(httpRequest);

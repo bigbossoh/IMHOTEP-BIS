@@ -71,225 +71,225 @@ import { VilleDto } from '../models/ville-dto';
   providedIn: 'root',
 })
 class ApiService extends __BaseService {
-  static readonly getAllAgenceByOrderAgencePath = 'gestimoweb/api/v1/agences/all/{idAgence}';
-  static readonly deleteAgenceByIdAgencePath = 'gestimoweb/api/v1/agences/deleteagence/{id}';
-  static readonly getAgenceByEmailAgencePath = 'gestimoweb/api/v1/agences/getagencebyemail/{email}';
-  static readonly getAgenceByIDAgencePath = 'gestimoweb/api/v1/agences/getagencebyid/{id}';
-  static readonly authenticateAgencePath = 'gestimoweb/api/v1/agences/signup';
-  static readonly findAllAppartementPath = 'gestimoweb/api/v1/appartement/all/{id}';
-  static readonly findAllAppartementLibrePath = 'gestimoweb/api/v1/appartement/alllmeublelibre/{idAgence}';
-  static readonly findAllAppartementMeublePath = 'gestimoweb/api/v1/appartement/allmeuble/{id}';
-  static readonly deleteAppartementPath = 'gestimoweb/api/v1/appartement/delete/{id}';
-  static readonly findByIDAppartementPath = 'gestimoweb/api/v1/appartement/findById/{id}';
-  static readonly findByIdEtageAppartementPath = 'gestimoweb/api/v1/appartement/findByIdEtage/{id}';
-  static readonly findByNameAppartementPath = 'gestimoweb/api/v1/appartement/findByName/{name}';
-  static readonly findAllAppartementByIdCategoriePath = 'gestimoweb/api/v1/appartement/findallappartementbyidcategorie/{id}';
-  static readonly saveAppartementPath = 'gestimoweb/api/v1/appartement/save';
-  static readonly saveForCategoriePath = 'gestimoweb/api/v1/appartement/saveForCategorie';
-  static readonly deleteAppelDtoPath = 'gestimoweb/api/v1/appelloyer/clotureOfAppelDtoByID/{id}';
-  static readonly AppelLoyersParPeriodePath = 'gestimoweb/api/v1/appelloyer/findAllAppelloyerByPeriode/{periode}/{idAgence}';
-  static readonly listTousAppelsLoyersPath = 'gestimoweb/api/v1/appelloyer/findAllAppelsLoyer/{idAgence}';
-  static readonly findAllPeriodePath = 'gestimoweb/api/v1/appelloyer/findAllPeriodeAppel/{idAgence}';
-  static readonly findAllPeriodeByAnneePath = 'gestimoweb/api/v1/appelloyer/findAllPeriodeByAnnee/{annee}/{idAgence}';
-  static readonly findAllPeriodeChiffreEtLettreByAnneePath = 'gestimoweb/api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/{annee}/{idAgence}';
-  static readonly AppelLoyersParIdPath = 'gestimoweb/api/v1/appelloyer/findAppelloyer/{id}';
-  static readonly listDesLoyersParBailPath = 'gestimoweb/api/v1/appelloyer/findAppelsByIdBail/{idBail}';
-  static readonly listDesLoyersImpayerParBailPath = 'gestimoweb/api/v1/appelloyer/findAppelsImpayerByIdBail/{id}';
-  static readonly findByIdAndBailPath = 'gestimoweb/api/v1/appelloyer/findByIdAndBail/{idBien}/{periode}';
-  static readonly getFirstLoyerImpayerByBienPath = 'gestimoweb/api/v1/appelloyer/getFirstLoyerImpayerByBien/{id}';
-  static readonly impayeLoyerParAnneePath = 'gestimoweb/api/v1/appelloyer/impayeParAnnee/{annee}/{idAgence}/{chapitre}';
-  static readonly impayeLoyerParMoisAppelLoyerPath = 'gestimoweb/api/v1/appelloyer/impayeParMois/{periode}/{idAgence}/{chapitre}';
-  static readonly listMessageEnvoyerAUnLocatairePath = 'gestimoweb/api/v1/appelloyer/listMessageEnvoyerAUnLocataire/{login}';
-  static readonly listOfDistinctAnneeAppelPath = 'gestimoweb/api/v1/appelloyer/listOfDistinctAnneeAppel/{idAgence}';
-  static readonly listeDesloyerSuperieurAUnePeriodePath = 'gestimoweb/api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/{idBien}/{periode}';
-  static readonly miseAjourDesUnlockDesBauxPath = 'gestimoweb/api/v1/appelloyer/miseAjourDesUnlockDesBaux/{idAgence}';
-  static readonly nombreImpayerLoyerParMoisPath = 'gestimoweb/api/v1/appelloyer/nombreImpayerLoyerParMois/{periode}/{idAgence}/{chapitre}';
-  static readonly nombrePayerLoyerParMoisPath = 'gestimoweb/api/v1/appelloyer/nombrePayerLoyerParMois/{periode}/{idAgence}/{chapitre}';
-  static readonly payeLoyerParAnneePath = 'gestimoweb/api/v1/appelloyer/payeParAnnee/{annee}/{idAgence}/{chapitre}';
-  static readonly payeLoyerParMoisPath = 'gestimoweb/api/v1/appelloyer/payeParMois/{periode}/{idAgence}/{chapitre}';
-  static readonly ReductionLoyerByPeriodePath = 'gestimoweb/api/v1/appelloyer/reductionLoyerByPeriode';
-  static readonly saveAppelLoyersPath = 'gestimoweb/api/v1/appelloyer/save';
-  static readonly staisiqueLoyerParMoisPath = 'gestimoweb/api/v1/appelloyer/staisiqueLoyerParMois/{periode}/{idAgence}/{chapitre}';
-  static readonly statistiqueLoyerParAnneePath = 'gestimoweb/api/v1/appelloyer/statistiqueLoyerParAnnee/{annee}/{idAgence}/{chapitre}';
-  static readonly supprimerPaiementAppelPath = 'gestimoweb/api/v1/appelloyer/supprimerPaiementAppel/{idPeriode}/{idBail}';
-  static readonly verifyAccountPath = 'gestimoweb/api/v1/auth/accountVerification/{token}';
-  static readonly loginPath = 'gestimoweb/api/v1/auth/login';
-  static readonly bailByLocataireEtBienPath = 'gestimoweb/api/v1/bail/bailLocataireetbien/{locataire}/{bien}';
-  static readonly clotureBailPath = 'gestimoweb/api/v1/bail/clotureBail/{id}';
-  static readonly findOperationByIdPath = 'gestimoweb/api/v1/bail/findoperationbyid/{id}';
-  static readonly listDesBauxPourUnBienImmobilierPath = 'gestimoweb/api/v1/bail/getallbailbybien/{id}';
-  static readonly listDesBauxPourUnLocatairePath = 'gestimoweb/api/v1/bail/getallbailbylocataire/{id}';
-  static readonly nombrebailactifPath = 'gestimoweb/api/v1/bail/nombrebailactif/{idAgence}';
-  static readonly nombrebailnonactifPath = 'gestimoweb/api/v1/bail/nombrebailnonactif/{idAgence}';
-  static readonly modifierUnBailPath = 'gestimoweb/api/v1/bail/save';
-  static readonly supprimerBailPath = 'gestimoweb/api/v1/bail/supprimerBail/{id}';
-  static readonly findAllBailAppartementPath = 'gestimoweb/api/v1/bailappartement/all/{idAgence}';
-  static readonly findAllOperationsPath = 'gestimoweb/api/v1/bailappartement/alloperation/{idAgence}';
-  static readonly deleteBailAppartementPath = 'gestimoweb/api/v1/bailappartement/delete/{id}';
-  static readonly findByIDBailAppartementPath = 'gestimoweb/api/v1/bailappartement/findById/{id}';
-  static readonly findByNameBailAppartementPath = 'gestimoweb/api/v1/bailappartement/findByName/{name}';
-  static readonly saveBailAppartementPath = 'gestimoweb/api/v1/bailappartement/save';
-  static readonly findAllBailMagasinPath = 'gestimoweb/api/v1/bailmagasin/all/{idAgence}';
-  static readonly deleteBailMagasinPath = 'gestimoweb/api/v1/bailmagasin/delete/{id}';
-  static readonly findByIDBailMagasinPath = 'gestimoweb/api/v1/bailmagasin/findById/{id}';
-  static readonly findByNameBailMagasinPath = 'gestimoweb/api/v1/bailmagasin/findByName/{name}';
-  static readonly saveBailMagasinPath = 'gestimoweb/api/v1/bailmagasin/save';
-  static readonly findAllBailVillaPath = 'gestimoweb/api/v1/bailvilla/all/{idAgence}';
-  static readonly deleteBailVillaPath = 'gestimoweb/api/v1/bailvilla/delete/{id}';
-  static readonly findBailVillaByIDPath = 'gestimoweb/api/v1/bailvilla/findById/{id}';
-  static readonly findBailVillaByNamePath = 'gestimoweb/api/v1/bailvilla/findByName/{name}';
-  static readonly saveBailVillaPath = 'gestimoweb/api/v1/bailvilla/save';
-  static readonly findAllBienPath = 'gestimoweb/api/v1/bienImmobilier/all/{idAgence}/{chapitre}';
-  static readonly findAllBienOqpPath = 'gestimoweb/api/v1/bienImmobilier/allBienOccuper/{idAgence}/{chapitre}';
-  static readonly rattacherUnBienAUnChapitrePath = 'gestimoweb/api/v1/bienImmobilier/rattacherUnBienAUnChapitre/{idBien}/{chapitre}';
-  static readonly findAllCategorieChambrePath = 'gestimoweb/api/v1/categoriechambre/all/{idAgence}';
-  static readonly deleteCategoryChambrePath = 'gestimoweb/api/v1/categoriechambre/delete/{id}';
-  static readonly findCategorieChambreByIDPath = 'gestimoweb/api/v1/categoriechambre/findById/{id}';
-  static readonly findCategorieByIdAppartementPath = 'gestimoweb/api/v1/categoriechambre/findCategorieByIdAppartement/{idAppart}';
-  static readonly saveOrUpdateCategoryChambrePath = 'gestimoweb/api/v1/categoriechambre/saveOrUpdateCategoryChambre';
-  static readonly saveorupdateCategoryChambrePath = 'gestimoweb/api/v1/categoriechambre/saveorupdate';
-  static readonly countInitClotureByCaissiaireAndChampitrePath = 'gestimoweb/api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}';
-  static readonly findAllByCaissierAndChapitrePath = 'gestimoweb/api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}';
-  static readonly findAllCloturerCaisseAgencePath = 'gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseAgence';
-  static readonly findAllCloturerCaisseByDateAndChapitrePath = 'gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}';
-  static readonly findNonCloturerByDateAndCaisseAndChapitrePath = 'gestimoweb/api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}';
-  static readonly saveClotureCaissePath = 'gestimoweb/api/v1/cloturecaisse/savecloturecaisse';
-  static readonly findAllCommunePath = 'gestimoweb/api/v1/commune/all';
-  static readonly deleteCommunePath = 'gestimoweb/api/v1/commune/delete/{id}';
-  static readonly findCommuneByIDPath = 'gestimoweb/api/v1/commune/findById/{id}';
-  static readonly findCommuneByIdPaysPath = 'gestimoweb/api/v1/commune/findByIdVille/{id}';
-  static readonly findCommuneByNamePath = 'gestimoweb/api/v1/commune/findByName/{name}';
-  static readonly saveCommunePath = 'gestimoweb/api/v1/commune/save';
-  static readonly findAllDroitAccessPath = 'gestimoweb/api/v1/droitAccess/';
-  static readonly saveDroitAccessPath = 'gestimoweb/api/v1/droitAccess/save';
-  static readonly findByIdDroitAccessPath = 'gestimoweb/api/v1/droitAccess/{droitAccessid}';
-  static readonly deleteDroitAccessPath = 'gestimoweb/api/v1/droitAccess/{droitAccessid}';
-  static readonly findAllEncaissementByIdLocatirePath = 'gestimoweb/api/v1/encaissement/allEncaissementByIdLocatire/{idLocatire}';
-  static readonly findAllEncaissementByIdBienImmobilierPath = 'gestimoweb/api/v1/encaissement/allencaissementByIdBien/{id}';
-  static readonly listTousEncaissementsPrincipalPath = 'gestimoweb/api/v1/encaissement/findAllEncaissementPrincipal/{idAgence}';
-  static readonly findByIdEncaissementPath = 'gestimoweb/api/v1/encaissement/findByIdEncaissement/{id}';
-  static readonly getTotalEncaissementparPeriodePath = 'gestimoweb/api/v1/encaissement/getTotalEncaissementparPeriode/{idAgence}/{datedebut}/{datefin}';
-  static readonly getTotalEncaissementsEtMontantsDeLoyerParMoisPath = 'gestimoweb/api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/{idAgence}/{datedebut}/{datefin}';
-  static readonly getTotalEncaissementsParMoisPath = 'gestimoweb/api/v1/encaissement/getTotalEncaissementsParMois/{idAgence}/{datedebut}/{datefin}';
-  static readonly listeEncaisseLoyerEntreDeuxDatePath = 'gestimoweb/api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/{idAgence}/{datedebut}/{datefin}';
-  static readonly listeEncaissementEntreDeuxDateParChapitreEtCaissePath = 'gestimoweb/api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/{idEncaiss}/{idChapitre}/{debut}/{fin}';
-  static readonly listeLocataireImpayerParAgenceEtPeriodePath = 'gestimoweb/api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/{agence}/{periode}';
-  static readonly miseAJourEncaissementCloturerPath = 'gestimoweb/api/v1/encaissement/miseAJourEncaissementCloturer/{idEncaiss}';
-  static readonly saveEncaissementPath = 'gestimoweb/api/v1/encaissement/saveencaissement';
-  static readonly saveEncaissementAvecretourDeListePath = 'gestimoweb/api/v1/encaissement/saveencaissementavecretour';
-  static readonly saveEncaissementMassePath = 'gestimoweb/api/v1/encaissement/saveencaissementmasse';
-  static readonly saveEncaissementMasseAvecretourDeListePath = 'gestimoweb/api/v1/encaissement/saveencaissementmasseavecretour';
-  static readonly sommeEncaissementParAgenceEtParPeriodePath = 'gestimoweb/api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
-  static readonly sommeLoyerParAgenceEtParPeriodePath = 'gestimoweb/api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
-  static readonly totalencaissementParIdAppelLoyerPath = 'gestimoweb/api/v1/encaissement/totalencaissement/{id}';
-  static readonly totalEncaissementParJourPath = 'gestimoweb/api/v1/encaissement/totalencaissementjournalier/{jour}/{idAgence}/{chapitre}';
-  static readonly sendMailGrouperWithAttachmentPath = 'gestimoweb/api/v1/envoimail/sendmailgrouper/{periode}/{idAgence}';
-  static readonly sendMailQuittanceWithAttachmentPath = 'gestimoweb/api/v1/envoimail/sendquittancebymail/{id}';
-  static readonly saveEspeceEncaissementPath = 'gestimoweb/api/v1/especeencaissement/save';
-  static readonly getDefaultEtablePath = 'gestimoweb/api/v1/etablissement/getDefaultEtable/{id}';
-  static readonly findAllEtagePath = 'gestimoweb/api/v1/etage/all/{idAgence}';
-  static readonly deleteEtagePath = 'gestimoweb/api/v1/etage/delete/{id}';
-  static readonly findEtageByIDPath = 'gestimoweb/api/v1/etage/findById/{id}';
-  static readonly affichageDesEtageParImmeublePath = 'gestimoweb/api/v1/etage/findByIdImmeuble/{id}';
-  static readonly findEtageByNamePath = 'gestimoweb/api/v1/etage/findByName/{name}';
-  static readonly saveEtagePath = 'gestimoweb/api/v1/etage/save';
-  static readonly findAllGroupeDroitPath = 'gestimoweb/api/v1/groupeDroit/';
-  static readonly saveGroupeDroitPath = 'gestimoweb/api/v1/groupeDroit/save';
-  static readonly findByIdGroupeDroitPath = 'gestimoweb/api/v1/groupeDroit/{groupedroitid}';
-  static readonly deleteGroupeDroitPath = 'gestimoweb/api/v1/groupeDroit/{groupedroitid}';
-  static readonly telechagerImagePath = 'gestimoweb/api/v1/image/imagesbybien/{id}';
-  static readonly uploadImagePath = 'gestimoweb/api/v1/image/upload/{id}/{name}';
-  static readonly affichageDesImmeublesPath = 'gestimoweb/api/v1/immeuble/affichetoutlesimmeubles/{idAgence}';
-  static readonly findAllImmeublePath = 'gestimoweb/api/v1/immeuble/all/{idAgence}';
-  static readonly deleteImmeublePath = 'gestimoweb/api/v1/immeuble/deleteImmeuble/{id}';
-  static readonly findImmeubleByIDPath = 'gestimoweb/api/v1/immeuble/findById/{id}';
-  static readonly findImmeubleByIdSitePath = 'gestimoweb/api/v1/immeuble/findByIdSite/{id}';
-  static readonly findImmeubleByNamePath = 'gestimoweb/api/v1/immeuble/findByName/{name}';
-  static readonly saveImmeubleEtagePath = 'gestimoweb/api/v1/immeuble/saveImeubleEtage';
-  static readonly findAllMagasinPath = 'gestimoweb/api/v1/magasin/all/{idAgence}';
-  static readonly findAllMagasinLibrePath = 'gestimoweb/api/v1/magasin/alllibre/{idAgence}';
-  static readonly findAllMagasinByEtagePath = 'gestimoweb/api/v1/magasin/findAllMagasinByIdEtage/{id}';
-  static readonly findAllMagasinByIdSitePath = 'gestimoweb/api/v1/magasin/findAllMagasinByIdSite/{idSite}';
-  static readonly findByNameMagasinDtoPath = 'gestimoweb/api/v1/magasin/findByName/{name}';
-  static readonly findByIDMagasinPath = 'gestimoweb/api/v1/magasin/findmagasinById/{id}';
-  static readonly saveMagasinReturnDtoPath = 'gestimoweb/api/v1/magasin/savemagasin';
-  static readonly findByIDMontantLoyerBailPath = 'gestimoweb/api/v1/montantloyerbail/findMontantByBail/{id}';
-  static readonly findAllPaysPath = 'gestimoweb/api/v1/pays/all';
-  static readonly deletePaysPath = 'gestimoweb/api/v1/pays/delete/{id}';
-  static readonly findPaysByIDPath = 'gestimoweb/api/v1/pays/findById/{id}';
-  static readonly findPaysByNamePath = 'gestimoweb/api/v1/pays/findByName/{name}';
-  static readonly savePaysPath = 'gestimoweb/api/v1/pays/save';
-  static readonly findAllServiceAdditionnelPrestationPath = 'gestimoweb/api/v1/prestation/all';
-  static readonly deleteServiceAdditionnelPrestationPath = 'gestimoweb/api/v1/prestation/delete/{id}';
-  static readonly findServiceAdditionnelByIDPrestationPath = 'gestimoweb/api/v1/prestation/findById/{id}';
-  static readonly saveorupdatePrestationPath = 'gestimoweb/api/v1/prestation/saveorupdate';
-  static readonly sampleQuitancePath = 'gestimoweb/api/v1/print/quittance/{id}';
-  static readonly quittancePeriodePath = 'gestimoweb/api/v1/print/quittancegrouper/{periode}/{idAgence}/{proprio}';
-  static readonly recuReservationParIdReservationPath = 'gestimoweb/api/v1/print/recuReservationParIdReservation/{idReservation}/{idAgence}/{proprio}';
-  static readonly recuPaimentPath = 'gestimoweb/api/v1/print/recupaiment/{idEncaissement}';
-  static readonly recuReservationPath = 'gestimoweb/api/v1/print/recureservation/{idEncaissement}/{idAgence}/{proprio}';
-  static readonly listDesPrixParCategoriPath = 'gestimoweb/api/v1/prixparcategorie/listDesPrixParCategori/{idCategorie}';
-  static readonly saveOrUpDatePrixParCategoriePath = 'gestimoweb/api/v1/prixparcategorie/saveOrUpDatePrixParCategorie';
-  static readonly findAllQuartiersPath = 'gestimoweb/api/v1/quartier/all/{idAgence}';
-  static readonly deleteQuartierPath = 'gestimoweb/api/v1/quartier/delete/{id}';
-  static readonly findByIDQuartiersPath = 'gestimoweb/api/v1/quartier/findById/{id}';
-  static readonly findAllQuartierByIdCommunePath = 'gestimoweb/api/v1/quartier/findByIdCommune/{id}';
-  static readonly findByNameQuartierPath = 'gestimoweb/api/v1/quartier/findByName/{name}';
-  static readonly saveQuartierPath = 'gestimoweb/api/v1/quartier/save';
-  static readonly allreservationPath = 'gestimoweb/api/v1/reservation/allreservation';
-  static readonly allreservationparagencePath = 'gestimoweb/api/v1/reservation/allreservationparagence/{idAgence}';
-  static readonly deleteReservationPath = 'gestimoweb/api/v1/reservation/delete/{id}';
-  static readonly findAllEncaissementReservationByIdBienPath = 'gestimoweb/api/v1/reservation/findAllEncaissementReservationByIdBien/{idReser}';
-  static readonly findPeriodeReservationByIdBienPath = 'gestimoweb/api/v1/reservation/findPeriodeReservationByIdBien/{idBien}';
-  static readonly findCategorieChambreByIDReservationPath = 'gestimoweb/api/v1/reservation/findReservationById/{id}';
-  static readonly listeDesReservationOuvertParAgencePath = 'gestimoweb/api/v1/reservation/listeDesReservationOuvertParAgence/{idAgence}';
-  static readonly saveencaissementreservationPath = 'gestimoweb/api/v1/reservation/saveencaissementreservation';
-  static readonly saveorupdateResPath = 'gestimoweb/api/v1/reservation/saveorupdate';
-  static readonly saveorupdategoodPath = 'gestimoweb/api/v1/reservation/saveorupdategood';
-  static readonly saveorupdatereservationPath = 'gestimoweb/api/v1/reservation/saveorupdatereservation';
-  static readonly findAllServiceAdditionnelPrestationAdditionnelPath = 'gestimoweb/api/v1/serviceadditionnel/all';
-  static readonly deleteServiceAdditionnelPrestationAdditionnelPath = 'gestimoweb/api/v1/serviceadditionnel/delete/{id}';
-  static readonly findServiceAdditionnelByIDPrestationAdditionnelPath = 'gestimoweb/api/v1/serviceadditionnel/findById/{id}';
-  static readonly saveorupdatePrestationAdditionnelPath = 'gestimoweb/api/v1/serviceadditionnel/saveorupdate';
-  static readonly findAllSitesPath = 'gestimoweb/api/v1/sites/all/{idAgence}';
-  static readonly deleteSitePath = 'gestimoweb/api/v1/sites/delete/{id}';
-  static readonly findSiteByIDPath = 'gestimoweb/api/v1/sites/findById/{id}';
-  static readonly findSiteByNamePath = 'gestimoweb/api/v1/sites/findByName/{name}';
-  static readonly saveSitesPath = 'gestimoweb/api/v1/sites/save';
-  static readonly saveSitePath = 'gestimoweb/api/v1/sites/savesite';
-  static readonly getAllEncaissementSuivieDepenseParAgencePath = 'gestimoweb/api/v1/suiviedepense/allSuivieDepense/{idAgence}';
-  static readonly countSuiviNonCloturerParCaisseEtChapitreAvantDatePath = 'gestimoweb/api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/{datePriseEnCompteEncaii}/{idCaiss}/{idChapitre}';
-  static readonly getSuivieDepenseByCodeTransactionPath = 'gestimoweb/api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/{codeTransaction}';
-  static readonly getSuivieDepenseByIdPath = 'gestimoweb/api/v1/suiviedepense/getSuivieDepenseById/{id}';
-  static readonly listSortieDeuxDatePath = 'gestimoweb/api/v1/suiviedepense/listSortieDeuxDate/{idAgence}/{debut}/{fin}';
-  static readonly listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDatePath = 'gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/{idcaisse}/{dateDepriseEnCompte}/{idChapitre}';
-  static readonly listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDatePath = 'gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/{idcaisse}/{dateDebut}/{dateFin}/{idChapitre}';
-  static readonly saveSuivieDepensePath = 'gestimoweb/api/v1/suiviedepense/saveSuivieDepense';
-  static readonly suprimerSuiviParIdPath = 'gestimoweb/api/v1/suiviedepense/suprimerSuiviParId/{id}/{idAgence}';
-  static readonly totalSortieDeuxDatePath = 'gestimoweb/api/v1/suiviedepense/totalSortieDeuxDate/{idAgence}/{debut}/{fin}';
-  static readonly getAllUtilisateursByOrderPath = 'gestimoweb/api/v1/utilisateur/all/{idAgence}';
-  static readonly listOfAllUtilisateurClientHotelOrderbyNameByAgencePath = 'gestimoweb/api/v1/utilisateur/clienthotel/all/{idAgence}';
-  static readonly getAllGerantsByOrderPath = 'gestimoweb/api/v1/utilisateur/gerants/all/{idAgence}';
-  static readonly getUtilisateurByAgencePath = 'gestimoweb/api/v1/utilisateur/getAllutilisateurbyAgence/{idAgence}';
-  static readonly getUtilisateurByEmailPath = 'gestimoweb/api/v1/utilisateur/getutilisateurbyemail/{email}';
-  static readonly getUtilisateurByIDPath = 'gestimoweb/api/v1/utilisateur/getutilisateurbyid/{id}';
-  static readonly getUtilisateurByUsernamePath = 'gestimoweb/api/v1/utilisateur/getutilisateurbyusername/{username}';
-  static readonly getAllLocatairesByOrderPath = 'gestimoweb/api/v1/utilisateur/locataires/all/{idAgence}';
-  static readonly getAllLocatairesAvecBailPath = 'gestimoweb/api/v1/utilisateur/locataires/ayanbail/{idAgence}';
-  static readonly getAllProprietaireByOrderPath = 'gestimoweb/api/v1/utilisateur/proprietaires/all/{idAgence}';
-  static readonly saveUtilisateurPath = 'gestimoweb/api/v1/utilisateur/save';
-  static readonly getAllSuperviseursByOrderPath = 'gestimoweb/api/v1/utilisateur/superviseurs/all';
-  static readonly findAllVillaPath = 'gestimoweb/api/v1/villa/all/{idAgence}';
-  static readonly findAllVillaLibrePath = 'gestimoweb/api/v1/villa/alllibre/{idAgence}';
-  static readonly findVillaByIdPath = 'gestimoweb/api/v1/villa/findVillaById/{id}';
-  static readonly saveVillaPath = 'gestimoweb/api/v1/villa/save';
-  static readonly findAllVillesPath = 'gestimoweb/api/v1/ville/all';
-  static readonly deleteVillePath = 'gestimoweb/api/v1/ville/delete/{id}';
-  static readonly findByIdVillePath = 'gestimoweb/api/v1/ville/findById/{id}';
-  static readonly findAllVilleByIdPaysPath = 'gestimoweb/api/v1/ville/findByIdPays/{id}';
-  static readonly findVilleByNameVillePath = 'gestimoweb/api/v1/ville/findByName/{name}';
-  static readonly findAllVilleByPaysObjectPath = 'gestimoweb/api/v1/ville/findByPays';
-  static readonly saveVillePath = 'gestimoweb/api/v1/ville/save';
+  static readonly getAllAgenceByOrderAgencePath = 'api/v1/agences/all/{idAgence}';
+  static readonly deleteAgenceByIdAgencePath = 'api/v1/agences/deleteagence/{id}';
+  static readonly getAgenceByEmailAgencePath = 'api/v1/agences/getagencebyemail/{email}';
+  static readonly getAgenceByIDAgencePath = 'api/v1/agences/getagencebyid/{id}';
+  static readonly authenticateAgencePath = 'api/v1/agences/signup';
+  static readonly findAllAppartementPath = 'api/v1/appartement/all/{id}';
+  static readonly findAllAppartementLibrePath = 'api/v1/appartement/alllmeublelibre/{idAgence}';
+  static readonly findAllAppartementMeublePath = 'api/v1/appartement/allmeuble/{id}';
+  static readonly deleteAppartementPath = 'api/v1/appartement/delete/{id}';
+  static readonly findByIDAppartementPath = 'api/v1/appartement/findById/{id}';
+  static readonly findByIdEtageAppartementPath = 'api/v1/appartement/findByIdEtage/{id}';
+  static readonly findByNameAppartementPath = 'api/v1/appartement/findByName/{name}';
+  static readonly findAllAppartementByIdCategoriePath = 'api/v1/appartement/findallappartementbyidcategorie/{id}';
+  static readonly saveAppartementPath = 'api/v1/appartement/save';
+  static readonly saveForCategoriePath = 'api/v1/appartement/saveForCategorie';
+  static readonly deleteAppelDtoPath = 'api/v1/appelloyer/clotureOfAppelDtoByID/{id}';
+  static readonly AppelLoyersParPeriodePath = 'api/v1/appelloyer/findAllAppelloyerByPeriode/{periode}/{idAgence}';
+  static readonly listTousAppelsLoyersPath = 'api/v1/appelloyer/findAllAppelsLoyer/{idAgence}';
+  static readonly findAllPeriodePath = 'api/v1/appelloyer/findAllPeriodeAppel/{idAgence}';
+  static readonly findAllPeriodeByAnneePath = 'api/v1/appelloyer/findAllPeriodeByAnnee/{annee}/{idAgence}';
+  static readonly findAllPeriodeChiffreEtLettreByAnneePath = 'api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/{annee}/{idAgence}';
+  static readonly AppelLoyersParIdPath = 'api/v1/appelloyer/findAppelloyer/{id}';
+  static readonly listDesLoyersParBailPath = 'api/v1/appelloyer/findAppelsByIdBail/{idBail}';
+  static readonly listDesLoyersImpayerParBailPath = 'api/v1/appelloyer/findAppelsImpayerByIdBail/{id}';
+  static readonly findByIdAndBailPath = 'api/v1/appelloyer/findByIdAndBail/{idBien}/{periode}';
+  static readonly getFirstLoyerImpayerByBienPath = 'api/v1/appelloyer/getFirstLoyerImpayerByBien/{id}';
+  static readonly impayeLoyerParAnneePath = 'api/v1/appelloyer/impayeParAnnee/{annee}/{idAgence}/{chapitre}';
+  static readonly impayeLoyerParMoisAppelLoyerPath = 'api/v1/appelloyer/impayeParMois/{periode}/{idAgence}/{chapitre}';
+  static readonly listMessageEnvoyerAUnLocatairePath = 'api/v1/appelloyer/listMessageEnvoyerAUnLocataire/{login}';
+  static readonly listOfDistinctAnneeAppelPath = 'api/v1/appelloyer/listOfDistinctAnneeAppel/{idAgence}';
+  static readonly listeDesloyerSuperieurAUnePeriodePath = 'api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/{idBien}/{periode}';
+  static readonly miseAjourDesUnlockDesBauxPath = 'api/v1/appelloyer/miseAjourDesUnlockDesBaux/{idAgence}';
+  static readonly nombreImpayerLoyerParMoisPath = 'api/v1/appelloyer/nombreImpayerLoyerParMois/{periode}/{idAgence}/{chapitre}';
+  static readonly nombrePayerLoyerParMoisPath = 'api/v1/appelloyer/nombrePayerLoyerParMois/{periode}/{idAgence}/{chapitre}';
+  static readonly payeLoyerParAnneePath = 'api/v1/appelloyer/payeParAnnee/{annee}/{idAgence}/{chapitre}';
+  static readonly payeLoyerParMoisPath = 'api/v1/appelloyer/payeParMois/{periode}/{idAgence}/{chapitre}';
+  static readonly ReductionLoyerByPeriodePath = 'api/v1/appelloyer/reductionLoyerByPeriode';
+  static readonly saveAppelLoyersPath = 'api/v1/appelloyer/save';
+  static readonly staisiqueLoyerParMoisPath = 'api/v1/appelloyer/staisiqueLoyerParMois/{periode}/{idAgence}/{chapitre}';
+  static readonly statistiqueLoyerParAnneePath = 'api/v1/appelloyer/statistiqueLoyerParAnnee/{annee}/{idAgence}/{chapitre}';
+  static readonly supprimerPaiementAppelPath = 'api/v1/appelloyer/supprimerPaiementAppel/{idPeriode}/{idBail}';
+  static readonly verifyAccountPath = 'api/v1/auth/accountVerification/{token}';
+  static readonly loginPath = 'api/v1/auth/login';
+  static readonly bailByLocataireEtBienPath = 'api/v1/bail/bailLocataireetbien/{locataire}/{bien}';
+  static readonly clotureBailPath = 'api/v1/bail/clotureBail/{id}';
+  static readonly findOperationByIdPath = 'api/v1/bail/findoperationbyid/{id}';
+  static readonly listDesBauxPourUnBienImmobilierPath = 'api/v1/bail/getallbailbybien/{id}';
+  static readonly listDesBauxPourUnLocatairePath = 'api/v1/bail/getallbailbylocataire/{id}';
+  static readonly nombrebailactifPath = 'api/v1/bail/nombrebailactif/{idAgence}';
+  static readonly nombrebailnonactifPath = 'api/v1/bail/nombrebailnonactif/{idAgence}';
+  static readonly modifierUnBailPath = 'api/v1/bail/save';
+  static readonly supprimerBailPath = 'api/v1/bail/supprimerBail/{id}';
+  static readonly findAllBailAppartementPath = 'api/v1/bailappartement/all/{idAgence}';
+  static readonly findAllOperationsPath = 'api/v1/bailappartement/alloperation/{idAgence}';
+  static readonly deleteBailAppartementPath = 'api/v1/bailappartement/delete/{id}';
+  static readonly findByIDBailAppartementPath = 'api/v1/bailappartement/findById/{id}';
+  static readonly findByNameBailAppartementPath = 'api/v1/bailappartement/findByName/{name}';
+  static readonly saveBailAppartementPath = 'api/v1/bailappartement/save';
+  static readonly findAllBailMagasinPath = 'api/v1/bailmagasin/all/{idAgence}';
+  static readonly deleteBailMagasinPath = 'api/v1/bailmagasin/delete/{id}';
+  static readonly findByIDBailMagasinPath = 'api/v1/bailmagasin/findById/{id}';
+  static readonly findByNameBailMagasinPath = 'api/v1/bailmagasin/findByName/{name}';
+  static readonly saveBailMagasinPath = 'api/v1/bailmagasin/save';
+  static readonly findAllBailVillaPath = 'api/v1/bailvilla/all/{idAgence}';
+  static readonly deleteBailVillaPath = 'api/v1/bailvilla/delete/{id}';
+  static readonly findBailVillaByIDPath = 'api/v1/bailvilla/findById/{id}';
+  static readonly findBailVillaByNamePath = 'api/v1/bailvilla/findByName/{name}';
+  static readonly saveBailVillaPath = 'api/v1/bailvilla/save';
+  static readonly findAllBienPath = 'api/v1/bienImmobilier/all/{idAgence}/{chapitre}';
+  static readonly findAllBienOqpPath = 'api/v1/bienImmobilier/allBienOccuper/{idAgence}/{chapitre}';
+  static readonly rattacherUnBienAUnChapitrePath = 'api/v1/bienImmobilier/rattacherUnBienAUnChapitre/{idBien}/{chapitre}';
+  static readonly findAllCategorieChambrePath = 'api/v1/categoriechambre/all/{idAgence}';
+  static readonly deleteCategoryChambrePath = 'api/v1/categoriechambre/delete/{id}';
+  static readonly findCategorieChambreByIDPath = 'api/v1/categoriechambre/findById/{id}';
+  static readonly findCategorieByIdAppartementPath = 'api/v1/categoriechambre/findCategorieByIdAppartement/{idAppart}';
+  static readonly saveOrUpdateCategoryChambrePath = 'api/v1/categoriechambre/saveOrUpdateCategoryChambre';
+  static readonly saveorupdateCategoryChambrePath = 'api/v1/categoriechambre/saveorupdate';
+  static readonly countInitClotureByCaissiaireAndChampitrePath = 'api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}';
+  static readonly findAllByCaissierAndChapitrePath = 'api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/{idCaisse}/{chapitre}';
+  static readonly findAllCloturerCaisseAgencePath = 'api/v1/cloturecaisse/findAllCloturerCaisseAgence';
+  static readonly findAllCloturerCaisseByDateAndChapitrePath = 'api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}';
+  static readonly findNonCloturerByDateAndCaisseAndChapitrePath = 'api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/{idCaisse}/{chapitre}/{dateDuJoure}';
+  static readonly saveClotureCaissePath = 'api/v1/cloturecaisse/savecloturecaisse';
+  static readonly findAllCommunePath = 'api/v1/commune/all';
+  static readonly deleteCommunePath = 'api/v1/commune/delete/{id}';
+  static readonly findCommuneByIDPath = 'api/v1/commune/findById/{id}';
+  static readonly findCommuneByIdPaysPath = 'api/v1/commune/findByIdVille/{id}';
+  static readonly findCommuneByNamePath = 'api/v1/commune/findByName/{name}';
+  static readonly saveCommunePath = 'api/v1/commune/save';
+  static readonly findAllDroitAccessPath = 'api/v1/droitAccess/';
+  static readonly saveDroitAccessPath = 'api/v1/droitAccess/save';
+  static readonly findByIdDroitAccessPath = 'api/v1/droitAccess/{droitAccessid}';
+  static readonly deleteDroitAccessPath = 'api/v1/droitAccess/{droitAccessid}';
+  static readonly findAllEncaissementByIdLocatirePath = 'api/v1/encaissement/allEncaissementByIdLocatire/{idLocatire}';
+  static readonly findAllEncaissementByIdBienImmobilierPath = 'api/v1/encaissement/allencaissementByIdBien/{id}';
+  static readonly listTousEncaissementsPrincipalPath = 'api/v1/encaissement/findAllEncaissementPrincipal/{idAgence}';
+  static readonly findByIdEncaissementPath = 'api/v1/encaissement/findByIdEncaissement/{id}';
+  static readonly getTotalEncaissementparPeriodePath = 'api/v1/encaissement/getTotalEncaissementparPeriode/{idAgence}/{datedebut}/{datefin}';
+  static readonly getTotalEncaissementsEtMontantsDeLoyerParMoisPath = 'api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/{idAgence}/{datedebut}/{datefin}';
+  static readonly getTotalEncaissementsParMoisPath = 'api/v1/encaissement/getTotalEncaissementsParMois/{idAgence}/{datedebut}/{datefin}';
+  static readonly listeEncaisseLoyerEntreDeuxDatePath = 'api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/{idAgence}/{datedebut}/{datefin}';
+  static readonly listeEncaissementEntreDeuxDateParChapitreEtCaissePath = 'api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/{idEncaiss}/{idChapitre}/{debut}/{fin}';
+  static readonly listeLocataireImpayerParAgenceEtPeriodePath = 'api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/{agence}/{periode}';
+  static readonly miseAJourEncaissementCloturerPath = 'api/v1/encaissement/miseAJourEncaissementCloturer/{idEncaiss}';
+  static readonly saveEncaissementPath = 'api/v1/encaissement/saveencaissement';
+  static readonly saveEncaissementAvecretourDeListePath = 'api/v1/encaissement/saveencaissementavecretour';
+  static readonly saveEncaissementMassePath = 'api/v1/encaissement/saveencaissementmasse';
+  static readonly saveEncaissementMasseAvecretourDeListePath = 'api/v1/encaissement/saveencaissementmasseavecretour';
+  static readonly sommeEncaissementParAgenceEtParPeriodePath = 'api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
+  static readonly sommeLoyerParAgenceEtParPeriodePath = 'api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
+  static readonly totalencaissementParIdAppelLoyerPath = 'api/v1/encaissement/totalencaissement/{id}';
+  static readonly totalEncaissementParJourPath = 'api/v1/encaissement/totalencaissementjournalier/{jour}/{idAgence}/{chapitre}';
+  static readonly sendMailGrouperWithAttachmentPath = 'api/v1/envoimail/sendmailgrouper/{periode}/{idAgence}';
+  static readonly sendMailQuittanceWithAttachmentPath = 'api/v1/envoimail/sendquittancebymail/{id}';
+  static readonly saveEspeceEncaissementPath = 'api/v1/especeencaissement/save';
+  static readonly getDefaultEtablePath = 'api/v1/etablissement/getDefaultEtable/{id}';
+  static readonly findAllEtagePath = 'api/v1/etage/all/{idAgence}';
+  static readonly deleteEtagePath = 'api/v1/etage/delete/{id}';
+  static readonly findEtageByIDPath = 'api/v1/etage/findById/{id}';
+  static readonly affichageDesEtageParImmeublePath = 'api/v1/etage/findByIdImmeuble/{id}';
+  static readonly findEtageByNamePath = 'api/v1/etage/findByName/{name}';
+  static readonly saveEtagePath = 'api/v1/etage/save';
+  static readonly findAllGroupeDroitPath = 'api/v1/groupeDroit/';
+  static readonly saveGroupeDroitPath = 'api/v1/groupeDroit/save';
+  static readonly findByIdGroupeDroitPath = 'api/v1/groupeDroit/{groupedroitid}';
+  static readonly deleteGroupeDroitPath = 'api/v1/groupeDroit/{groupedroitid}';
+  static readonly telechagerImagePath = 'api/v1/image/imagesbybien/{id}';
+  static readonly uploadImagePath = 'api/v1/image/upload/{id}/{name}';
+  static readonly affichageDesImmeublesPath = 'api/v1/immeuble/affichetoutlesimmeubles/{idAgence}';
+  static readonly findAllImmeublePath = 'api/v1/immeuble/all/{idAgence}';
+  static readonly deleteImmeublePath = 'api/v1/immeuble/deleteImmeuble/{id}';
+  static readonly findImmeubleByIDPath = 'api/v1/immeuble/findById/{id}';
+  static readonly findImmeubleByIdSitePath = 'api/v1/immeuble/findByIdSite/{id}';
+  static readonly findImmeubleByNamePath = 'api/v1/immeuble/findByName/{name}';
+  static readonly saveImmeubleEtagePath = 'api/v1/immeuble/saveImeubleEtage';
+  static readonly findAllMagasinPath = 'api/v1/magasin/all/{idAgence}';
+  static readonly findAllMagasinLibrePath = 'api/v1/magasin/alllibre/{idAgence}';
+  static readonly findAllMagasinByEtagePath = 'api/v1/magasin/findAllMagasinByIdEtage/{id}';
+  static readonly findAllMagasinByIdSitePath = 'api/v1/magasin/findAllMagasinByIdSite/{idSite}';
+  static readonly findByNameMagasinDtoPath = 'api/v1/magasin/findByName/{name}';
+  static readonly findByIDMagasinPath = 'api/v1/magasin/findmagasinById/{id}';
+  static readonly saveMagasinReturnDtoPath = 'api/v1/magasin/savemagasin';
+  static readonly findByIDMontantLoyerBailPath = 'api/v1/montantloyerbail/findMontantByBail/{id}';
+  static readonly findAllPaysPath = 'api/v1/pays/all';
+  static readonly deletePaysPath = 'api/v1/pays/delete/{id}';
+  static readonly findPaysByIDPath = 'api/v1/pays/findById/{id}';
+  static readonly findPaysByNamePath = 'api/v1/pays/findByName/{name}';
+  static readonly savePaysPath = 'api/v1/pays/save';
+  static readonly findAllServiceAdditionnelPrestationPath = 'api/v1/prestation/all';
+  static readonly deleteServiceAdditionnelPrestationPath = 'api/v1/prestation/delete/{id}';
+  static readonly findServiceAdditionnelByIDPrestationPath = 'api/v1/prestation/findById/{id}';
+  static readonly saveorupdatePrestationPath = 'api/v1/prestation/saveorupdate';
+  static readonly sampleQuitancePath = 'api/v1/print/quittance/{id}';
+  static readonly quittancePeriodePath = 'api/v1/print/quittancegrouper/{periode}/{idAgence}/{proprio}';
+  static readonly recuReservationParIdReservationPath = 'api/v1/print/recuReservationParIdReservation/{idReservation}/{idAgence}/{proprio}';
+  static readonly recuPaimentPath = 'api/v1/print/recupaiment/{idEncaissement}';
+  static readonly recuReservationPath = 'api/v1/print/recureservation/{idEncaissement}/{idAgence}/{proprio}';
+  static readonly listDesPrixParCategoriPath = 'api/v1/prixparcategorie/listDesPrixParCategori/{idCategorie}';
+  static readonly saveOrUpDatePrixParCategoriePath = 'api/v1/prixparcategorie/saveOrUpDatePrixParCategorie';
+  static readonly findAllQuartiersPath = 'api/v1/quartier/all/{idAgence}';
+  static readonly deleteQuartierPath = 'api/v1/quartier/delete/{id}';
+  static readonly findByIDQuartiersPath = 'api/v1/quartier/findById/{id}';
+  static readonly findAllQuartierByIdCommunePath = 'api/v1/quartier/findByIdCommune/{id}';
+  static readonly findByNameQuartierPath = 'api/v1/quartier/findByName/{name}';
+  static readonly saveQuartierPath = 'api/v1/quartier/save';
+  static readonly allreservationPath = 'api/v1/reservation/allreservation';
+  static readonly allreservationparagencePath = 'api/v1/reservation/allreservationparagence/{idAgence}';
+  static readonly deleteReservationPath = 'api/v1/reservation/delete/{id}';
+  static readonly findAllEncaissementReservationByIdBienPath = 'api/v1/reservation/findAllEncaissementReservationByIdBien/{idReser}';
+  static readonly findPeriodeReservationByIdBienPath = 'api/v1/reservation/findPeriodeReservationByIdBien/{idBien}';
+  static readonly findCategorieChambreByIDReservationPath = 'api/v1/reservation/findReservationById/{id}';
+  static readonly listeDesReservationOuvertParAgencePath = 'api/v1/reservation/listeDesReservationOuvertParAgence/{idAgence}';
+  static readonly saveencaissementreservationPath = 'api/v1/reservation/saveencaissementreservation';
+  static readonly saveorupdateResPath = 'api/v1/reservation/saveorupdate';
+  static readonly saveorupdategoodPath = 'api/v1/reservation/saveorupdategood';
+  static readonly saveorupdatereservationPath = 'api/v1/reservation/saveorupdatereservation';
+  static readonly findAllServiceAdditionnelPrestationAdditionnelPath = 'api/v1/serviceadditionnel/all';
+  static readonly deleteServiceAdditionnelPrestationAdditionnelPath = 'api/v1/serviceadditionnel/delete/{id}';
+  static readonly findServiceAdditionnelByIDPrestationAdditionnelPath = 'api/v1/serviceadditionnel/findById/{id}';
+  static readonly saveorupdatePrestationAdditionnelPath = 'api/v1/serviceadditionnel/saveorupdate';
+  static readonly findAllSitesPath = 'api/v1/sites/all/{idAgence}';
+  static readonly deleteSitePath = 'api/v1/sites/delete/{id}';
+  static readonly findSiteByIDPath = 'api/v1/sites/findById/{id}';
+  static readonly findSiteByNamePath = 'api/v1/sites/findByName/{name}';
+  static readonly saveSitesPath = 'api/v1/sites/save';
+  static readonly saveSitePath = 'api/v1/sites/savesite';
+  static readonly getAllEncaissementSuivieDepenseParAgencePath = 'api/v1/suiviedepense/allSuivieDepense/{idAgence}';
+  static readonly countSuiviNonCloturerParCaisseEtChapitreAvantDatePath = 'api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/{datePriseEnCompteEncaii}/{idCaiss}/{idChapitre}';
+  static readonly getSuivieDepenseByCodeTransactionPath = 'api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/{codeTransaction}';
+  static readonly getSuivieDepenseByIdPath = 'api/v1/suiviedepense/getSuivieDepenseById/{id}';
+  static readonly listSortieDeuxDatePath = 'api/v1/suiviedepense/listSortieDeuxDate/{idAgence}/{debut}/{fin}';
+  static readonly listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDatePath = 'api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/{idcaisse}/{dateDepriseEnCompte}/{idChapitre}';
+  static readonly listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDatePath = 'api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/{idcaisse}/{dateDebut}/{dateFin}/{idChapitre}';
+  static readonly saveSuivieDepensePath = 'api/v1/suiviedepense/saveSuivieDepense';
+  static readonly suprimerSuiviParIdPath = 'api/v1/suiviedepense/suprimerSuiviParId/{id}/{idAgence}';
+  static readonly totalSortieDeuxDatePath = 'api/v1/suiviedepense/totalSortieDeuxDate/{idAgence}/{debut}/{fin}';
+  static readonly getAllUtilisateursByOrderPath = 'api/v1/utilisateur/all/{idAgence}';
+  static readonly listOfAllUtilisateurClientHotelOrderbyNameByAgencePath = 'api/v1/utilisateur/clienthotel/all/{idAgence}';
+  static readonly getAllGerantsByOrderPath = 'api/v1/utilisateur/gerants/all/{idAgence}';
+  static readonly getUtilisateurByAgencePath = 'api/v1/utilisateur/getAllutilisateurbyAgence/{idAgence}';
+  static readonly getUtilisateurByEmailPath = 'api/v1/utilisateur/getutilisateurbyemail/{email}';
+  static readonly getUtilisateurByIDPath = 'api/v1/utilisateur/getutilisateurbyid/{id}';
+  static readonly getUtilisateurByUsernamePath = 'api/v1/utilisateur/getutilisateurbyusername/{username}';
+  static readonly getAllLocatairesByOrderPath = 'api/v1/utilisateur/locataires/all/{idAgence}';
+  static readonly getAllLocatairesAvecBailPath = 'api/v1/utilisateur/locataires/ayanbail/{idAgence}';
+  static readonly getAllProprietaireByOrderPath = 'api/v1/utilisateur/proprietaires/all/{idAgence}';
+  static readonly saveUtilisateurPath = 'api/v1/utilisateur/save';
+  static readonly getAllSuperviseursByOrderPath = 'api/v1/utilisateur/superviseurs/all';
+  static readonly findAllVillaPath = 'api/v1/villa/all/{idAgence}';
+  static readonly findAllVillaLibrePath = 'api/v1/villa/alllibre/{idAgence}';
+  static readonly findVillaByIdPath = 'api/v1/villa/findVillaById/{id}';
+  static readonly saveVillaPath = 'api/v1/villa/save';
+  static readonly findAllVillesPath = 'api/v1/ville/all';
+  static readonly deleteVillePath = 'api/v1/ville/delete/{id}';
+  static readonly findByIdVillePath = 'api/v1/ville/findById/{id}';
+  static readonly findAllVilleByIdPaysPath = 'api/v1/ville/findByIdPays/{id}';
+  static readonly findVilleByNameVillePath = 'api/v1/ville/findByName/{name}';
+  static readonly findAllVilleByPaysObjectPath = 'api/v1/ville/findByPays';
+  static readonly saveVillePath = 'api/v1/ville/save';
 
   constructor(
     config: __Configuration,
@@ -309,7 +309,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/agences/all/${idAgence}`,
+      this.rootUrl + `api/v1/agences/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -345,7 +345,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/agences/deleteagence/${id}`,
+      this.rootUrl + `api/v1/agences/deleteagence/${id}`,
       __body,
       {
         headers: __headers,
@@ -381,7 +381,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/agences/getagencebyemail/${email}`,
+      this.rootUrl + `api/v1/agences/getagencebyemail/${email}`,
       __body,
       {
         headers: __headers,
@@ -417,7 +417,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/agences/getagencebyid/${id}`,
+      this.rootUrl + `api/v1/agences/getagencebyid/${id}`,
       __body,
       {
         headers: __headers,
@@ -453,7 +453,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/agences/signup`,
+      this.rootUrl + `api/v1/agences/signup`,
       __body,
       {
         headers: __headers,
@@ -489,7 +489,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/all/${id}`,
+      this.rootUrl + `api/v1/appartement/all/${id}`,
       __body,
       {
         headers: __headers,
@@ -525,7 +525,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/alllmeublelibre/${idAgence}`,
+      this.rootUrl + `api/v1/appartement/alllmeublelibre/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -561,7 +561,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/allmeuble/${id}`,
+      this.rootUrl + `api/v1/appartement/allmeuble/${id}`,
       __body,
       {
         headers: __headers,
@@ -597,7 +597,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/appartement/delete/${id}`,
+      this.rootUrl + `api/v1/appartement/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -633,7 +633,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/findById/${id}`,
+      this.rootUrl + `api/v1/appartement/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -669,7 +669,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/findByIdEtage/${id}`,
+      this.rootUrl + `api/v1/appartement/findByIdEtage/${id}`,
       __body,
       {
         headers: __headers,
@@ -705,7 +705,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/findByName/${name}`,
+      this.rootUrl + `api/v1/appartement/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -741,7 +741,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appartement/findallappartementbyidcategorie/${id}`,
+      this.rootUrl + `api/v1/appartement/findallappartementbyidcategorie/${id}`,
       __body,
       {
         headers: __headers,
@@ -777,7 +777,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/appartement/save`,
+      this.rootUrl + `api/v1/appartement/save`,
       __body,
       {
         headers: __headers,
@@ -813,7 +813,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/appartement/saveForCategorie`,
+      this.rootUrl + `api/v1/appartement/saveForCategorie`,
       __body,
       {
         headers: __headers,
@@ -849,7 +849,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/clotureOfAppelDtoByID/${id}`,
+      this.rootUrl + `api/v1/appelloyer/clotureOfAppelDtoByID/${id}`,
       __body,
       {
         headers: __headers,
@@ -891,7 +891,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAllAppelloyerByPeriode/${params.periode}/${params.idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/findAllAppelloyerByPeriode/${params.periode}/${params.idAgence}`,
       __body,
       {
         headers: __headers,
@@ -932,7 +932,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAllAppelsLoyer/${idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/findAllAppelsLoyer/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -968,7 +968,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAllPeriodeAppel/${idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/findAllPeriodeAppel/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -1010,7 +1010,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAllPeriodeByAnnee/${params.annee}/${params.idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/findAllPeriodeByAnnee/${params.annee}/${params.idAgence}`,
       __body,
       {
         headers: __headers,
@@ -1057,7 +1057,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/${params.annee}/${params.idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/findAllPeriodeChiffreEtLettreByAnnee/${params.annee}/${params.idAgence}`,
       __body,
       {
         headers: __headers,
@@ -1098,7 +1098,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAppelloyer/${id}`,
+      this.rootUrl + `api/v1/appelloyer/findAppelloyer/${id}`,
       __body,
       {
         headers: __headers,
@@ -1134,7 +1134,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAppelsByIdBail/${idBail}`,
+      this.rootUrl + `api/v1/appelloyer/findAppelsByIdBail/${idBail}`,
       __body,
       {
         headers: __headers,
@@ -1170,7 +1170,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findAppelsImpayerByIdBail/${id}`,
+      this.rootUrl + `api/v1/appelloyer/findAppelsImpayerByIdBail/${id}`,
       __body,
       {
         headers: __headers,
@@ -1212,7 +1212,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/findByIdAndBail/${params.idBien}/${params.periode}`,
+      this.rootUrl + `api/v1/appelloyer/findByIdAndBail/${params.idBien}/${params.periode}`,
       __body,
       {
         headers: __headers,
@@ -1253,7 +1253,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/getFirstLoyerImpayerByBien/${id}`,
+      this.rootUrl + `api/v1/appelloyer/getFirstLoyerImpayerByBien/${id}`,
       __body,
       {
         headers: __headers,
@@ -1298,7 +1298,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/impayeParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/impayeParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1350,7 +1350,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/impayeParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/impayeParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1393,7 +1393,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/listMessageEnvoyerAUnLocataire/${login}`,
+      this.rootUrl + `api/v1/appelloyer/listMessageEnvoyerAUnLocataire/${login}`,
       __body,
       {
         headers: __headers,
@@ -1429,7 +1429,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/listOfDistinctAnneeAppel/${idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/listOfDistinctAnneeAppel/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -1471,7 +1471,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/${params.idBien}/${params.periode}`,
+      this.rootUrl + `api/v1/appelloyer/listeDesloyerSuperieurAUnePeriode/${params.idBien}/${params.periode}`,
       __body,
       {
         headers: __headers,
@@ -1512,7 +1512,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/miseAjourDesUnlockDesBaux/${idAgence}`,
+      this.rootUrl + `api/v1/appelloyer/miseAjourDesUnlockDesBaux/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -1557,7 +1557,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/nombreImpayerLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/nombreImpayerLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1609,7 +1609,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/nombrePayerLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/nombrePayerLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1661,7 +1661,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/payeParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/payeParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1713,7 +1713,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/payeParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/payeParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1756,7 +1756,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/reductionLoyerByPeriode`,
+      this.rootUrl + `api/v1/appelloyer/reductionLoyerByPeriode`,
       __body,
       {
         headers: __headers,
@@ -1792,7 +1792,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/save`,
+      this.rootUrl + `api/v1/appelloyer/save`,
       __body,
       {
         headers: __headers,
@@ -1837,7 +1837,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/staisiqueLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/staisiqueLoyerParMois/${params.periode}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1889,7 +1889,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/statistiqueLoyerParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/appelloyer/statistiqueLoyerParAnnee/${params.annee}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -1938,7 +1938,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/appelloyer/supprimerPaiementAppel/${params.idPeriode}/${params.idBail}`,
+      this.rootUrl + `api/v1/appelloyer/supprimerPaiementAppel/${params.idPeriode}/${params.idBail}`,
       __body,
       {
         headers: __headers,
@@ -1979,7 +1979,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/auth/accountVerification/${token}`,
+      this.rootUrl + `api/v1/auth/accountVerification/${token}`,
       __body,
       {
         headers: __headers,
@@ -2015,7 +2015,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/auth/login`,
+      this.rootUrl + `api/v1/auth/login`,
       __body,
       {
         headers: __headers,
@@ -2057,7 +2057,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/bailLocataireetbien/${params.locataire}/${params.bien}`,
+      this.rootUrl + `api/v1/bail/bailLocataireetbien/${params.locataire}/${params.bien}`,
       __body,
       {
         headers: __headers,
@@ -2102,7 +2102,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bail/clotureBail/${id}`,
+      this.rootUrl + `api/v1/bail/clotureBail/${id}`,
       __body,
       {
         headers: __headers,
@@ -2138,7 +2138,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/findoperationbyid/${id}`,
+      this.rootUrl + `api/v1/bail/findoperationbyid/${id}`,
       __body,
       {
         headers: __headers,
@@ -2174,7 +2174,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/getallbailbybien/${id}`,
+      this.rootUrl + `api/v1/bail/getallbailbybien/${id}`,
       __body,
       {
         headers: __headers,
@@ -2210,7 +2210,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/getallbailbylocataire/${id}`,
+      this.rootUrl + `api/v1/bail/getallbailbylocataire/${id}`,
       __body,
       {
         headers: __headers,
@@ -2246,7 +2246,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/nombrebailactif/${idAgence}`,
+      this.rootUrl + `api/v1/bail/nombrebailactif/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2282,7 +2282,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bail/nombrebailnonactif/${idAgence}`,
+      this.rootUrl + `api/v1/bail/nombrebailnonactif/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2318,7 +2318,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bail/save`,
+      this.rootUrl + `api/v1/bail/save`,
       __body,
       {
         headers: __headers,
@@ -2354,7 +2354,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bail/supprimerBail/${id}`,
+      this.rootUrl + `api/v1/bail/supprimerBail/${id}`,
       __body,
       {
         headers: __headers,
@@ -2390,7 +2390,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/all/${idAgence}`,
+      this.rootUrl + `api/v1/bailappartement/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2426,7 +2426,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/alloperation/${idAgence}`,
+      this.rootUrl + `api/v1/bailappartement/alloperation/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2462,7 +2462,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/delete/${id}`,
+      this.rootUrl + `api/v1/bailappartement/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -2498,7 +2498,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/findById/${id}`,
+      this.rootUrl + `api/v1/bailappartement/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -2534,7 +2534,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/findByName/${name}`,
+      this.rootUrl + `api/v1/bailappartement/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -2570,7 +2570,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bailappartement/save`,
+      this.rootUrl + `api/v1/bailappartement/save`,
       __body,
       {
         headers: __headers,
@@ -2606,7 +2606,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailmagasin/all/${idAgence}`,
+      this.rootUrl + `api/v1/bailmagasin/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2642,7 +2642,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/bailmagasin/delete/${id}`,
+      this.rootUrl + `api/v1/bailmagasin/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -2678,7 +2678,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailmagasin/findById/${id}`,
+      this.rootUrl + `api/v1/bailmagasin/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -2714,7 +2714,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailmagasin/findByName/${name}`,
+      this.rootUrl + `api/v1/bailmagasin/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -2750,7 +2750,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bailmagasin/save`,
+      this.rootUrl + `api/v1/bailmagasin/save`,
       __body,
       {
         headers: __headers,
@@ -2786,7 +2786,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailvilla/all/${idAgence}`,
+      this.rootUrl + `api/v1/bailvilla/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -2822,7 +2822,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/bailvilla/delete/${id}`,
+      this.rootUrl + `api/v1/bailvilla/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -2858,7 +2858,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailvilla/findById/${id}`,
+      this.rootUrl + `api/v1/bailvilla/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -2894,7 +2894,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bailvilla/findByName/${name}`,
+      this.rootUrl + `api/v1/bailvilla/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -2930,7 +2930,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/bailvilla/save`,
+      this.rootUrl + `api/v1/bailvilla/save`,
       __body,
       {
         headers: __headers,
@@ -2972,7 +2972,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bienImmobilier/all/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/bienImmobilier/all/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -3019,7 +3019,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bienImmobilier/allBienOccuper/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/bienImmobilier/allBienOccuper/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -3066,7 +3066,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/bienImmobilier/rattacherUnBienAUnChapitre/${params.idBien}/${params.chapitre}`,
+      this.rootUrl + `api/v1/bienImmobilier/rattacherUnBienAUnChapitre/${params.idBien}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -3107,7 +3107,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/all/${idAgence}`,
+      this.rootUrl + `api/v1/categoriechambre/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -3142,7 +3142,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/delete/${id}`,
+      this.rootUrl + `api/v1/categoriechambre/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -3177,7 +3177,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/findById/${id}`,
+      this.rootUrl + `api/v1/categoriechambre/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -3213,7 +3213,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/findCategorieByIdAppartement/${idAppart}`,
+      this.rootUrl + `api/v1/categoriechambre/findCategorieByIdAppartement/${idAppart}`,
       __body,
       {
         headers: __headers,
@@ -3249,7 +3249,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/saveOrUpdateCategoryChambre`,
+      this.rootUrl + `api/v1/categoriechambre/saveOrUpdateCategoryChambre`,
       __body,
       {
         headers: __headers,
@@ -3285,7 +3285,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/categoriechambre/saveorupdate`,
+      this.rootUrl + `api/v1/categoriechambre/saveorupdate`,
       __body,
       {
         headers: __headers,
@@ -3327,7 +3327,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/${params.idCaisse}/${params.chapitre}`,
+      this.rootUrl + `api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/${params.idCaisse}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -3374,7 +3374,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/${params.idCaisse}/${params.chapitre}`,
+      this.rootUrl + `api/v1/cloturecaisse/countInitClotureByCaissiaireAndChampitre/${params.idCaisse}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -3413,7 +3413,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseAgence`,
+      this.rootUrl + `api/v1/cloturecaisse/findAllCloturerCaisseAgence`,
       __body,
       {
         headers: __headers,
@@ -3457,7 +3457,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/${params.idCaisse}/${params.chapitre}/${params.dateDuJoure}`,
+      this.rootUrl + `api/v1/cloturecaisse/findAllCloturerCaisseByDateAndChapitre/${params.idCaisse}/${params.chapitre}/${params.dateDuJoure}`,
       __body,
       {
         headers: __headers,
@@ -3509,7 +3509,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/${params.idCaisse}/${params.chapitre}/${params.dateDuJoure}`,
+      this.rootUrl + `api/v1/cloturecaisse/findNonCloturerByDateAndCaisseAndChapitre/${params.idCaisse}/${params.chapitre}/${params.dateDuJoure}`,
       __body,
       {
         headers: __headers,
@@ -3552,7 +3552,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/cloturecaisse/savecloturecaisse`,
+      this.rootUrl + `api/v1/cloturecaisse/savecloturecaisse`,
       __body,
       {
         headers: __headers,
@@ -3586,7 +3586,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/commune/all`,
+      this.rootUrl + `api/v1/commune/all`,
       __body,
       {
         headers: __headers,
@@ -3621,7 +3621,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/commune/delete/${id}`,
+      this.rootUrl + `api/v1/commune/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -3657,7 +3657,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/commune/findById/${id}`,
+      this.rootUrl + `api/v1/commune/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -3693,7 +3693,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/commune/findByIdVille/${id}`,
+      this.rootUrl + `api/v1/commune/findByIdVille/${id}`,
       __body,
       {
         headers: __headers,
@@ -3729,7 +3729,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/commune/findByName/${name}`,
+      this.rootUrl + `api/v1/commune/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -3765,7 +3765,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/commune/save`,
+      this.rootUrl + `api/v1/commune/save`,
       __body,
       {
         headers: __headers,
@@ -3799,7 +3799,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/droitAccess/`,
+      this.rootUrl + `api/v1/droitAccess/`,
       __body,
       {
         headers: __headers,
@@ -3834,7 +3834,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/droitAccess/save`,
+      this.rootUrl + `api/v1/droitAccess/save`,
       __body,
       {
         headers: __headers,
@@ -3870,7 +3870,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/droitAccess/${droitAccessid}`,
+      this.rootUrl + `api/v1/droitAccess/${droitAccessid}`,
       __body,
       {
         headers: __headers,
@@ -3905,7 +3905,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/droitAccess/${droitAccessid}`,
+      this.rootUrl + `api/v1/droitAccess/${droitAccessid}`,
       __body,
       {
         headers: __headers,
@@ -3940,7 +3940,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/allEncaissementByIdLocatire/${idLocatire}`,
+      this.rootUrl + `api/v1/encaissement/allEncaissementByIdLocatire/${idLocatire}`,
       __body,
       {
         headers: __headers,
@@ -3976,7 +3976,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/allencaissementByIdBien/${id}`,
+      this.rootUrl + `api/v1/encaissement/allencaissementByIdBien/${id}`,
       __body,
       {
         headers: __headers,
@@ -4012,7 +4012,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/findAllEncaissementPrincipal/${idAgence}`,
+      this.rootUrl + `api/v1/encaissement/findAllEncaissementPrincipal/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -4048,7 +4048,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/findByIdEncaissement/${id}`,
+      this.rootUrl + `api/v1/encaissement/findByIdEncaissement/${id}`,
       __body,
       {
         headers: __headers,
@@ -4093,7 +4093,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/getTotalEncaissementparPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/getTotalEncaissementparPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4145,7 +4145,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/getTotalEncaissementsEtMontantsDeLoyerParMois/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4197,7 +4197,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/getTotalEncaissementsParMois/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/getTotalEncaissementsParMois/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4249,7 +4249,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/listeEncaisseLoyerEntreDeuxDate/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4304,7 +4304,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/${params.idEncaiss}/${params.idChapitre}/${params.debut}/${params.fin}`,
+      this.rootUrl + `api/v1/encaissement/listeEncaissementEntreDeuxDateParChapitreEtCaisse/${params.idEncaiss}/${params.idChapitre}/${params.debut}/${params.fin}`,
       __body,
       {
         headers: __headers,
@@ -4355,7 +4355,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/${params.agence}/${params.periode}`,
+      this.rootUrl + `api/v1/encaissement/listeLocataireImpayerParAgenceEtPeriode/${params.agence}/${params.periode}`,
       __body,
       {
         headers: __headers,
@@ -4396,7 +4396,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/miseAJourEncaissementCloturer/${idEncaiss}`,
+      this.rootUrl + `api/v1/encaissement/miseAJourEncaissementCloturer/${idEncaiss}`,
       __body,
       {
         headers: __headers,
@@ -4432,7 +4432,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/saveencaissement`,
+      this.rootUrl + `api/v1/encaissement/saveencaissement`,
       __body,
       {
         headers: __headers,
@@ -4468,7 +4468,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/saveencaissementavecretour`,
+      this.rootUrl + `api/v1/encaissement/saveencaissementavecretour`,
       __body,
       {
         headers: __headers,
@@ -4504,7 +4504,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/saveencaissementmasse`,
+      this.rootUrl + `api/v1/encaissement/saveencaissementmasse`,
       __body,
       {
         headers: __headers,
@@ -4540,7 +4540,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/saveencaissementmasseavecretour`,
+      this.rootUrl + `api/v1/encaissement/saveencaissementmasseavecretour`,
       __body,
       {
         headers: __headers,
@@ -4585,7 +4585,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4637,7 +4637,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
+      this.rootUrl + `api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/${params.idAgence}/${params.datedebut}/${params.datefin}`,
       __body,
       {
         headers: __headers,
@@ -4680,7 +4680,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/totalencaissement/${id}`,
+      this.rootUrl + `api/v1/encaissement/totalencaissement/${id}`,
       __body,
       {
         headers: __headers,
@@ -4725,7 +4725,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/encaissement/totalencaissementjournalier/${params.jour}/${params.idAgence}/${params.chapitre}`,
+      this.rootUrl + `api/v1/encaissement/totalencaissementjournalier/${params.jour}/${params.idAgence}/${params.chapitre}`,
       __body,
       {
         headers: __headers,
@@ -4774,7 +4774,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/envoimail/sendmailgrouper/${params.periode}/${params.idAgence}`,
+      this.rootUrl + `api/v1/envoimail/sendmailgrouper/${params.periode}/${params.idAgence}`,
       __body,
       {
         headers: __headers,
@@ -4815,7 +4815,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/envoimail/sendquittancebymail/${id}`,
+      this.rootUrl + `api/v1/envoimail/sendquittancebymail/${id}`,
       __body,
       {
         headers: __headers,
@@ -4851,7 +4851,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/especeencaissement/save`,
+      this.rootUrl + `api/v1/especeencaissement/save`,
       __body,
       {
         headers: __headers,
@@ -4887,7 +4887,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/etablissement/getDefaultEtable/${id}`,
+      this.rootUrl + `api/v1/etablissement/getDefaultEtable/${id}`,
       __body,
       {
         headers: __headers,
@@ -4923,7 +4923,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/etage/all/${idAgence}`,
+      this.rootUrl + `api/v1/etage/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -4959,7 +4959,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/etage/delete/${id}`,
+      this.rootUrl + `api/v1/etage/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -4995,7 +4995,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/etage/findById/${id}`,
+      this.rootUrl + `api/v1/etage/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -5031,7 +5031,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/etage/findByIdImmeuble/${id}`,
+      this.rootUrl + `api/v1/etage/findByIdImmeuble/${id}`,
       __body,
       {
         headers: __headers,
@@ -5067,7 +5067,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/etage/findByName/${name}`,
+      this.rootUrl + `api/v1/etage/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -5103,7 +5103,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/etage/save`,
+      this.rootUrl + `api/v1/etage/save`,
       __body,
       {
         headers: __headers,
@@ -5137,7 +5137,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/groupeDroit/`,
+      this.rootUrl + `api/v1/groupeDroit/`,
       __body,
       {
         headers: __headers,
@@ -5172,7 +5172,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/groupeDroit/save`,
+      this.rootUrl + `api/v1/groupeDroit/save`,
       __body,
       {
         headers: __headers,
@@ -5208,7 +5208,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/groupeDroit/${groupedroitid}`,
+      this.rootUrl + `api/v1/groupeDroit/${groupedroitid}`,
       __body,
       {
         headers: __headers,
@@ -5243,7 +5243,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/groupeDroit/${groupedroitid}`,
+      this.rootUrl + `api/v1/groupeDroit/${groupedroitid}`,
       __body,
       {
         headers: __headers,
@@ -5278,7 +5278,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/image/imagesbybien/${id}`,
+      this.rootUrl + `api/v1/image/imagesbybien/${id}`,
       __body,
       {
         headers: __headers,
@@ -5323,7 +5323,7 @@ class ApiService extends __BaseService {
     if (params.file != null) __params = __params.set('file', params.file.toString());
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/image/upload/${params.id}/${params.name}`,
+      this.rootUrl + `api/v1/image/upload/${params.id}/${params.name}`,
       __body,
       {
         headers: __headers,
@@ -5366,7 +5366,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/affichetoutlesimmeubles/${idAgence}`,
+      this.rootUrl + `api/v1/immeuble/affichetoutlesimmeubles/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -5402,7 +5402,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/all/${idAgence}`,
+      this.rootUrl + `api/v1/immeuble/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -5438,7 +5438,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/deleteImmeuble/${id}`,
+      this.rootUrl + `api/v1/immeuble/deleteImmeuble/${id}`,
       __body,
       {
         headers: __headers,
@@ -5474,7 +5474,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/findById/${id}`,
+      this.rootUrl + `api/v1/immeuble/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -5510,7 +5510,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/findByIdSite/${id}`,
+      this.rootUrl + `api/v1/immeuble/findByIdSite/${id}`,
       __body,
       {
         headers: __headers,
@@ -5546,7 +5546,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/findByName/${name}`,
+      this.rootUrl + `api/v1/immeuble/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -5582,7 +5582,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/immeuble/saveImeubleEtage`,
+      this.rootUrl + `api/v1/immeuble/saveImeubleEtage`,
       __body,
       {
         headers: __headers,
@@ -5618,7 +5618,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/all/${idAgence}`,
+      this.rootUrl + `api/v1/magasin/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -5654,7 +5654,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/alllibre/${idAgence}`,
+      this.rootUrl + `api/v1/magasin/alllibre/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -5690,7 +5690,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/findAllMagasinByIdEtage/${id}`,
+      this.rootUrl + `api/v1/magasin/findAllMagasinByIdEtage/${id}`,
       __body,
       {
         headers: __headers,
@@ -5726,7 +5726,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/findAllMagasinByIdSite/${idSite}`,
+      this.rootUrl + `api/v1/magasin/findAllMagasinByIdSite/${idSite}`,
       __body,
       {
         headers: __headers,
@@ -5762,7 +5762,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/findByName/${name}`,
+      this.rootUrl + `api/v1/magasin/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -5798,7 +5798,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/magasin/findmagasinById/${id}`,
+      this.rootUrl + `api/v1/magasin/findmagasinById/${id}`,
       __body,
       {
         headers: __headers,
@@ -5834,7 +5834,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/magasin/savemagasin`,
+      this.rootUrl + `api/v1/magasin/savemagasin`,
       __body,
       {
         headers: __headers,
@@ -5870,7 +5870,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/montantloyerbail/findMontantByBail/${id}`,
+      this.rootUrl + `api/v1/montantloyerbail/findMontantByBail/${id}`,
       __body,
       {
         headers: __headers,
@@ -5904,7 +5904,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/pays/all`,
+      this.rootUrl + `api/v1/pays/all`,
       __body,
       {
         headers: __headers,
@@ -5939,7 +5939,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/pays/delete/${id}`,
+      this.rootUrl + `api/v1/pays/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -5975,7 +5975,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/pays/findById/${id}`,
+      this.rootUrl + `api/v1/pays/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -6011,7 +6011,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/pays/findByName/${name}`,
+      this.rootUrl + `api/v1/pays/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -6047,7 +6047,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/pays/save`,
+      this.rootUrl + `api/v1/pays/save`,
       __body,
       {
         headers: __headers,
@@ -6081,7 +6081,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/prestation/all`,
+      this.rootUrl + `api/v1/prestation/all`,
       __body,
       {
         headers: __headers,
@@ -6115,7 +6115,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/prestation/delete/${id}`,
+      this.rootUrl + `api/v1/prestation/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -6150,7 +6150,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/prestation/findById/${id}`,
+      this.rootUrl + `api/v1/prestation/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -6186,7 +6186,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/prestation/saveorupdate`,
+      this.rootUrl + `api/v1/prestation/saveorupdate`,
       __body,
       {
         headers: __headers,
@@ -6222,7 +6222,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/print/quittance/${id}`,
+      this.rootUrl + `api/v1/print/quittance/${id}`,
       __body,
       {
         headers: __headers,
@@ -6267,7 +6267,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/print/quittancegrouper/${params.periode}/${params.idAgence}/${params.proprio}`,
+      this.rootUrl + `api/v1/print/quittancegrouper/${params.periode}/${params.idAgence}/${params.proprio}`,
       __body,
       {
         headers: __headers,
@@ -6319,7 +6319,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/print/recuReservationParIdReservation/${params.idReservation}/${params.idAgence}/${params.proprio}`,
+      this.rootUrl + `api/v1/print/recuReservationParIdReservation/${params.idReservation}/${params.idAgence}/${params.proprio}`,
       __body,
       {
         headers: __headers,
@@ -6362,7 +6362,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/print/recupaiment/${idEncaissement}`,
+      this.rootUrl + `api/v1/print/recupaiment/${idEncaissement}`,
       __body,
       {
         headers: __headers,
@@ -6407,7 +6407,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/print/recureservation/${params.idEncaissement}/${params.idAgence}/${params.proprio}`,
+      this.rootUrl + `api/v1/print/recureservation/${params.idEncaissement}/${params.idAgence}/${params.proprio}`,
       __body,
       {
         headers: __headers,
@@ -6450,7 +6450,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/prixparcategorie/listDesPrixParCategori/${idCategorie}`,
+      this.rootUrl + `api/v1/prixparcategorie/listDesPrixParCategori/${idCategorie}`,
       __body,
       {
         headers: __headers,
@@ -6486,7 +6486,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/prixparcategorie/saveOrUpDatePrixParCategorie`,
+      this.rootUrl + `api/v1/prixparcategorie/saveOrUpDatePrixParCategorie`,
       __body,
       {
         headers: __headers,
@@ -6522,7 +6522,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/quartier/all/${idAgence}`,
+      this.rootUrl + `api/v1/quartier/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -6558,7 +6558,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/quartier/delete/${id}`,
+      this.rootUrl + `api/v1/quartier/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -6594,7 +6594,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/quartier/findById/${id}`,
+      this.rootUrl + `api/v1/quartier/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -6630,7 +6630,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/quartier/findByIdCommune/${id}`,
+      this.rootUrl + `api/v1/quartier/findByIdCommune/${id}`,
       __body,
       {
         headers: __headers,
@@ -6666,7 +6666,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/quartier/findByName/${name}`,
+      this.rootUrl + `api/v1/quartier/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -6702,7 +6702,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/quartier/save`,
+      this.rootUrl + `api/v1/quartier/save`,
       __body,
       {
         headers: __headers,
@@ -6736,7 +6736,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/allreservation`,
+      this.rootUrl + `api/v1/reservation/allreservation`,
       __body,
       {
         headers: __headers,
@@ -6771,7 +6771,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/allreservationparagence/${idAgence}`,
+      this.rootUrl + `api/v1/reservation/allreservationparagence/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -6806,7 +6806,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/reservation/delete/${id}`,
+      this.rootUrl + `api/v1/reservation/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -6841,7 +6841,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/findAllEncaissementReservationByIdBien/${idReser}`,
+      this.rootUrl + `api/v1/reservation/findAllEncaissementReservationByIdBien/${idReser}`,
       __body,
       {
         headers: __headers,
@@ -6877,7 +6877,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/findPeriodeReservationByIdBien/${idBien}`,
+      this.rootUrl + `api/v1/reservation/findPeriodeReservationByIdBien/${idBien}`,
       __body,
       {
         headers: __headers,
@@ -6913,7 +6913,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/findReservationById/${id}`,
+      this.rootUrl + `api/v1/reservation/findReservationById/${id}`,
       __body,
       {
         headers: __headers,
@@ -6949,7 +6949,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/reservation/listeDesReservationOuvertParAgence/${idAgence}`,
+      this.rootUrl + `api/v1/reservation/listeDesReservationOuvertParAgence/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -6985,7 +6985,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/reservation/saveencaissementreservation`,
+      this.rootUrl + `api/v1/reservation/saveencaissementreservation`,
       __body,
       {
         headers: __headers,
@@ -7021,7 +7021,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/reservation/saveorupdate`,
+      this.rootUrl + `api/v1/reservation/saveorupdate`,
       __body,
       {
         headers: __headers,
@@ -7057,7 +7057,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/reservation/saveorupdategood`,
+      this.rootUrl + `api/v1/reservation/saveorupdategood`,
       __body,
       {
         headers: __headers,
@@ -7093,7 +7093,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/reservation/saveorupdatereservation`,
+      this.rootUrl + `api/v1/reservation/saveorupdatereservation`,
       __body,
       {
         headers: __headers,
@@ -7127,7 +7127,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/serviceadditionnel/all`,
+      this.rootUrl + `api/v1/serviceadditionnel/all`,
       __body,
       {
         headers: __headers,
@@ -7161,7 +7161,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/serviceadditionnel/delete/${id}`,
+      this.rootUrl + `api/v1/serviceadditionnel/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -7196,7 +7196,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/serviceadditionnel/findById/${id}`,
+      this.rootUrl + `api/v1/serviceadditionnel/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -7232,7 +7232,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/serviceadditionnel/saveorupdate`,
+      this.rootUrl + `api/v1/serviceadditionnel/saveorupdate`,
       __body,
       {
         headers: __headers,
@@ -7268,7 +7268,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/sites/all/${idAgence}`,
+      this.rootUrl + `api/v1/sites/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -7304,7 +7304,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/sites/delete/${id}`,
+      this.rootUrl + `api/v1/sites/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -7340,7 +7340,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/sites/findById/${id}`,
+      this.rootUrl + `api/v1/sites/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -7376,7 +7376,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/sites/findByName/${name}`,
+      this.rootUrl + `api/v1/sites/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -7412,7 +7412,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/sites/save`,
+      this.rootUrl + `api/v1/sites/save`,
       __body,
       {
         headers: __headers,
@@ -7448,7 +7448,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/sites/savesite`,
+      this.rootUrl + `api/v1/sites/savesite`,
       __body,
       {
         headers: __headers,
@@ -7484,7 +7484,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/allSuivieDepense/${idAgence}`,
+      this.rootUrl + `api/v1/suiviedepense/allSuivieDepense/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -7529,7 +7529,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/${params.datePriseEnCompteEncaii}/${params.idCaiss}/${params.idChapitre}`,
+      this.rootUrl + `api/v1/suiviedepense/countSuiviNonCloturerParCaisseEtChapitreAvantDate/${params.datePriseEnCompteEncaii}/${params.idCaiss}/${params.idChapitre}`,
       __body,
       {
         headers: __headers,
@@ -7572,7 +7572,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/${codeTransaction}`,
+      this.rootUrl + `api/v1/suiviedepense/getSuivieDepenseByCodeTransaction/${codeTransaction}`,
       __body,
       {
         headers: __headers,
@@ -7608,7 +7608,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/getSuivieDepenseById/${id}`,
+      this.rootUrl + `api/v1/suiviedepense/getSuivieDepenseById/${id}`,
       __body,
       {
         headers: __headers,
@@ -7653,7 +7653,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/listSortieDeuxDate/${params.idAgence}/${params.debut}/${params.fin}`,
+      this.rootUrl + `api/v1/suiviedepense/listSortieDeuxDate/${params.idAgence}/${params.debut}/${params.fin}`,
       __body,
       {
         headers: __headers,
@@ -7705,7 +7705,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/${params.idcaisse}/${params.dateDepriseEnCompte}/${params.idChapitre}`,
+      this.rootUrl + `api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitrAvantDate/${params.idcaisse}/${params.dateDepriseEnCompte}/${params.idChapitre}`,
       __body,
       {
         headers: __headers,
@@ -7760,7 +7760,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/${params.idcaisse}/${params.dateDebut}/${params.dateFin}/${params.idChapitre}`,
+      this.rootUrl + `api/v1/suiviedepense/listSuiviDepenseNonCloturerParCaisseEtChapitreEntreDeuxDate/${params.idcaisse}/${params.dateDebut}/${params.dateFin}/${params.idChapitre}`,
       __body,
       {
         headers: __headers,
@@ -7805,7 +7805,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/saveSuivieDepense`,
+      this.rootUrl + `api/v1/suiviedepense/saveSuivieDepense`,
       __body,
       {
         headers: __headers,
@@ -7847,7 +7847,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/suprimerSuiviParId/${params.id}/${params.idAgence}`,
+      this.rootUrl + `api/v1/suiviedepense/suprimerSuiviParId/${params.id}/${params.idAgence}`,
       __body,
       {
         headers: __headers,
@@ -7897,7 +7897,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/suiviedepense/totalSortieDeuxDate/${params.idAgence}/${params.debut}/${params.fin}`,
+      this.rootUrl + `api/v1/suiviedepense/totalSortieDeuxDate/${params.idAgence}/${params.debut}/${params.fin}`,
       __body,
       {
         headers: __headers,
@@ -7940,7 +7940,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/all/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -7976,7 +7976,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/clienthotel/all/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/clienthotel/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8012,7 +8012,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/gerants/all/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/gerants/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8048,7 +8048,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/getAllutilisateurbyAgence/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/getAllutilisateurbyAgence/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8084,7 +8084,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/getutilisateurbyemail/${email}`,
+      this.rootUrl + `api/v1/utilisateur/getutilisateurbyemail/${email}`,
       __body,
       {
         headers: __headers,
@@ -8120,7 +8120,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/getutilisateurbyid/${id}`,
+      this.rootUrl + `api/v1/utilisateur/getutilisateurbyid/${id}`,
       __body,
       {
         headers: __headers,
@@ -8156,7 +8156,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/getutilisateurbyusername/${username}`,
+      this.rootUrl + `api/v1/utilisateur/getutilisateurbyusername/${username}`,
       __body,
       {
         headers: __headers,
@@ -8192,7 +8192,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/locataires/all/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/locataires/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8228,7 +8228,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/locataires/ayanbail/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/locataires/ayanbail/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8264,7 +8264,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/proprietaires/all/${idAgence}`,
+      this.rootUrl + `api/v1/utilisateur/proprietaires/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8300,7 +8300,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/save`,
+      this.rootUrl + `api/v1/utilisateur/save`,
       __body,
       {
         headers: __headers,
@@ -8334,7 +8334,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/utilisateur/superviseurs/all`,
+      this.rootUrl + `api/v1/utilisateur/superviseurs/all`,
       __body,
       {
         headers: __headers,
@@ -8369,7 +8369,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/villa/all/${idAgence}`,
+      this.rootUrl + `api/v1/villa/all/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8405,7 +8405,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/villa/alllibre/${idAgence}`,
+      this.rootUrl + `api/v1/villa/alllibre/${idAgence}`,
       __body,
       {
         headers: __headers,
@@ -8441,7 +8441,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/villa/findVillaById/${id}`,
+      this.rootUrl + `api/v1/villa/findVillaById/${id}`,
       __body,
       {
         headers: __headers,
@@ -8477,7 +8477,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/villa/save`,
+      this.rootUrl + `api/v1/villa/save`,
       __body,
       {
         headers: __headers,
@@ -8511,7 +8511,7 @@ class ApiService extends __BaseService {
     let __body: any = null;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/ville/all`,
+      this.rootUrl + `api/v1/ville/all`,
       __body,
       {
         headers: __headers,
@@ -8546,7 +8546,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'DELETE',
-      this.rootUrl + `gestimoweb/api/v1/ville/delete/${id}`,
+      this.rootUrl + `api/v1/ville/delete/${id}`,
       __body,
       {
         headers: __headers,
@@ -8582,7 +8582,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/ville/findById/${id}`,
+      this.rootUrl + `api/v1/ville/findById/${id}`,
       __body,
       {
         headers: __headers,
@@ -8618,7 +8618,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/ville/findByIdPays/${id}`,
+      this.rootUrl + `api/v1/ville/findByIdPays/${id}`,
       __body,
       {
         headers: __headers,
@@ -8654,7 +8654,7 @@ class ApiService extends __BaseService {
 
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/ville/findByName/${name}`,
+      this.rootUrl + `api/v1/ville/findByName/${name}`,
       __body,
       {
         headers: __headers,
@@ -8690,7 +8690,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'GET',
-      this.rootUrl + `gestimoweb/api/v1/ville/findByPays`,
+      this.rootUrl + `api/v1/ville/findByPays`,
       __body,
       {
         headers: __headers,
@@ -8726,7 +8726,7 @@ class ApiService extends __BaseService {
     __body = body;
     let req = new HttpRequest<any>(
       'POST',
-      this.rootUrl + `gestimoweb/api/v1/ville/save`,
+      this.rootUrl + `api/v1/ville/save`,
       __body,
       {
         headers: __headers,
