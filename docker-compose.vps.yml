@@ -1,4 +1,19 @@
 services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
   db:
     image: mysql:8.4
     restart: unless-stopped
@@ -21,13 +36,16 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       MYSQL_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
       MYSQL_USER: gestimo
       MYSQL_PASSWORD: gestimoweb
+      APP_CORS_ALLOWED_ORIGIN_PATTERNS: https://gestimoweb.com,https://www.gestimoweb.com
       JWT_SECRET: change_me_in_prod
-      PASSWORD_RESET_URL: http://51.75.142.41/reset-password
-      DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
-      DEFAULT_AGENCY_ID: "1"
+      APP_PASSWORD_RESET_URL: https://gestimoweb.com/reset-password
+      APP_DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
+      APP_DEFAULT_AGENCY_ID: "1"
       TZ: Africa/Abidjan
     volumes:
       - backend_data:/home/spring/gestimoweb
@@ -40,12 +58,14 @@ services:
   frontend:
     image: astairenazaire/imhotep-bis-frontend:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - backend
 
 volumes:
   db_data:
   backend_data:
+  caddy_data:
+  caddy_config:
 

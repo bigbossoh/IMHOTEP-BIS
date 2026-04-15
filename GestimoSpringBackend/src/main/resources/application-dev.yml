@@ -11,6 +11,8 @@ spring:
 
 app:
   password-reset-url: http://localhost:4200/reset-password
+  cors:
+    allowed-origin-patterns: "http://localhost:[*],http://127.0.0.1:[*]"
 
 logging:
   level:

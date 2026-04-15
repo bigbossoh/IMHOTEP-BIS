@@ -40,9 +40,9 @@ import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -74,7 +74,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -93,6 +92,30 @@ public class PrintServiceImpl implements PrintService {
   private static Map<String, Object> withFrenchLocale(Map<String, Object> parameters) {
     parameters.put(JRParameter.REPORT_LOCALE, FRENCH_LOCALE);
     return parameters;
+  }
+
+  private InputStream openClasspathResource(String classpathLocation) throws FileNotFoundException {
+    try {
+      return resourceLoader.getResource(classpathLocation).getInputStream();
+    } catch (IOException exception) {
+      FileNotFoundException wrapped = new FileNotFoundException(
+        "Impossible de charger la ressource " + classpathLocation
+      );
+      wrapped.initCause(exception);
+      throw wrapped;
+    }
+  }
+
+  private void closeQuietly(InputStream stream) {
+    if (stream == null) {
+      return;
+    }
+
+    try {
+      stream.close();
+    } catch (IOException exception) {
+      log.debug("Erreur lors de la fermeture d'un flux", exception);
+    }
   }
 
   ResourceLoader resourceLoader;
@@ -143,51 +166,61 @@ public class PrintServiceImpl implements PrintService {
   @Override
   public byte[] quittanceLoyer(Long id)
     throws FileNotFoundException, JRException, SQLException {
-    String path = "src/main/resources/templates";
-
-    File file = ResourceUtils.getFile(path + "/print/Recu_paiement.jrxml");
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("idQuit", id);
-    JasperReport jasperReport = JasperCompileManager.compileReport(
-      file.getAbsolutePath()
-    );
 
-    JasperPrint print = JasperFillManager.fillReport(
-      jasperReport,
-      withFrenchLocale(parameters),
-      dataSourceSQL.getConnection()
+    InputStream jrxmlStream = openClasspathResource(
+      "classpath:templates/print/Recu_paiement.jrxml"
     );
-    JasperExportManager.exportReportToPdfFile(
-      print,
-      path + "/quittance" + id + ".pdf"
-    );
-
-    return JasperExportManager.exportReportToPdf(print);
+    try {
+      JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+      JasperPrint print = JasperFillManager.fillReport(
+        jasperReport,
+        withFrenchLocale(parameters),
+        dataSourceSQL.getConnection()
+      );
+      return JasperExportManager.exportReportToPdf(print);
+    } finally {
+      closeQuietly(jrxmlStream);
+    }
   }
 
   @Override
   public byte[] quittancePeriode(String periode, String proprio, Long idAgence)
     throws FileNotFoundException, JRException, SQLException {
-    String path = "src/main/resources/templates";
-    File file = ResourceUtils.getFile(
-      path + "/print/quittance_appel_loyer.jrxml"
+    AgenceImmobiliere agence = resolveAgenceById(idAgence);
+    String nomProprio = StringUtils.hasText(proprio)
+      ? proprio.trim()
+      : agence != null
+        ? fallback(agence.getNomAgence(), "GESTIMO")
+        : "GESTIMO";
+
+    InputStream jrxmlStream = openClasspathResource(
+      "classpath:templates/print/quittanceappelloyer.jrxml"
     );
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("PARAMETER_PERIODE", periode);
-    JasperReport jasperReport = JasperCompileManager.compileReport(
-      file.getAbsolutePath()
+    InputStream logoStream = resolveAgenceLogoStream(
+      agence,
+      "classpath:templates/print/seve.jpeg"
     );
 
-    JasperPrint print = JasperFillManager.fillReport(
-      jasperReport,
-      parameters,
-      dataSourceSQL.getConnection()
-    );
-    JasperExportManager.exportReportToPdfFile(
-      print,
-      path + "/depot_etat/appel_loyer_du_" + periode + ".pdf"
-    );
-    return JasperExportManager.exportReportToPdf(print);
+    try {
+      Map<String, Object> parameters = new HashMap<>();
+      parameters.put("PARAMETER_PERIODE", periode);
+      parameters.put("PARAMETER_AGENCE", idAgence);
+      parameters.put("NOM_PROPRIO", nomProprio);
+      parameters.put("LOGO", logoStream);
+
+      JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+      JasperPrint print = JasperFillManager.fillReport(
+        jasperReport,
+        withFrenchLocale(parameters),
+        dataSourceSQL.getConnection()
+      );
+      return JasperExportManager.exportReportToPdf(print);
+    } finally {
+      closeQuietly(logoStream);
+      closeQuietly(jrxmlStream);
+    }
   }
 
   @Override
@@ -199,28 +232,30 @@ public class PrintServiceImpl implements PrintService {
       AgenceImmobiliere agence = resolveAgenceById(idAgence);
       String nomAgence = agence != null ? fallback(agence.getNomAgence(), "GESTIMO") : "GESTIMO";
 
-      InputStream jrxmlStream = resourceLoader
-        .getResource("classpath:templates/print/quittanceappelloyer.jrxml")
-        .getInputStream();
-      InputStream logoStream = resolveAgenceLogoStream(
-        agence,
-        "classpath:templates/print/seve.jpeg"
-      );
+      try (
+        InputStream jrxmlStream = openClasspathResource(
+          "classpath:templates/print/quittanceappelloyer.jrxml"
+        );
+        InputStream logoStream = resolveAgenceLogoStream(
+          agence,
+          "classpath:templates/print/seve.jpeg"
+        )
+      ) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("PARAMETER_PERIODE", periode);
+        parameters.put("PARAMETER_AGENCE", idAgence);
+        parameters.put("NOM_PROPRIO", nomAgence);
+        parameters.put("LOGO", logoStream);
 
-      Map<String, Object> parameters = new HashMap<>();
-      parameters.put("PARAMETER_PERIODE", periode);
-      parameters.put("PARAMETER_AGENCE", idAgence);
-      parameters.put("NOM_PROPRIO", nomAgence);
-      parameters.put("LOGO", logoStream);
-
-      JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      log.info("Rapport genere pour periode={} agence={} : {} page(s)", periode, idAgence, print.getPages().size());
-      return JasperExportManager.exportReportToPdf(print);
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+        JasperPrint print = JasperFillManager.fillReport(
+          jasperReport,
+          withFrenchLocale(parameters),
+          dataSourceSQL.getConnection()
+        );
+        log.info("Rapport genere pour periode={} agence={} : {} page(s)", periode, idAgence, print.getPages().size());
+        return JasperExportManager.exportReportToPdf(print);
+      }
     } catch (Exception e) {
       log.error(
         "Erreur lors de la generation de la quittance groupee pour la periode {} et l'agence {}",
@@ -239,44 +274,30 @@ public class PrintServiceImpl implements PrintService {
   public byte[] quittancePeriodeById(String periode, Long id, String proprio)
     throws FileNotFoundException, JRException, SQLException {
     try {
-      String path = "src/main/resources/templates";
       AgenceImmobiliere agence = resolveAgenceForLocataireAndPeriode(periode, id);
-      InputStream logoMagiser = resolveAgenceLogoStream(
-        agence,
-        "classpath:templates/print/magiser.jpeg"
-      );
-      File file = ResourceUtils.getFile(
-        path + "/print/quittance_appel_loyer_indiv_pour_mail.jrxml"
-      );
+      try (
+        InputStream jrxmlStream = openClasspathResource(
+          "classpath:templates/print/quittance_appel_loyer_indiv_pour_mail.jrxml"
+        );
+        InputStream logoMagiser = resolveAgenceLogoStream(
+          agence,
+          "classpath:templates/print/magiser.jpeg"
+        )
+      ) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("PARAMETER_PERIODE", periode);
+        parameters.put("ID_UTILISATEUR", id.toString());
+        parameters.put("NOM_PROPRIO", proprio);
+        parameters.put("LOGO", logoMagiser);
 
-      Map<String, Object> parameters = new HashMap<>();
-
-      parameters.put("PARAMETER_PERIODE", periode);
-      parameters.put("ID_UTILISATEUR", id.toString());
-      parameters.put("NOM_PROPRIO", proprio);
-      parameters.put("LOGO", logoMagiser);
-      JasperReport jasperReport = JasperCompileManager.compileReport(
-        file.getAbsolutePath()
-      );
-      File di = new File(path + "/depot_etat");
-      boolean di1 = di.mkdirs();
-      if (di1) {
-        System.out.println("Folder is created successfully");
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+        JasperPrint print = JasperFillManager.fillReport(
+          jasperReport,
+          withFrenchLocale(parameters),
+          dataSourceSQL.getConnection()
+        );
+        return JasperExportManager.exportReportToPdf(print);
       }
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      JasperExportManager.exportReportToPdfFile(
-        print,
-        path + "/depot_etat/appel_loyer_du_" + periode + "_" + id + ".pdf"
-      );
-      log.info(
-        "Le fichier {}",
-        path + "/appel_loyer_du_" + periode + "_" + id + ".pdf"
-      );
-      return JasperExportManager.exportReportToPdf(print);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return null;
@@ -335,32 +356,20 @@ public class PrintServiceImpl implements PrintService {
   public byte[] printRecuPaiement(Long idEncaissemnt)
     throws FileNotFoundException, JRException, SQLException {
     try {
-      String path = "src/main/resources/templates";
-      File file = ResourceUtils.getFile(
-        path + "/print/recupaiementappelloyer.jrxml"
-      );
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("PARAMETER_ENCAISSEMENT", idEncaissemnt);
 
-      JasperReport jasperReport = JasperCompileManager.compileReport(
-        file.getAbsolutePath()
-      );
-      File di = new File(path + "/depot_etat");
-      boolean di1 = di.mkdirs();
-      if (di1) {
-        System.out.println("Folder is created successfully");
+      try (InputStream jrxmlStream = openClasspathResource(
+        "classpath:templates/print/recupaiementappelloyer.jrxml"
+      )) {
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+        JasperPrint print = JasperFillManager.fillReport(
+          jasperReport,
+          withFrenchLocale(parameters),
+          dataSourceSQL.getConnection()
+        );
+        return JasperExportManager.exportReportToPdf(print);
       }
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      JasperExportManager.exportReportToPdfFile(
-        print,
-        path + "/depot_etat/recu_paiement_du" + idEncaissemnt + ".pdf"
-      );
-
-      return JasperExportManager.exportReportToPdf(print);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return null;
@@ -371,37 +380,22 @@ public class PrintServiceImpl implements PrintService {
   public byte[] recuReservation(Long idEncaisse, String proprio, Long idAgence)
     throws FileNotFoundException, JRException, SQLException {
     try {
-      String path = "src/main/resources/templates";
-      File file = ResourceUtils.getFile(
-        path + "/print/quittancereservation.jrxml"
-      );
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("id_encaissement", idEncaisse);
       parameters.put("PARAMETER_AGENCE", idAgence);
       parameters.put("NOM_PROPRIO", proprio);
 
-      JasperReport jasperReport = JasperCompileManager.compileReport(
-        file.getAbsolutePath()
-      );
-      File di = new File(path + "/depot_etat");
-      boolean di1 = di.mkdirs();
-      if (di1) {
-        System.out.println("Folder is created successfully");
+      try (InputStream jrxmlStream = openClasspathResource(
+        "classpath:templates/print/quittancereservation.jrxml"
+      )) {
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+        JasperPrint print = JasperFillManager.fillReport(
+          jasperReport,
+          withFrenchLocale(parameters),
+          dataSourceSQL.getConnection()
+        );
+        return JasperExportManager.exportReportToPdf(print);
       }
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      JasperExportManager.exportReportToPdfFile(
-        print,
-        path + "/depot_etat/recu_de_" + idEncaisse + ".pdf"
-      );
-    log.info(
-      "Le fichier {}",
-      path + "/depot_etat/recu_de_" + idEncaisse + ".pdf"
-    );
-    return JasperExportManager.exportReportToPdf(print);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return null;
@@ -473,37 +467,22 @@ public class PrintServiceImpl implements PrintService {
       if (encaissementReservation != null) {
         idEncaisse = encaissementReservation.getId();
       }
-      String path = "src/main/resources/templates";
-      File file = ResourceUtils.getFile(
-        path + "/print/quittancereservation.jrxml"
-      );
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("id_encaissement", idEncaisse);
       parameters.put("PARAMETER_AGENCE", idAgence);
       parameters.put("NOM_PROPRIO", proprio);
 
-      JasperReport jasperReport = JasperCompileManager.compileReport(
-        file.getAbsolutePath()
-      );
-      File di = new File(path + "/depot_etat");
-      boolean di1 = di.mkdirs();
-      if (di1) {
-        System.out.println("Folder is created successfully");
+      try (InputStream jrxmlStream = openClasspathResource(
+        "classpath:templates/print/quittancereservation.jrxml"
+      )) {
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+        JasperPrint print = JasperFillManager.fillReport(
+          jasperReport,
+          withFrenchLocale(parameters),
+          dataSourceSQL.getConnection()
+        );
+        return JasperExportManager.exportReportToPdf(print);
       }
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      JasperExportManager.exportReportToPdfFile(
-        print,
-        path + "/depot_etat/recu_de_" + idEncaisse + ".pdf"
-      );
-      log.info(
-        "Le fichier {}",
-        path + "/depot_etat/recu_de_" + idEncaisse + ".pdf"
-      );
-      return JasperExportManager.exportReportToPdf(print);
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return null;

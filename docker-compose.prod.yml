@@ -1,4 +1,21 @@
 services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+      - grafana
+      - prometheus
+
   db:
     image: mysql:8.4
     restart: unless-stopped
@@ -9,7 +26,8 @@ services:
       MYSQL_PASSWORD: gestimoweb
       TZ: Africa/Abidjan
     ports:
-      - "3306:3306"
+      # Sécurité: ne pas exposer MySQL à Internet (accès via SSH tunnel si besoin)
+      - "3305:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -19,21 +37,25 @@ services:
       retries: 10
 
   backend:
-    image: bigbossoh/imhotep-backend:latest
+    image: astairenazaire/imhotep-bd10:latest
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       MYSQL_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
       MYSQL_USER: gestimo
       MYSQL_PASSWORD: gestimoweb
-      JWT_SECRET: "[a-zA-Z0-9._]^+$GuidelinAurorees8SaisonACfsewwsikkoggishherforAlphabeticalArraNumeralsandOtherSymbo$"
-      MAIL_HOST: smtp-fr.securemail.pro
-      MAIL_PORT: 587
-      MAIL_USERNAME: info@molibetycenter.com
-      MAIL_PASSWORD: 2024@Seve2024
-      PASSWORD_RESET_URL: http://51.75.142.41/reset-password
-      DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
+      APP_CORS_ALLOWED_ORIGIN_PATTERNS: https://gestimoweb.com,https://www.gestimoweb.com
+      JWT_SECRET: "CHANGE_ME_JWT_SECRET"
+      SPRING_MAIL_HOST: smtp-fr.securemail.pro
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: info@molibetycenter.com
+      SPRING_MAIL_PASSWORD: 2024@Seve2024
+      APP_PASSWORD_RESET_URL: https://gestimoweb.com/reset-password
+      APP_DEFAULT_USER_EMAIL: bossohpaulin@gmail.com
       TZ: Africa/Abidjan
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
     volumes:
       - backend_data:/home/spring/gestimoweb
     depends_on:
@@ -43,13 +65,100 @@ services:
       - "8287"
 
   frontend:
-    image: bigbossoh/imhotep-frontend:latest
+    image: astairenazaire/imhotep-fd6:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    expose:
+      - "9090"
+
+  loki:
+    image: grafana/loki:2.9.8
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/loki/loki.yml
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/loki
+    expose:
+      - "3100"
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail_positions:/tmp
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "Admin@2026Change"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      TZ: Africa/Abidjan
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    expose:
+      - "3000"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    restart: unless-stopped
+    pid: host
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    expose:
+      - "9100"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /dev/disk:/dev/disk:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    expose:
+      - "8080"
 
 volumes:
   db_data:
   backend_data:
+  caddy_data:
+  caddy_config:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  promtail_positions:

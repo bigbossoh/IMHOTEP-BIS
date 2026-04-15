@@ -30,7 +30,7 @@ public class PasswordResetToken extends AbstractEntity {
   @Column(nullable = false)
   private boolean used;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "utilisateur_id", nullable = false)
   private Utilisateur utilisateur;
 }

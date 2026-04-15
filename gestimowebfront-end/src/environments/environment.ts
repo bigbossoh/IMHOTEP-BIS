@@ -1,7 +1,8 @@
 export const environment = {
   production: false,
-  // serverUrl: 'http://51.75.142.41:8287/actuator',
-  serverUrl: 'http://localhost:8287/actuator',
+  // Dev local (backend sur ta machine)
+  serverUrl: '/actuator',
+  // Dev contre le serveur HTTPS (via Caddy)
+  // serverUrl: 'https://localhost/actuator',
   openAiApiKey: '',
 };
-
