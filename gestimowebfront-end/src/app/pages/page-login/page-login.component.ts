@@ -16,6 +16,7 @@ import { AuthRequestDto } from 'src/gs-api/src/models';
 })
 export class PageLoginComponent implements OnInit {
   public showLoading?: boolean;
+  public showPassword = false;
   private subscriptions: Subscription[] = [];
 
   constructor(private router: Router,
@@ -66,6 +67,10 @@ export class PageLoginComponent implements OnInit {
     } else {
       this.notificationService.notify(notificationType, 'An error occurred. Please try again.');
     }
+  }
+
+  public togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   // ngOnDestroy(): void {

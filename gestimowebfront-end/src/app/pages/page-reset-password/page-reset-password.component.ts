@@ -135,14 +135,20 @@ export class PageResetPasswordComponent {
       return errorPayload;
     }
 
-    if (
-      errorPayload &&
-      typeof errorPayload === 'object' &&
-      'message' in errorPayload &&
-      typeof errorPayload.message === 'string' &&
-      errorPayload.message.trim().length > 0
-    ) {
-      return errorPayload.message;
+    if (errorPayload && typeof errorPayload === 'object') {
+      const maybeMessage = (errorPayload as { message?: unknown }).message;
+      if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
+        return maybeMessage;
+      }
+
+      const maybeErrorMessage = (errorPayload as { errorMessage?: unknown })
+        .errorMessage;
+      if (
+        typeof maybeErrorMessage === 'string' &&
+        maybeErrorMessage.trim().length > 0
+      ) {
+        return maybeErrorMessage;
+      }
     }
 
     return 'Une erreur est survenue. Veuillez réessayer.';

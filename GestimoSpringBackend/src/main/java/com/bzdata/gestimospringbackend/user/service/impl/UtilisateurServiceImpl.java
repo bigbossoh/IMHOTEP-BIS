@@ -24,6 +24,8 @@ import com.bzdata.gestimospringbackend.user.dto.request.UtilisateurRequestDto;
 import com.bzdata.gestimospringbackend.user.entity.PasswordResetToken;
 import com.bzdata.gestimospringbackend.user.entity.Utilisateur;
 import com.bzdata.gestimospringbackend.user.service.UtilisateurService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.dao.DataIntegrityViolationException;
 import com.bzdata.gestimospringbackend.exceptions.EntityNotFoundException;
 import com.bzdata.gestimospringbackend.exceptions.ErrorCodes;
@@ -94,6 +96,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
   private final BailMapperImpl bailMapper;
   private final EtablissementRepository etablissementRepository;
   private final EtablissementUtilisteurRepository etablissementUtilisteurRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Value("${app.password-reset-url:http://localhost:4200/reset-password}")
   private String passwordResetUrl;
@@ -309,30 +314,65 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
   @Override
   public UtilisateurRequestDto findUtilisateurByEmail(String email) {
-    return utilisateurRepository
-      .findUtilisateurByEmail(email)
-      .map(UtilisateurRequestDto::fromEntity)
-      .orElseThrow(() ->
-        new EntityNotFoundException(
-          "Aucun utilisateur avec l'email = " +
-          email +
-          " n' ete trouve dans la BDD",
-          ErrorCodes.UTILISATEUR_NOT_FOUND
-        )
+    String normalizedEmail = email == null ? "" : email.trim();
+    if (!StringUtils.hasText(normalizedEmail)) {
+      throw new EntityNotFoundException(
+        "Aucun utilisateur avec l'email = " +
+        email +
+        " n' ete trouve dans la BDD",
+        ErrorCodes.UTILISATEUR_NOT_FOUND
       );
+    }
+
+    List<Utilisateur> matches = utilisateurRepository.findAllByEmail(
+      normalizedEmail
+    );
+    Optional<Utilisateur> selected = pickPreferredUtilisateur(matches);
+    if (selected.isPresent()) {
+      if (matches.size() > 1) {
+        log.warn(
+          "Plusieurs utilisateurs trouvÃ©s pour l'email {} ({}). Utilisation de l'id {}.",
+          normalizedEmail,
+          matches.size(),
+          selected.get().getId()
+        );
+      }
+      return UtilisateurRequestDto.fromEntity(selected.get());
+    }
+
+    throw new EntityNotFoundException(
+      "Aucun utilisateur avec l'email = " +
+      email +
+      " n' ete trouve dans la BDD",
+      ErrorCodes.UTILISATEUR_NOT_FOUND
+    );
   }
 
   @Override
   public UtilisateurRequestDto findUtilisateurByUsername(String username) {
-    Utilisateur utilisateurByUsername = utilisateurRepository.findUtilisateurByUsername(
-      username
-    );
-    // log.info("Le User est {}", utilisateurByUsername.getUsername());
-    if (utilisateurByUsername != null) {
-      return UtilisateurRequestDto.fromEntity(utilisateurByUsername);
-    } else {
+    String normalizedUsername = username == null ? "" : username.trim();
+    if (!StringUtils.hasText(normalizedUsername)) {
       return null;
     }
+
+    List<Utilisateur> matches = utilisateurRepository.findAllByUsername(
+      normalizedUsername
+    );
+    Optional<Utilisateur> selected = pickPreferredUtilisateur(matches);
+    if (selected.isEmpty()) {
+      return null;
+    }
+
+    if (matches.size() > 1) {
+      log.warn(
+        "Plusieurs utilisateurs trouvÃ©s pour le username {} ({}). Utilisation de l'id {}.",
+        normalizedUsername,
+        matches.size(),
+        selected.get().getId()
+      );
+    }
+
+    return UtilisateurRequestDto.fromEntity(selected.get());
   }
 
   @Override
@@ -644,25 +684,39 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     Utilisateur utilisateur = utilisateurOptional.get();
-    String recipientEmail = resolveUserEmail(utilisateur.getEmail());
-    if (!recipientEmail.equals(utilisateur.getEmail())) {
-      utilisateur.setEmail(recipientEmail);
-      utilisateurRepository.save(utilisateur);
+    if (
+      utilisateur.getId() == null ||
+      !utilisateurRepository.existsById(utilisateur.getId())
+    ) {
+      log.error(
+        "Aucune reinitialisation envoyee car l'utilisateur n'existe pas en base (id={}) pour l'identifiant {}",
+        utilisateur.getId(),
+        identifier
+      );
+      return;
+    }
+
+    String recipientEmail = resolvePasswordResetRecipientEmail(utilisateur, identifier);
+    if (!StringUtils.hasText(recipientEmail)) {
+      log.warn(
+        "Aucune reinitialisation envoyee car l'utilisateur {} n'a pas d'email valide",
+        utilisateur.getId()
+      );
+      return;
     }
 
     invaliderTokensActifs(utilisateur);
 
-    String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+    PasswordResetToken passwordResetToken = generateAndSavePasswordResetToken(utilisateur);
+    if (passwordResetToken == null) {
+      throw new InvalidOperationException(
+        "Impossible de générer le code de réinitialisation. Veuillez réessayer.",
+        ErrorCodes.PASSWORD_RESET_REQUEST_NOT_VALID
+      );
+    }
 
-    PasswordResetToken passwordResetToken = new PasswordResetToken();
-    passwordResetToken.setToken(otp);
-    passwordResetToken.setExpiryDate(Instant.now().plus(PASSWORD_RESET_TOKEN_TTL));
-    passwordResetToken.setUsed(false);
-    passwordResetToken.setUtilisateur(utilisateur);
-    passwordResetTokenRepository.save(passwordResetToken);
-
-    String displayName = buildDisplayName(utilisateur).toUpperCase();
-    String emailBody = buildOtpEmailBody(displayName, otp);
+    String displayName = buildDisplayName(utilisateur).toUpperCase(Locale.ROOT);
+    String emailBody = buildOtpEmailBody(displayName, passwordResetToken.getToken());
 
     mailService.sendMail(
       new NotificationEmail(
@@ -1180,23 +1234,87 @@ public class UtilisateurServiceImpl implements UtilisateurService {
   }
 
   private Optional<Utilisateur> findUtilisateurByIdentifier(String identifier) {
-    Optional<Utilisateur> utilisateurByEmail = utilisateurRepository.findUtilisateurByEmail(
-      identifier
-    );
-    if (utilisateurByEmail.isPresent()) {
-      return utilisateurByEmail;
+    if (!StringUtils.hasText(identifier)) {
+      return Optional.empty();
     }
 
-    Utilisateur utilisateurByUsername = utilisateurRepository.findUtilisateurByUsername(
-      identifier
+    String normalizedIdentifier = identifier.trim();
+
+    List<Utilisateur> emailMatches = utilisateurRepository.findAllByEmail(
+      normalizedIdentifier
     );
-    if (utilisateurByUsername != null) {
-      return Optional.of(utilisateurByUsername);
+    Optional<Utilisateur> selected = pickPreferredUtilisateur(emailMatches);
+    if (selected.isPresent()) {
+      if (emailMatches.size() > 1) {
+        log.warn(
+          "Plusieurs utilisateurs trouvÃ©s pour l'email {} ({}). Utilisation de l'id {}.",
+          normalizedIdentifier,
+          emailMatches.size(),
+          selected.get().getId()
+        );
+      }
+      return selected;
     }
 
-    return Optional.ofNullable(
-      utilisateurRepository.findUtilisateurByMobile(identifier)
+    List<Utilisateur> usernameMatches = utilisateurRepository.findAllByUsername(
+      normalizedIdentifier
     );
+    selected = pickPreferredUtilisateur(usernameMatches);
+    if (selected.isPresent()) {
+      if (usernameMatches.size() > 1) {
+        log.warn(
+          "Plusieurs utilisateurs trouvÃ©s pour le username {} ({}). Utilisation de l'id {}.",
+          normalizedIdentifier,
+          usernameMatches.size(),
+          selected.get().getId()
+        );
+      }
+      return selected;
+    }
+
+    List<Utilisateur> mobileMatches = utilisateurRepository.findAllByMobile(
+      normalizedIdentifier
+    );
+    selected = pickPreferredUtilisateur(mobileMatches);
+    if (selected.isPresent() && mobileMatches.size() > 1) {
+      log.warn(
+        "Plusieurs utilisateurs trouvÃ©s pour le mobile {} ({}). Utilisation de l'id {}.",
+        normalizedIdentifier,
+        mobileMatches.size(),
+        selected.get().getId()
+      );
+    }
+
+    return selected;
+  }
+
+  private Optional<Utilisateur> pickPreferredUtilisateur(List<Utilisateur> candidats) {
+    if (candidats == null || candidats.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return candidats
+      .stream()
+      .filter(Objects::nonNull)
+      .sorted(
+        Comparator
+          .comparing((Utilisateur utilisateur) -> utilisateur.isActive() ? 0 : 1)
+          .thenComparing(utilisateur -> utilisateur.isNonLocked() ? 0 : 1)
+          .thenComparing(utilisateur -> utilisateur.isActivated() ? 0 : 1)
+          .thenComparing(
+            Utilisateur::getLastLoginDate,
+            Comparator.nullsLast(Comparator.reverseOrder())
+          )
+          .thenComparing(
+            Utilisateur::getJoinDate,
+            Comparator.nullsLast(Comparator.reverseOrder())
+          )
+          .thenComparing(
+            Utilisateur::getId,
+            Comparator.nullsLast(Comparator.reverseOrder())
+          )
+      )
+      .findFirst();
   }
 
   private void invaliderTokensActifs(Utilisateur utilisateur) {
@@ -1211,6 +1329,97 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     passwordResetTokenRepository.saveAll(activeTokens);
   }
 
+  private PasswordResetToken generateAndSavePasswordResetToken(Utilisateur utilisateur) {
+    Long utilisateurId = utilisateur != null ? utilisateur.getId() : null;
+    if (utilisateurId == null) {
+      return null;
+    }
+
+    for (int attempt = 0; attempt < 8; attempt++) {
+      String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+
+      try {
+        if (passwordResetTokenRepository.findByToken(otp).isPresent()) {
+          continue;
+        }
+
+        PasswordResetToken passwordResetToken = new PasswordResetToken();
+        passwordResetToken.setToken(otp);
+        passwordResetToken.setExpiryDate(Instant.now().plus(PASSWORD_RESET_TOKEN_TTL));
+        passwordResetToken.setUsed(false);
+
+        Utilisateur userRef = utilisateur;
+        if (entityManager != null) {
+          userRef = entityManager.getReference(Utilisateur.class, utilisateurId);
+        }
+        passwordResetToken.setUtilisateur(userRef);
+
+        return passwordResetTokenRepository.saveAndFlush(passwordResetToken);
+      } catch (DataIntegrityViolationException exception) {
+        String rootMessage = exception.getMostSpecificCause() != null
+          ? exception.getMostSpecificCause().getMessage()
+          : exception.getMessage();
+        String normalizedMessage = rootMessage == null ? "" : rootMessage.toLowerCase();
+        if (
+          normalizedMessage.contains("foreign key constraint fails") ||
+          normalizedMessage.contains("cannot add or update a child row")
+        ) {
+          log.error(
+            "Impossible de sauvegarder un token de reinitialisation car l'utilisateur {} n'existe pas en base (FK). Identifiant/Email={}.",
+            utilisateurId,
+            utilisateur != null ? utilisateur.getEmail() : null
+          );
+          return null;
+        }
+
+        log.error(
+          "Impossible de sauvegarder un token de reinitialisation (tentative {}) pour l'utilisateur {}: {}",
+          attempt + 1,
+          utilisateurId,
+          rootMessage
+        );
+        if (entityManager != null) {
+          entityManager.clear();
+        }
+      }
+    }
+
+    log.error(
+      "Echec de generation du token de reinitialisation pour l'utilisateur {}",
+      utilisateur != null ? utilisateur.getId() : null
+    );
+    return null;
+  }
+
+  private String resolvePasswordResetRecipientEmail(Utilisateur utilisateur, String identifier) {
+    String candidateEmail = utilisateur == null ? null : utilisateur.getEmail();
+    if (!StringUtils.hasText(candidateEmail) && utilisateur != null) {
+      candidateEmail = utilisateur.getUsername();
+    }
+    if (!StringUtils.hasText(candidateEmail)) {
+      candidateEmail = identifier;
+    }
+    if (!StringUtils.hasText(candidateEmail)) {
+      return null;
+    }
+
+    String normalizedEmail = candidateEmail.trim();
+    if (!StringUtils.hasText(normalizedEmail) || !normalizedEmail.contains("@")) {
+      return null;
+    }
+
+    String lowerCaseEmail = normalizedEmail.toLowerCase();
+    if (
+      lowerCaseEmail.equals("superviseur@superviseur.com") ||
+      lowerCaseEmail.endsWith("@superviseur.com")
+    ) {
+      return defaultUserEmail;
+    }
+
+    return normalizedEmail;
+  }
+
+  // OTP email template
   private String buildOtpEmailBody(String displayName, String otp) {
     return
       "<div style='font-family:Arial,sans-serif;max-width:520px;margin:0 auto;'>" +
@@ -1232,10 +1441,28 @@ public class UtilisateurServiceImpl implements UtilisateurService {
   }
 
   private String buildDisplayName(Utilisateur utilisateur) {
-    String prenom = utilisateur.getPrenom() == null ? "" : utilisateur.getPrenom().trim();
+    if (utilisateur == null) {
+      return "Utilisateur";
+    }
+
+    String prenom = utilisateur.getPrenom() == null
+      ? ""
+      : utilisateur.getPrenom().trim();
     String nom = utilisateur.getNom() == null ? "" : utilisateur.getNom().trim();
     String fullName = (prenom + " " + nom).trim();
-    return StringUtils.hasText(fullName) ? fullName : utilisateur.getUsername();
+    if (StringUtils.hasText(fullName)) {
+      return fullName;
+    }
+
+    if (StringUtils.hasText(utilisateur.getUsername())) {
+      return utilisateur.getUsername().trim();
+    }
+
+    if (StringUtils.hasText(utilisateur.getEmail())) {
+      return utilisateur.getEmail().trim();
+    }
+
+    return utilisateur.getId() != null ? "Utilisateur " + utilisateur.getId() : "Utilisateur";
   }
 
   private String resolveUserEmail(String email) {

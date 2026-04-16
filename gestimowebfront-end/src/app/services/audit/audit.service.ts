@@ -47,7 +47,24 @@ export class AuditService {
     return `${normalizedRootUrl}api/v1/audit`;
   }
 
+  private getAuthToken(): string | null {
+    const tokenRaw = localStorage.getItem('token');
+    if (!tokenRaw) return null;
+
+    const token = tokenRaw.trim();
+    if (!token || token === 'null' || token === 'undefined') {
+      return null;
+    }
+
+    return token;
+  }
+
   addEntry(entry: AuditEntryCreate): void {
+    const token = this.getAuthToken();
+    if (!token) {
+      return;
+    }
+
     const user = this.userService.getUserFromLocalCache();
     const payload = {
       ...entry,
@@ -59,7 +76,7 @@ export class AuditService {
         : 'Inconnu',
     };
     this.http
-      .post(this.getApiRoot(), payload, { headers: this.getHeaders() })
+      .post(this.getApiRoot(), payload, { headers: this.getHeaders(token) })
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
@@ -67,11 +84,16 @@ export class AuditService {
   // ─── Lecture ──────────────────────────────────────────────────────────────
 
   getAll(): Observable<AuditEntry[]> {
+    const token = this.getAuthToken();
+    if (!token) {
+      return of([]);
+    }
+
     const user = this.userService.getUserFromLocalCache();
     const idAgence = user?.idAgence ?? 0;
     return this.http
       .get<AuditEntry[]>(`${this.getApiRoot()}/agence/${idAgence}`, {
-        headers: this.getHeaders(),
+        headers: this.getHeaders(token),
       })
       .pipe(catchError(() => of([])));
   }
@@ -79,11 +101,16 @@ export class AuditService {
   // ─── Effacement ───────────────────────────────────────────────────────────
 
   clearAll(): Observable<void> {
+    const token = this.getAuthToken();
+    if (!token) {
+      return of(undefined);
+    }
+
     const user = this.userService.getUserFromLocalCache();
     const idAgence = user?.idAgence ?? 0;
     return this.http
       .delete<void>(`${this.getApiRoot()}/agence/${idAgence}`, {
-        headers: this.getHeaders(),
+        headers: this.getHeaders(token),
       })
       .pipe(catchError(() => of(undefined)));
   }
@@ -150,8 +177,7 @@ export class AuditService {
 
   // ─── Utilitaires ──────────────────────────────────────────────────────────
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token') ?? '';
+  private getHeaders(token: string): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',

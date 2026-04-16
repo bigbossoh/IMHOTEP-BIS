@@ -396,7 +396,7 @@ ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC,
 			<textField>
 				<reportElement mode="Transparent" x="2" y="257" width="548" height="43" forecolor="#FA071C" backcolor="#FFFFFF" uuid="b5ca87f5-a666-41e7-952d-d0815e88f5f8"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
-					<font fontName="Century Schoolbook L" size="14" isBold="true"/>
+					<font fontName="SansSerif" size="14" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{message_reduction}]]></textFieldExpression>
 			</textField>
@@ -420,7 +420,7 @@ ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC,
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="true"/>
 					<paragraph lineSpacing="Double" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Désignation]]></text>
@@ -436,7 +436,7 @@ ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC,
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="true"/>
 					<paragraph lineSpacing="Double" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Montant loyer			]]></text>

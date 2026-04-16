@@ -181,6 +181,8 @@ Un `docker-compose.yml` est disponible à la racine du dépôt pour déployer My
 
 Voir : `docs/deploy-vps.md`.
 
+Supervision (Prometheus / Grafana) : `docs/monitoring.md`.
+
 ## Documentation détaillée
 
 - documentation backend complète : `docs/backend-reference.md`
