@@ -87,7 +87,13 @@ Accès :
 
 - Front : `http://51.75.142.41/`
 - Swagger (via proxy Nginx) : `http://51.75.142.41/swagger-ui/index.html`
-- Actuator (via proxy Nginx) : `http://51.75.142.41/actuator`
+- Actuator : non exposé publiquement (sécurité). Accessible uniquement depuis le réseau Docker.
+
+### Supervision (Prometheus / Grafana)
+
+Le `docker-compose.prod.yml` inclut aussi Prometheus + Grafana + node-exporter + cAdvisor.
+
+Voir le guide : `docs/monitoring.md`.
 
 ## 5) Importer un dump SQL (si besoin)
 

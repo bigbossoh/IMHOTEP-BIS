@@ -78,18 +78,31 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             for (int i = 0; i < listDesLocataireAppel.size(); i++) {
-                this.printService.quittancePeriodeById(periode, listDesLocataireAppel.get(i).getIdLocataire(),
+                byte[] quittancePdf = this.printService.quittancePeriodeById(
+                        periode,
+                        listDesLocataireAppel.get(i).getIdLocataire(),
                         listDesLocataireAppel.get(i).getNomPropietaire() + " "
-                                + listDesLocataireAppel.get(i).getPrenomPropietaire());
+                                + listDesLocataireAppel.get(i).getPrenomPropietaire()
+                );
                 System.out.println(" Les quittance par ID sont : " + periode + "** Locatire ID **"
                         + listDesLocataireAppel.get(i).getIdLocataire() + " *** Nom ***"
                         + listDesLocataireAppel.get(i).getNomLocataire());
-                this.sendMailWithAttachment(periode, listDesLocataireAppel.get(i).getEmailLocatire(),
+
+                if (quittancePdf == null || quittancePdf.length == 0) {
+                    log.warn(
+                            "Quittance vide pour la periode {} et le locataire {} - email non envoye",
+                            periode,
+                            listDesLocataireAppel.get(i).getIdLocataire()
+                    );
+                    continue;
+                }
+
+                this.sendMail(periode, listDesLocataireAppel.get(i).getEmailLocatire(),
                         "Avis d'échéance de loyer.",
                         "Bonjour Monsieur/Madame " + listDesLocataireAppel.get(i).getNomLocataire().toUpperCase() + " "
                                 + listDesLocataireAppel.get(i).getPrenomLocataire().toUpperCase()+","+"\n"+"Vous trouverez ci-joint votre avis d'échéance de loyer du "+listDesLocataireAppel.get(i).getPeriodeLettre()+".",
-                        "src/main/resources/templates/depot_etat/appel_loyer_du_" + periode + "_"
-                                + listDesLocataireAppel.get(i).getIdLocataire() + ".pdf");
+                        quittancePdf,
+                        "Quittance du mois de " + periode + ".pdf");
                 System.out.println(i);
             }
             return true;
@@ -105,15 +118,24 @@ public class EmailServiceImpl implements EmailService {
         AppelLoyersFactureDto factureLocataire = this.appelLoyerService.findById(id);
         try {
             log.info("facture du du client {} ", factureLocataire);
-            this.printService.quittancePeriodeById(factureLocataire.getPeriodeAppelLoyer(),
+            byte[] quittancePdf = this.printService.quittancePeriodeById(factureLocataire.getPeriodeAppelLoyer(),
                     factureLocataire.getIdLocataire(),
                     factureLocataire.getNomPropietaire() + " " + factureLocataire.getPrenomPropietaire());
-            this.sendMailWithAttachment(factureLocataire.getPeriodeAppelLoyer(), "astairenazaire@gmail.com",
+
+            if (quittancePdf == null || quittancePdf.length == 0) {
+                log.warn(
+                        "Quittance vide pour la periode {} et le locataire {} - email non envoye",
+                        factureLocataire.getPeriodeAppelLoyer(),
+                        factureLocataire.getIdLocataire()
+                );
+                return false;
+            }
+
+            this.sendMail(factureLocataire.getPeriodeAppelLoyer(), "astairenazaire@gmail.com",
                     "Envoi de Quittance groupé",
                     "Bonjour,  " + factureLocataire.getNomLocataire() + " " + factureLocataire.getPrenomLocataire(),
-                    "src/main/resources/templates/depot_etat/appel_loyer_du_" + factureLocataire.getPeriodeAppelLoyer()
-                            + "_"
-                            + factureLocataire.getIdLocataire() + ".pdf");
+                    quittancePdf,
+                    "Quittance du mois de " + factureLocataire.getPeriodeAppelLoyer() + ".pdf");
             System.out.println(factureLocataire.getIdLocataire() + "-" + factureLocataire.getNomLocataire() + " "
                     + factureLocataire.getPrenomLocataire());
             return true;

@@ -85,7 +85,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
             @Value(
-                    "${app.cors.allowed-origin-patterns:http://localhost:4200,http://127.0.0.1:4200,http://51.75.142.41,http://gestimoweb.com,http://gestimoweb.com:80,http://:8080,http://gestimoweb.com:8080,http://gestimoweb.com:8287,https://localhost:4200,https://127.0.0.1:4200,https://51.75.142.41,https://gestimoweb.com,https://gestimoweb.com:80,https://:8080,https://gestimoweb.com:8080,https://gestimoweb.com:8287,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287,http://www.gestimoweb.com,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287 }"
+                    "${app.cors.allowed-origin-patterns:http://localhost:[*],http://127.0.0.1:[*],http://51.75.142.41,http://gestimoweb.com,http://gestimoweb.com:80,http://gestimoweb.com:8080,http://gestimoweb.com:8287,https://localhost:[*],https://127.0.0.1:[*],https://51.75.142.41,https://gestimoweb.com,https://gestimoweb.com:80,https://gestimoweb.com:8080,https://gestimoweb.com:8287,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287,http://www.gestimoweb.com,https://www.gestimoweb.com,https://www.gestimoweb.com:80,https://www.gestimoweb.com:8080,https://www.gestimoweb.com:8287}"
             ) String allowedOriginPatterns
     ) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();

@@ -8,7 +8,7 @@ spring:
   application:
     name: gestimo_backend_springboot
   profiles:
-    active: dev
+    active: prod
   main:
     allow-circular-references: true
 

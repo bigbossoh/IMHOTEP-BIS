@@ -327,7 +327,7 @@ and
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="true"/>
 					<paragraph lineSpacing="Double" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Période]]></text>
@@ -343,7 +343,7 @@ and
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#080707"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true" isItalic="true"/>
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="true"/>
 					<paragraph lineSpacing="Double" leftIndent="5"/>
 				</textElement>
 				<text><![CDATA[Montant		]]></text>

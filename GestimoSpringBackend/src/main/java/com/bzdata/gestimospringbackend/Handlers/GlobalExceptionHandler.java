@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.bzdata.gestimospringbackend.exception.ObjectValidationException;
 import com.bzdata.gestimospringbackend.exceptions.OperationNonPermittedException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Ali Bouali
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
   @ExceptionHandler({ObjectValidationException.class})
@@ -54,9 +56,27 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<ExceptionRepresentation> handleException() {
+  public ResponseEntity<ExceptionRepresentation> handleException(
+    DataIntegrityViolationException exception
+  ) {
+    String details = exception.getMostSpecificCause() != null
+      ? exception.getMostSpecificCause().getMessage()
+      : exception.getMessage();
+    String lowerDetails = details == null ? "" : details.toLowerCase();
+
+    String message = "Contrainte d'intÃ©gritÃ© en base de donnÃ©es.";
+    if (lowerDetails.contains("duplicate entry") && lowerDetails.contains("email")) {
+      message = "Un utilisateur existe dÃ©jÃ  avec cet email.";
+    } else if (
+      lowerDetails.contains("password_reset_token") ||
+      lowerDetails.contains("fk6xhhidrwocldvi9ifxkmynsdc")
+    ) {
+      message = "Impossible de gÃ©nÃ©rer le code de rÃ©initialisation. Veuillez rÃ©essayer.";
+    }
+
+    log.error("DataIntegrityViolationException: {}", details, exception);
     ExceptionRepresentation representation = ExceptionRepresentation.builder()
-        .errorMessage("A user already exists with the provided Email")
+        .errorMessage(message)
         .build();
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)

@@ -1,0 +1,39 @@
+{
+	# Mets ton email ici (Let's Encrypt)
+	# email you@example.com
+}
+
+(gestimo_common) {
+	encode zstd gzip
+
+	# Sécurité: ne pas exposer Actuator publiquement (Prometheus scrappe en interne)
+	@actuator path /actuator/*
+	respond @actuator 404
+
+	@backend path /api/*
+	reverse_proxy @backend backend:8287
+
+	reverse_proxy frontend:80
+}
+
+gestimoweb.com, www.gestimoweb.com {
+	import gestimo_common
+}
+
+# Accès par IP (HTTP uniquement) — utile pour tests (pas de TLS sur une IP).
+http://51.75.142.41 {
+	import gestimo_common
+}
+
+# Supervision (Grafana) — recommandé en sous-domaine.
+# Pensez à créer l'enregistrement DNS (A/AAAA) : grafana.gestimoweb.com -> IP du VPS
+grafana.gestimoweb.com {
+	encode zstd gzip
+	reverse_proxy grafana:3000
+}
+
+# Prometheus UI : à éviter en public (pas d'auth). Garder interne (Grafana suffit).
+# prometheus.gestimoweb.com {
+# 	encode zstd gzip
+# 	reverse_proxy prometheus:9090
+# }

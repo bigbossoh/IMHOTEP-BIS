@@ -9,6 +9,7 @@ import com.bzdata.gestimospringbackend.Models.Bienimmobilier;
 import com.bzdata.gestimospringbackend.Models.Encaissement;
 import com.bzdata.gestimospringbackend.Models.Operation;
 import com.bzdata.gestimospringbackend.Models.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -17,6 +18,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +31,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "utilisateur")
 @JsonIdentityInfo(
   generator = ObjectIdGenerators.PropertyGenerator.class,
   property = "id"
@@ -88,6 +91,10 @@ public class Utilisateur extends AbstractEntity {
 
   @OneToMany(mappedBy = "utilisateurProprietaire")
   private List<Bienimmobilier> biensUtilisateur;
+
+  @JsonIgnore
+  @OneToMany(mappedBy = "utilisateur")
+  private List<PasswordResetToken> passwordResetTokens;
 
 //   @OneToMany(mappedBy = "utilisateurChapitre")
 //   @JsonManagedReference
