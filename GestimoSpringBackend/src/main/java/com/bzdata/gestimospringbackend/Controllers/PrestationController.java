@@ -53,11 +53,18 @@ public class PrestationController {
           log.info("Find Commune by ID{}", id);
           return ResponseEntity.ok(serviceAdditionnelService.findById(id));
       }
-      // TOUTES LES COMMUES
+    // TOUTES LES COMMUES
     @Operation(summary = "Liste de toutes les Service Additionnel", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<PrestationSaveOrUpdateDto>> findAllServiceAdditionnelPrestation() {
         return ResponseEntity.ok(serviceAdditionnelService.findAll());
+    }
+
+    @Operation(summary = "Liste des prestations par agence", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/all/{idAgence}")
+    public ResponseEntity<List<PrestationSaveOrUpdateDto>> findAllServiceAdditionnelPrestationByAgence(
+            @PathVariable("idAgence") Long idAgence) {
+        return ResponseEntity.ok(serviceAdditionnelService.findAllByAgence(idAgence));
     }
 
 }

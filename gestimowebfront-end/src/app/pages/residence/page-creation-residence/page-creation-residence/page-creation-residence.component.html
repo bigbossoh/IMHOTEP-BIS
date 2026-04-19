@@ -1,0 +1,187 @@
+<section class="residence-create-page container-fluid">
+  <header class="residence-page__header">
+    <div class="residence-page__copy">
+      <p class="page-eyebrow">Module residence</p>
+      <h1>Creation de residence</h1>
+      <p>
+        Creez une chambre/appartement meuble (bienMeublerResidence=true).
+      </p>
+    </div>
+
+    <div class="residence-page__actions">
+      <div class="residence-page__buttons">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submit()"
+          [disabled]="saving || loadingReferences"
+        >
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+            *ngIf="saving"
+          ></span>
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </header>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-body">
+      @if (loadingReferences) {
+        <div class="d-flex align-items-center gap-2 text-muted">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Chargement des references...
+        </div>
+      } @else {
+        <form [formGroup]="residenceForm" (ngSubmit)="submit()">
+          <div class="row g-3">
+            <div class="col-12 col-lg-6">
+              <label class="form-label">
+                Nom de la residence <span class="text-danger">*</span>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="nomBaptiserBienImmobilier"
+                  [class.is-invalid]="isInvalid('nomBaptiserBienImmobilier')"
+                  placeholder="Ex. Residence SEVE - Chambre 101"
+                />
+                <div class="invalid-feedback">
+                  Veuillez renseigner un nom (min. 2 caracteres).
+                </div>
+              </label>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label class="form-label">
+                Etage <span class="text-danger">*</span>
+                <select
+                  class="form-select"
+                  formControlName="idEtageAppartement"
+                  [class.is-invalid]="isInvalid('idEtageAppartement')"
+                >
+                  <option [ngValue]="null">Selectionnez un etage</option>
+                  @for (etage of etages; track etage) {
+                    <option [ngValue]="etage.id">
+                      {{ formatEtageLabel(etage) }}
+                    </option>
+                  }
+                </select>
+                <div class="invalid-feedback">Veuillez selectionner un etage.</div>
+              </label>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">
+                Description
+                <textarea
+                  rows="3"
+                  class="form-control"
+                  formControlName="description"
+                  placeholder="Informations utiles (equipements, etage, vue, etc.)"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label class="form-label">
+                Categorie de chambre
+                <select class="form-select" formControlName="idCategorieChambre">
+                  <option [ngValue]="null">Non definie</option>
+                  @for (cat of categories; track cat) {
+                    <option [ngValue]="cat.id">
+                      {{ cat.name }}
+                    </option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <label class="form-label">
+                Pieces <span class="text-danger">*</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="nbrPieceApp"
+                  [class.is-invalid]="isInvalid('nbrPieceApp')"
+                  min="1"
+                />
+                <div class="invalid-feedback">Minimum 1.</div>
+              </label>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <label class="form-label">
+                Chambres <span class="text-danger">*</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="nbreChambreApp"
+                  [class.is-invalid]="isInvalid('nbreChambreApp')"
+                  min="1"
+                />
+                <div class="invalid-feedback">Minimum 1.</div>
+              </label>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <label class="form-label">
+                Salons <span class="text-danger">*</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="nbreSalonApp"
+                  [class.is-invalid]="isInvalid('nbreSalonApp')"
+                  min="0"
+                />
+                <div class="invalid-feedback">Minimum 0.</div>
+              </label>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <label class="form-label">
+                Salle(s) d'eau <span class="text-danger">*</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="nbreSalleEauApp"
+                  [class.is-invalid]="isInvalid('nbreSalleEauApp')"
+                  min="1"
+                />
+                <div class="invalid-feedback">Minimum 1.</div>
+              </label>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <label class="form-label">
+                Superficie (m²) <span class="text-danger">*</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="superficieBien"
+                  [class.is-invalid]="isInvalid('superficieBien')"
+                  min="0"
+                  step="0.1"
+                />
+                <div class="invalid-feedback">Veuillez saisir une valeur valide.</div>
+              </label>
+            </div>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+</section>

@@ -1,6 +1,9 @@
 package com.bzdata.gestimospringbackend.Models.hotel;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import com.bzdata.gestimospringbackend.Models.AbstractEntity;
 
@@ -18,6 +21,11 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PrestationAdditionnelReservation extends AbstractEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idResvationServiceAdditionnel")
     Reservation reservation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idServiceAdditionnel")
     Prestation serviceAdditionnelle;
 }

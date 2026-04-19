@@ -7086,7 +7086,7 @@ class ApiService extends __BaseService {
    * @param body undefined
    * @return successful operation
    */
-  saveorupdatereservationResponse(body?: ReservationRequestDto): __Observable<__StrictHttpResponse<boolean>> {
+  saveorupdatereservationResponse(body?: ReservationRequestDto): __Observable<__StrictHttpResponse<ReservationAfficheDto>> {
     let __params = this.newParams();
     let __headers = new HttpHeaders();
     let __body: any = null;
@@ -7098,13 +7098,13 @@ class ApiService extends __BaseService {
       {
         headers: __headers,
         params: __params,
-        responseType: 'text'
+        responseType: 'json'
       });
 
     return this.http.request<any>(req).pipe(
       __filter(_r => _r instanceof HttpResponse),
       __map((_r) => {
-        return (_r as HttpResponse<any>).clone({ body: (_r as HttpResponse<any>).body === 'true' }) as __StrictHttpResponse<boolean>
+        return _r as __StrictHttpResponse<ReservationAfficheDto>
       })
     );
   }
@@ -7112,9 +7112,9 @@ class ApiService extends __BaseService {
    * @param body undefined
    * @return successful operation
    */
-  saveorupdatereservation(body?: ReservationRequestDto): __Observable<boolean> {
+  saveorupdatereservation(body?: ReservationRequestDto): __Observable<ReservationAfficheDto> {
     return this.saveorupdatereservationResponse(body).pipe(
-      __map(_r => _r.body as boolean)
+      __map(_r => _r.body as ReservationAfficheDto)
     );
   }
 

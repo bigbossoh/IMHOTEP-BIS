@@ -861,11 +861,21 @@ public class GestimoWebMapperImpl {
       prestationAdditionnelReservation,
       prestationAdditionnelReservationSaveOrrUpdate
     );
+
+    Reservation reservation = prestationAdditionnelReservation.getReservation();
+    Prestation prestation = prestationAdditionnelReservation.getServiceAdditionnelle();
+
+    prestationAdditionnelReservationSaveOrrUpdate.setIdReservation(
+      reservation != null ? reservation.getId() : null
+    );
+    prestationAdditionnelReservationSaveOrrUpdate.setIdServiceAdditionnelle(
+      prestation != null ? prestation.getId() : null
+    );
     prestationAdditionnelReservationSaveOrrUpdate.setNamePrestaion(
-      prestationAdditionnelReservation.getServiceAdditionnelle().getName()
+      prestation != null ? prestation.getName() : null
     );
     prestationAdditionnelReservationSaveOrrUpdate.setAmountPrestation(
-      prestationAdditionnelReservation.getServiceAdditionnelle().getAmount()
+      prestation != null ? prestation.getAmount() : 0
     );
     return prestationAdditionnelReservationSaveOrrUpdate;
   }

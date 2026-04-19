@@ -25,6 +25,7 @@ import com.bzdata.gestimospringbackend.mappers.GestimoWebMapperImpl;
 import com.bzdata.gestimospringbackend.repository.AppartementRepository;
 import com.bzdata.gestimospringbackend.repository.EncaissementPrincipalRepository;
 import com.bzdata.gestimospringbackend.repository.EncaissementReservationRepository;
+import com.bzdata.gestimospringbackend.repository.PrestationAdditionnelReservationRepository;
 import com.bzdata.gestimospringbackend.repository.ReservationRepository;
 import com.bzdata.gestimospringbackend.user.repository.UtilisateurRepository;
 import java.time.LocalDate;
@@ -56,6 +57,7 @@ public class ReservationServiceImpl implements ReservationService {
   final UtilisateurRepository utilisateurRepository;
   final AppartementRepository appartementRepository;
   final EncaissementReservationRepository encaissementReservationRepository;
+  final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
   final SaveEncaissementReservationAvecRetourDeListService saveEncaissementReservationAvecRetourDeListService;
 
   @Override
@@ -69,7 +71,6 @@ public class ReservationServiceImpl implements ReservationService {
       .findAll()
       .stream()
       .map(gestimoWebMapperImpl::fromReservation)
-      .filter(res -> res.getIdAgence() == 1)
       .collect(Collectors.toList());
   }
 
@@ -87,7 +88,19 @@ public class ReservationServiceImpl implements ReservationService {
   public void delete(Long id) {
     Reservation reservation = reservationRepository.findById(id).orElse(null);
     if (reservation != null) {
+      Long idBien = reservation.getBienImmobilierOperation() != null ? reservation.getBienImmobilierOperation().getId() : null;
+
+      prestationAdditionnelReservationRepository.deleteAllByReservation_Id(id);
+      encaissementReservationRepository.deleteAllByReservation_Id(id);
       reservationRepository.delete(reservation);
+
+      if (idBien != null) {
+        Appartement appartement = appartementRepository.findById(idBien).orElse(null);
+        if (appartement != null) {
+          appartement.setOccupied(false);
+          appartementRepository.save(appartement);
+        }
+      }
     } else {
       throw new UnsupportedOperationException("No value to 'delete'");
     }
@@ -232,7 +245,7 @@ public class ReservationServiceImpl implements ReservationService {
   }
 
   @Override
-  public boolean saveOrUpdateReservation(ReservationRequestDto dto) {
+  public ReservationAfficheDto saveOrUpdateReservation(ReservationRequestDto dto) {
     Objects.requireNonNull(dto, "Le paramètre dto ne doit pas être nul");
 
     AppartementDto appartementDto = appartementService.findById(
@@ -319,7 +332,7 @@ public class ReservationServiceImpl implements ReservationService {
     List<EncaissementReservationDto> encaissements = saveEncaissementReservationAvecRetourDeListService.saveEncaissementReservationAvecRetourDeList(
       encaissementReservation
     );
-    return true;
+    return gestimoWebMapperImpl.fromReservation(saveReservation);
   }
 
   @Override
@@ -357,7 +370,7 @@ public class ReservationServiceImpl implements ReservationService {
     return reservationRepository
       .findAll(Sort.by(Sort.Direction.DESC, "id"))
       .stream()
-      .filter(reser -> reser.getIdAgence() == idAgence)
+      .filter(reser -> Objects.equals(reser.getIdAgence(), idAgence))
       .map(x -> gestimoWebMapperImpl.fromReservation(x))
       .collect(Collectors.toList());
   }
@@ -370,7 +383,8 @@ public class ReservationServiceImpl implements ReservationService {
       .findAll(Sort.by(Sort.Direction.DESC, "id"))
       .stream()
       .filter(reser ->
-        reser.getIdAgence() == idAgence &&
+        Objects.equals(reser.getIdAgence(), idAgence) &&
+        reser.getStatutReservation() != null &&
         reser.getStatutReservation().contains("Ouv")
       )
       .map(x -> gestimoWebMapperImpl.fromReservation(x))
@@ -383,7 +397,7 @@ public class ReservationServiceImpl implements ReservationService {
     return reservationRepository
       .findAll()
       .stream()
-      .filter(reser -> reser.getId() == idReservation)
+      .filter(reser -> Objects.equals(reser.getId(), idReservation))
       .map(x -> gestimoWebMapperImpl.fromReservation(x))
       .findFirst()
       .orElse(null);
@@ -399,7 +413,7 @@ public class ReservationServiceImpl implements ReservationService {
       .findAll(Sort.by(Sort.Direction.DESC, "id"))
       .stream()
       .filter(encaissement ->
-        encaissement.getIdAgence() == agence &&
+        Objects.equals(encaissement.getIdAgence(), agence) &&
         encaissement.getDateEncaissement().isAfter(dateDebut) &&
         encaissement.getDateEncaissement().isBefore(dateFin)
       )

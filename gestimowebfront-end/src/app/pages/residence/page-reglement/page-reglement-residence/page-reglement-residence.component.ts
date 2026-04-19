@@ -82,6 +82,33 @@ export class PageReglementResidenceComponent implements OnInit {
   encaissementReservationState$: Observable<ReservationState> | null = null;
   modePaiement: string = 'ESPESE';
   montantEnacaisse: any;
+
+  public get remainingAmount(): number {
+    const amount = Number(this.leLocataire?.soldReservation ?? 0);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  public get paymentAmount(): number {
+    const amount = Number(this.montantEnacaisse ?? 0);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  public get newBalance(): number | null {
+    if (!this.leLocataire) {
+      return null;
+    }
+
+    return this.remainingAmount - this.paymentAmount;
+  }
+
+  public get canEncaisser(): boolean {
+    if (!this.leLocataire) {
+      return false;
+    }
+
+    const amount = this.paymentAmount;
+    return amount > 0 && amount <= this.remainingAmount;
+  }
   constructor(
     private fb: FormBuilder,
     private store: Store<any>,
@@ -127,7 +154,30 @@ export class PageReglementResidenceComponent implements OnInit {
     this.user = this.userService.getUserFromLocalCache();
     this.afficherLesReservationOuverte();
   }
+
+  public onReservationSelected(reservation: any | null): void {
+    this.leLocataire = reservation;
+    this.montantEnacaisse = null;
+
+    if (!reservation?.id) {
+      this.totalRecords = 0;
+      this.dataSource.data = [];
+      this.dataSource.paginator = null;
+      return;
+    }
+
+    this.getAllEncaissementByBienImmobilier(reservation);
+  }
+
+  public cancelEncaissement(): void {
+    this.montantEnacaisse = null;
+  }
+
   onSaveEncaissement() {
+    if (!this.canEncaisser) {
+      return;
+    }
+
     this.store.dispatch(
       new SaveEncaissementReservationAction({
         idReservation: this.leLocataire.id,
@@ -156,12 +206,20 @@ export class PageReglementResidenceComponent implements OnInit {
         if (donnee.dataState == 'Loaded') {
           this.dataSource.data = donnee.encaissements;
           this.dataSource.paginator = this.paginator;
+          this.cancelEncaissement();
         }
       });
     this.ngAfterViewInit();
   }
 
   getAllEncaissementByBienImmobilier(p: any) {
+    if (!p?.id) {
+      this.totalRecords = 0;
+      this.dataSource.data = [];
+      this.dataSource.paginator = null;
+      return;
+    }
+
     this.store.dispatch(new GetListEncaissementReservationBienAction(p.id));
     this.encaissementReservationState$ = this.store.pipe(
       map((state) => state.reservationState)

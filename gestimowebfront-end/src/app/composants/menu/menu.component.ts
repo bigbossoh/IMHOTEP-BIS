@@ -159,6 +159,18 @@ export class MenuComponent implements OnInit {
           icon: 'fas fa-bed',
           url: 'reservation-residence',
         },
+        // {
+        //   id: '77',
+        //   titre: 'Catégories de chambre',
+        //   icon: 'fas fa-layer-group',
+        //   url: 'categorie-appartement',
+        // },
+        {
+          id: '78',
+          titre: 'Prestations & services',
+          icon: 'fas fa-concierge-bell',
+          url: 'prestations-residence',
+        },
         {
           id: '73',
           titre: 'disponibilité',
@@ -171,6 +183,12 @@ export class MenuComponent implements OnInit {
           titre: 'paiement',
           icon: 'fas fa-credit-card',
           url: 'paiement-residence',
+        },
+        {
+          id: '75',
+          titre: 'Factures',
+          icon: 'fas fa-file-invoice',
+          url: 'factures-reservation',
         },
       ],
     },

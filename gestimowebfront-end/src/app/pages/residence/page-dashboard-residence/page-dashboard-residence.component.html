@@ -1,63 +1,338 @@
-  <div class="row m-2 row-cols-1 row-cols-md-2 row-cols-xl-4">
-         <div class="col">
-       <div class="card radius-10 border-start border-0 border-3 border-info">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div>
-              <p class="mb-0 text-secondary">Total reservations</p>
-              <h4 class="my-1 text-info">4805</h4>
-              <p class="mb-0 font-13">+2.5% depuis la semaine dernière</p>
-            </div>
-            <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><i class="fa fa-shopping-cart"></i>
-            </div>
-          </div>
+<div class="dash-page container-fluid">
+
+  <!-- ── Hero ── -->
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Résidence meublée</span>
+      <h1>Tableau de bord</h1>
+      <p>Vue en temps réel de l'occupation, des séjours en cours et des encaissements.</p>
+    </div>
+    <div class="hero-panel__actions">
+      <span class="hero-date">{{ today | date:'EEEE d MMMM yyyy':'':'fr' }}</span>
+      <button type="button" class="btn btn-outline-secondary" (click)="load()" [disabled]="loading">
+        Actualiser
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Filtre période ── -->
+  <div class="period-toolbar">
+    <div class="toolbar-field--date">
+      <label for="dashPeriodeDebut">Du</label>
+      <input id="dashPeriodeDebut" type="date" class="form-control" [(ngModel)]="periodeDebut" />
+    </div>
+    <div class="toolbar-field--date">
+      <label for="dashPeriodeFin">Au</label>
+      <input id="dashPeriodeFin" type="date" class="form-control" [(ngModel)]="periodeFin" />
+    </div>
+    <div class="period-actions">
+      <button type="button" class="btn btn-primary" (click)="applyPeriode()"
+        [disabled]="!periodeDebut && !periodeFin">
+        Appliquer
+      </button>
+      @if (hasPeriodeFilter) {
+        <button type="button" class="btn btn-outline-secondary" (click)="resetPeriode()">
+          Effacer
+        </button>
+      }
+    </div>
+    @if (hasPeriodeFilter) {
+      <div class="period-active-badge">
+        <i class="fas fa-filter"></i>
+        {{ periodeLabel }} — {{ sejoursAffiches.length }} séjour(s)
+      </div>
+    }
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger page-alert">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="dash-loading">Chargement du tableau de bord…</div>
+  }
+
+  @if (!loading) {
+
+    <!-- ── KPI Row ── -->
+    <div class="kpi-row">
+
+      <!-- Taux d'occupation -->
+      <article class="kpi-card kpi-card--occupation">
+        <div class="kpi-card__top">
+          <div class="kpi-icon"><i class="fas fa-hotel"></i></div>
+          <span class="kpi-label">Taux d'occupation</span>
         </div>
-       </div>
-       </div>
-       <div class="col">
-      <div class="card radius-10 border-start border-0 border-3 border-danger">
-         <div class="card-body">
-           <div class="d-flex align-items-center">
-             <div>
-               <p class="mb-0 text-secondary">Total encaissement</p>
-               <h4 class="my-1 text-danger">CFA 1.153.000 </h4>
-               <p class="mb-0 font-13">+5.4% depuis la semaine dernière</p>
-             </div>
-             <div class="widgets-icons-2 rounded-circle bg-gradient-bloody text-white ms-auto"><i class="fa fa-dollar"></i>
-             </div>
-           </div>
-         </div>
-      </div>
-      </div>
-      <div class="col">
-      <div class="card radius-10 border-start border-0 border-3 border-success">
-         <div class="card-body">
-           <div class="d-flex align-items-center">
-             <div>
-               <p class="mb-0 text-secondary">Taux de croissance</p>
-               <h4 class="my-1 text-success">34.6%</h4>
-               <p class="mb-0 font-13">-4.5% depuis la semaine dernière</p>
-             </div>
-             <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto"><i class="fa fa-bar-chart"></i>
-             </div>
-           </div>
-         </div>
-      </div>
-      </div>
-      <div class="col">
-      <div class="card radius-10 border-start border-0 border-3 border-warning">
-         <div class="card-body">
-           <div class="d-flex align-items-center">
-             <div>
-               <p class="mb-0 text-secondary">Total residents</p>
-               <h4 class="my-1 text-warning">8.4K</h4>
-               <p class="mb-0 font-13">+8.4% depuis la semaine dernière</p>
-             </div>
-             <div class="widgets-icons-2 rounded-circle bg-gradient-blooker text-white ms-auto"><i class="fa fa-users"></i>
-             </div>
-           </div>
-         </div>
-      </div>
-      </div>
+        <div class="kpi-value">{{ tauxOccupation }}<span class="kpi-unit">%</span></div>
+        <div class="kpi-progress">
+          <div class="kpi-progress__track">
+            <div class="kpi-progress__fill" [style.width.%]="tauxOccupation"></div>
+          </div>
+          <span class="kpi-sub">{{ sejoursAffiches.length }} / {{ totalChambres }} chambres{{ hasPeriodeFilter ? ' sur période' : '' }}</span>
+        </div>
+      </article>
+
+      <!-- Séjours en cours -->
+      <article class="kpi-card kpi-card--sejours">
+        <div class="kpi-card__top">
+          <div class="kpi-icon"><i class="fas fa-bed"></i></div>
+          <span class="kpi-label">Séjours en cours</span>
+        </div>
+        <div class="kpi-value">{{ totalSejoursEnCours }}</div>
+        <div class="kpi-sub">{{ totalReservationsMois }} réservation(s) {{ hasPeriodeFilter ? 'sur période' : 'ce mois' }}</div>
+      </article>
+
+      <!-- Revenu du mois -->
+      <article class="kpi-card kpi-card--revenu">
+        <div class="kpi-card__top">
+          <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+          <span class="kpi-label">{{ hasPeriodeFilter ? 'Encaissé sur période' : 'Encaissé ce mois' }}</span>
+        </div>
+        <div class="kpi-value kpi-value--sm">{{ formatCurrency(revenuMois) }}</div>
+        <div class="kpi-sub">Montant payé sur les réservations</div>
+      </article>
+
+      <!-- Solde à encaisser -->
+      <article class="kpi-card kpi-card--solde">
+        <div class="kpi-card__top">
+          <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+          <span class="kpi-label">Soldes restants</span>
+        </div>
+        <div class="kpi-value kpi-value--sm">{{ formatCurrency(soldeTotal) }}</div>
+        <div class="kpi-sub">Sur les séjours ouverts</div>
+      </article>
+
     </div>
 
+    <!-- ── Alertes du jour ── -->
+    @if (departsAujourdhui.length > 0 || arrivees.length > 0 || departsBientot.length > 0) {
+      <div class="alertes-row">
+
+        @if (departsAujourdhui.length > 0) {
+          <div class="alerte-card alerte-card--depart">
+            <div class="alerte-card__header">
+              <i class="fas fa-sign-out-alt"></i>
+              <strong>{{ departsAujourdhui.length }} départ(s) aujourd'hui</strong>
+            </div>
+            <ul class="alerte-list">
+              @for (r of departsAujourdhui; track r.id) {
+                <li>
+                  <span class="alerte-guest">{{ r.guestLabel }}</span>
+                  <span class="alerte-room">{{ r.chambreLabel }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (arrivees.length > 0) {
+          <div class="alerte-card alerte-card--arrivee">
+            <div class="alerte-card__header">
+              <i class="fas fa-sign-in-alt"></i>
+              <strong>{{ arrivees.length }} arrivée(s) aujourd'hui</strong>
+            </div>
+            <ul class="alerte-list">
+              @for (r of arrivees; track r.id) {
+                <li>
+                  <span class="alerte-guest">{{ guestName(r) }}</span>
+                  <span class="alerte-room">{{ r.bienImmobilierOperation || '—' }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @if (departsBientot.length > 0) {
+          <div class="alerte-card alerte-card--bientot">
+            <div class="alerte-card__header">
+              <i class="fas fa-calendar-times"></i>
+              <strong>{{ departsBientot.length }} départ(s) dans 3 jours</strong>
+            </div>
+            <ul class="alerte-list">
+              @for (r of departsBientot; track r.id) {
+                <li>
+                  <span class="alerte-guest">{{ r.guestLabel }}</span>
+                  <span class="alerte-room">dans {{ r.joursRestants }} j.</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- ── Contenu principal ── -->
+    <div class="dash-layout">
+
+      <!-- Séjours en cours (table) -->
+      <section class="surface-card sejours-card">
+        <div class="surface-card__body">
+          <div class="card-heading">
+            <div>
+              <span class="card-heading__eyebrow">Occupation</span>
+              <h2>Séjours en cours</h2>
+              <p>Classés par date de départ la plus proche.</p>
+            </div>
+            <span class="dash-count">{{ sejoursAffiches.length }} {{ hasPeriodeFilter ? 'séjour(s)' : 'actif(s)' }}</span>
+          </div>
+
+          @if (sejoursAffiches.length === 0) {
+            <div class="state-card">Aucun séjour en cours pour le moment.</div>
+          } @else {
+            <div class="table-shell">
+              <div class="table-responsive">
+                <table class="table align-middle sejour-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Chambre</th>
+                      <th>Arrivée</th>
+                      <th>Départ</th>
+                      <th>Progression</th>
+                      <th>Montant</th>
+                      <th>Solde</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of sejoursAffiches; track r.id) {
+                      <tr [class]="urgenceClass(r)">
+                        <td>
+                          <span class="guest-badge">{{ r.guestLabel }}</span>
+                          <div class="row-helper">{{ r.nmbreAdulte }} ad. · {{ r.nmbrEnfant }} enf.</div>
+                        </td>
+                        <td>
+                          <div>{{ r.chambreLabel }}</div>
+                          <div class="row-helper">{{ r.nameCategori || '—' }}</div>
+                        </td>
+                        <td>{{ r.dateDebut | date:'dd/MM/yyyy' }}</td>
+                        <td>
+                          <div>{{ r.dateFin | date:'dd/MM/yyyy' }}</div>
+                          @if (r.joursRestants <= 3) {
+                            <div class="row-helper urgence-label">
+                              @if (r.joursRestants === 0) { Départ aujourd'hui }
+                              @else { {{ r.joursRestants }} j. restant(s) }
+                            </div>
+                          }
+                        </td>
+                        <td>
+                          <div class="progress-wrap">
+                            <div class="progress-track">
+                              <div class="progress-fill" [class]="progressClass(r.progressPercent)"
+                                [style.width.%]="r.progressPercent"></div>
+                            </div>
+                            <span class="progress-label">{{ r.progressPercent }}%</span>
+                          </div>
+                          <div class="row-helper">{{ r.totalJours }} nuit(s)</div>
+                        </td>
+                        <td>{{ formatCurrency(+(r.montantReservation ?? 0)) }}</td>
+                        <td [class.text-warning]="+(r.soldReservation ?? 0) > 0">
+                          {{ formatCurrency(+(r.soldReservation ?? 0)) }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Sidebar droite -->
+      <aside class="dash-sidebar">
+
+        <!-- Chambres libres -->
+        <section class="surface-card">
+          <div class="surface-card__body">
+            <div class="card-heading">
+              <span class="card-heading__eyebrow">Disponibilité</span>
+            </div>
+            <div class="dispo-visual">
+              <div class="dispo-ring">
+                <svg viewBox="0 0 36 36" class="dispo-ring__svg">
+                  <path class="dispo-ring__bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <path class="dispo-ring__fill" [attr.stroke-dasharray]="tauxOccupation + ', 100'"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                  <text x="18" y="20.35" class="dispo-ring__text">{{ tauxOccupation }}%</text>
+                </svg>
+              </div>
+              <div class="dispo-legend">
+                <div class="dispo-legend__item dispo-legend__item--occupied">
+                  <span class="dispo-dot dispo-dot--occupied"></span>
+                  <div>
+                    <strong>{{ sejoursAffiches.length }}</strong>
+                    <span>Occupées</span>
+                  </div>
+                </div>
+                <div class="dispo-legend__item">
+                  <span class="dispo-dot dispo-dot--libre"></span>
+                  <div>
+                    <strong>{{ chambresLibres }}</strong>
+                    <span>Libres</span>
+                  </div>
+                </div>
+                <div class="dispo-legend__item">
+                  <span class="dispo-dot dispo-dot--total"></span>
+                  <div>
+                    <strong>{{ totalChambres }}</strong>
+                    <span>Total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Répartition par catégorie -->
+        @if (repartitionCategories.length > 0) {
+          <section class="surface-card">
+            <div class="surface-card__body">
+              <div class="card-heading">
+                <span class="card-heading__eyebrow">Par catégorie</span>
+              </div>
+              <div class="cat-list">
+                @for (cat of repartitionCategories; track cat.nom) {
+                  <div class="cat-row">
+                    <div class="cat-row__header">
+                      <span class="cat-name">{{ cat.nom }}</span>
+                      <span class="cat-count">{{ cat.count }} ch.</span>
+                    </div>
+                    <div class="cat-bar-track">
+                      <div class="cat-bar-fill" [style.width.%]="cat.percent"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+        }
+
+        <!-- Résumé financier -->
+        <section class="surface-card">
+          <div class="surface-card__body">
+            <div class="card-heading">
+              <span class="card-heading__eyebrow">{{ hasPeriodeFilter ? 'Finances — période' : 'Finances du mois' }}</span>
+            </div>
+            <div class="finance-list">
+              <div class="finance-row">
+                <span>Réservations</span>
+                <strong>{{ totalReservationsMois }}</strong>
+              </div>
+              <div class="finance-row">
+                <span>Encaissé</span>
+                <strong class="finance-row__value--success">{{ formatCurrency(revenuMois) }}</strong>
+              </div>
+              <div class="finance-row">
+                <span>Soldes ouverts</span>
+                <strong class="finance-row__value--warning">{{ formatCurrency(soldeTotal) }}</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+
+  }
+</div>

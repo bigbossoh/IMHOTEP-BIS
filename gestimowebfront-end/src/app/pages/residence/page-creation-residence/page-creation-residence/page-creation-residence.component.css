@@ -1,0 +1,87 @@
+.residence-create-page {
+  padding: 1.5rem;
+  --res-border: #d7dde7;
+  --res-border-strong: #c1cad9;
+  --res-primary: #b45309;
+  --res-primary-soft: rgba(217, 119, 6, 0.14);
+  --res-text-soft: #64748b;
+  --res-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
+.residence-create-page .residence-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.residence-create-page .residence-page__copy h1 {
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.residence-create-page .residence-page__copy p {
+  margin: 0.35rem 0 0;
+  color: var(--res-text-soft);
+}
+
+.residence-create-page .page-eyebrow {
+  display: inline-block;
+  margin: 0 0 0.35rem;
+  color: var(--res-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.residence-create-page .residence-page__actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+
+.residence-create-page .residence-page__buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.residence-create-page .card {
+  border: 0;
+  border-radius: 1.1rem;
+  box-shadow: var(--res-shadow);
+  max-width: 1100px;
+}
+
+.residence-create-page .form-control,
+.residence-create-page .form-select {
+  min-height: 3rem;
+  border-radius: 0.95rem;
+  border: 1px solid var(--res-border-strong);
+  box-shadow: none;
+}
+
+.residence-create-page .form-control:focus,
+.residence-create-page .form-select:focus {
+  border-color: var(--res-primary);
+  box-shadow: 0 0 0 0.22rem var(--res-primary-soft);
+}
+
+.residence-create-page textarea {
+  resize: vertical;
+}
+
+@media (max-width: 720px) {
+  .residence-create-page {
+    padding: 1.25rem;
+  }
+
+  .residence-create-page .residence-page__actions {
+    justify-items: start;
+  }
+}

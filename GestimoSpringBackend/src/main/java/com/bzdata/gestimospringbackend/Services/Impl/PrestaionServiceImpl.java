@@ -7,7 +7,10 @@ import java.util.stream.Collectors;
 import com.bzdata.gestimospringbackend.DTOs.PrestationSaveOrUpdateDto;
 import com.bzdata.gestimospringbackend.Models.hotel.Prestation;
 import com.bzdata.gestimospringbackend.Services.PrestaionService;
+import com.bzdata.gestimospringbackend.exceptions.EntityNotFoundException;
+import com.bzdata.gestimospringbackend.exceptions.InvalidOperationException;
 import com.bzdata.gestimospringbackend.mappers.GestimoWebMapperImpl;
+import com.bzdata.gestimospringbackend.repository.PrestationAdditionnelReservationRepository;
 import com.bzdata.gestimospringbackend.repository.PrestationRepository;
 import com.bzdata.gestimospringbackend.validator.ObjectsValidator;
 
@@ -23,13 +26,22 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PrestaionServiceImpl implements PrestaionService{
     final PrestationRepository serviceAdditionnelRepository;
+    final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
 
     private final ObjectsValidator<PrestationSaveOrUpdateDto> validator;
 
     @Override
     public Long save(PrestationSaveOrUpdateDto dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'save'");
+        validator.validate(dto);
+
+        Prestation prestation = new Prestation();
+        prestation.setName(dto.getName());
+        prestation.setAmount(dto.getAmount());
+        prestation.setIdAgence(dto.getIdAgence());
+        prestation.setIdCreateur(dto.getIdCreateur());
+
+        Prestation saved = serviceAdditionnelRepository.save(prestation);
+        return saved.getId();
     }
 
     @Override
@@ -42,48 +54,65 @@ public class PrestaionServiceImpl implements PrestaionService{
     }
 
     @Override
+    public List<PrestationSaveOrUpdateDto> findAllByAgence(Long idAgence) {
+        return serviceAdditionnelRepository.findAllByIdAgenceOrderByNameAsc(idAgence)
+                .stream()
+                .map(GestimoWebMapperImpl::fromServiceAditionnel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public PrestationSaveOrUpdateDto findById(Long id) {
-        Prestation serviceAdditionnelle = serviceAdditionnelRepository.findById(id).orElse(null);
-        if (serviceAdditionnelle != null) {
-            return GestimoWebMapperImpl.fromServiceAditionnel(serviceAdditionnelle);
-        } else {
-            return null;
-        }
+        Prestation prestation = serviceAdditionnelRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prestation introuvable (id=" + id + ")"));
+        return GestimoWebMapperImpl.fromServiceAditionnel(prestation);
     }
 
     @Override
     public void delete(Long id) {
-        Prestation serviceAdditionnelle = serviceAdditionnelRepository.findById(id).orElse(null);
-        if (serviceAdditionnelle != null) {
-            serviceAdditionnelRepository.delete(serviceAdditionnelle);
-        } else {
-            throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        Prestation prestation = serviceAdditionnelRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prestation introuvable (id=" + id + ")"));
+
+        long usageCount = prestationAdditionnelReservationRepository.countByServiceAdditionnelle_Id(id);
+        if (usageCount > 0) {
+            throw new InvalidOperationException(
+                    "Impossible de supprimer la prestation : elle est déjà utilisée sur des réservations ("
+                            + usageCount + ").");
         }
+
+        serviceAdditionnelRepository.delete(prestation);
     }
 
     @Override
     public PrestationSaveOrUpdateDto saveOrUpdate(PrestationSaveOrUpdateDto dto) {
-        Prestation serviceAdditionnelle = serviceAdditionnelRepository.findById(dto.getId()).orElse(null);
-
         validator.validate(dto);
-        if (serviceAdditionnelle != null) {
-            //serviceAdditionnelle.setType(dto.g());
-            serviceAdditionnelle.setName(dto.getName());
-            serviceAdditionnelle.setAmount(dto.getAmount());
-            serviceAdditionnelle.setIdAgence(dto.getIdAgence());
-            serviceAdditionnelle.setIdCreateur(dto.getIdCreateur());
-            Prestation saveServiceAdditionnelle = serviceAdditionnelRepository.save(serviceAdditionnelle);
-            return GestimoWebMapperImpl.fromServiceAditionnel(saveServiceAdditionnelle);
-        } else {
-            Prestation newsServiceAdditionnelle = new Prestation();
-           // newCategorieChambre.setDescription(dto.getDescription());
-           newsServiceAdditionnelle.setName(dto.getName());
-           newsServiceAdditionnelle.setAmount(dto.getAmount());
-           newsServiceAdditionnelle.setIdCreateur(dto.getIdCreateur());
-           newsServiceAdditionnelle.setIdAgence(dto.getIdAgence());
-           Prestation saveServiceAdditionnelle = serviceAdditionnelRepository.save(newsServiceAdditionnelle);
-            return GestimoWebMapperImpl.fromServiceAditionnel(saveServiceAdditionnelle);
+
+        Long id = dto.getId();
+        boolean isNew = id == null || id == 0;
+        if (isNew) {
+            Prestation prestation = new Prestation();
+            prestation.setName(dto.getName());
+            prestation.setAmount(dto.getAmount());
+            prestation.setIdAgence(dto.getIdAgence());
+            prestation.setIdCreateur(dto.getIdCreateur());
+
+            Prestation saved = serviceAdditionnelRepository.save(prestation);
+            return GestimoWebMapperImpl.fromServiceAditionnel(saved);
         }
+
+        Prestation prestation = serviceAdditionnelRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prestation introuvable (id=" + id + ")"));
+
+        prestation.setName(dto.getName());
+        prestation.setAmount(dto.getAmount());
+        prestation.setIdAgence(dto.getIdAgence());
+        prestation.setIdCreateur(dto.getIdCreateur());
+
+        Prestation saved = serviceAdditionnelRepository.save(prestation);
+        return GestimoWebMapperImpl.fromServiceAditionnel(saved);
     }
 
 }

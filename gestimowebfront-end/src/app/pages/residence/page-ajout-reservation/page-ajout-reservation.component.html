@@ -172,11 +172,13 @@
           <mat-form-field appearance="outline">
             <mat-label>Adultes</mat-label>
             <input matInput type="number" min="0" [(ngModel)]="nbrAdult" />
+            <mat-icon matSuffix>person</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Enfants</mat-label>
             <input matInput type="number" min="0" [(ngModel)]="nbrEnfant" />
+            <mat-icon matSuffix>child_care</mat-icon>
           </mat-form-field>
         </div>
       </mat-card>
@@ -297,7 +299,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Montant payé</mat-label>
+            <mat-label>Montant payé (acompte)</mat-label>
             <input
               matInput
               type="number"
@@ -305,6 +307,7 @@
               [(ngModel)]="montantPayer"
             />
             <span matTextSuffix>FCFA</span>
+            <mat-hint>Laisser 0 si aucun acompte</mat-hint>
           </mat-form-field>
         </div>
 
@@ -333,6 +336,108 @@
             <small>Après encaissement de {{ amountPaid | currency : "XOF" : "symbol" : "1.0-0" }}</small>
           </div>
         </div>
+      </mat-card>
+
+      <mat-card class="reservation-card reservation-card--wide reservation-card--prestations">
+        <div class="reservation-card__header">
+          <div>
+            <p class="card-kicker">Prestations</p>
+            <h3>Services additionnels</h3>
+          </div>
+          <mat-icon>room_service</mat-icon>
+        </div>
+
+        <div class="prestations-toolbar">
+          <mat-form-field appearance="outline">
+            <mat-label>Rechercher une prestation</mat-label>
+            <input
+              matInput
+              [(ngModel)]="prestationSearch"
+              (ngModelChange)="onPrestationSearch($event)"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <div class="prestations-totals">
+            <div class="prestations-totals__item">
+              <span>Sélection</span>
+              <strong>{{ selectedPrestationsCount }}</strong>
+              <small>prestation(s)</small>
+            </div>
+
+            <div class="prestations-totals__item prestations-totals__item--accent">
+              <span>Total prestations</span>
+              <strong>{{ selectedPrestationsTotal | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+              <small>hors séjour</small>
+            </div>
+          </div>
+        </div>
+
+        @if (prestationsLoading) {
+          <div class="inline-state inline-state--loading">
+            <mat-spinner diameter="28"></mat-spinner>
+            <span>Chargement du catalogue…</span>
+          </div>
+        } @else if (prestationsError) {
+          <div class="inline-state inline-state--error">
+            {{ prestationsError }}
+          </div>
+        } @else {
+          <div class="prestations-grid">
+            <div class="prestations-list">
+              @if (filteredPrestations.length) {
+                @for (prestation of filteredPrestations; track trackByPrestation($index, prestation)) {
+                  <div class="prestation-row">
+                    <mat-checkbox
+                      [checked]="isPrestationSelected(prestation)"
+                      (change)="togglePrestation(prestation, $event.checked)"
+                    >
+                      <span class="prestation-row__name">{{ prestation.name }}</span>
+                    </mat-checkbox>
+                    <span class="prestation-row__amount">
+                      {{ prestation.amount | currency : "XOF" : "symbol" : "1.0-0" }}
+                    </span>
+                  </div>
+                }
+              } @else {
+                <div class="inline-state">
+                  <mat-icon>playlist_remove</mat-icon>
+                  <span>Aucune prestation ne correspond à la recherche.</span>
+                </div>
+              }
+            </div>
+
+            <div class="prestations-selected">
+              <p class="prestations-selected__title">Sélection actuelle</p>
+
+              @if (selectedPrestations.length) {
+                <div class="prestations-selected__chips">
+                  @for (prestation of selectedPrestations; track trackByPrestation($index, prestation)) {
+                    <button
+                      type="button"
+                      class="prestation-chip"
+                      (click)="togglePrestation(prestation, false)"
+                      title="Retirer"
+                    >
+                      <span>{{ prestation.name }}</span>
+                      <strong>{{ prestation.amount | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+                </div>
+                <small class="prestations-selected__hint">Cliquer sur une prestation pour la retirer.</small>
+              } @else {
+                <div class="info-panel">
+                  <mat-icon>info</mat-icon>
+                  <div>
+                    <strong>Aucune prestation</strong>
+                    <p>Ajoute des services additionnels (petit-déjeuner, ménage, transport…).</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
       </mat-card>
     </div>
   </mat-dialog-content>

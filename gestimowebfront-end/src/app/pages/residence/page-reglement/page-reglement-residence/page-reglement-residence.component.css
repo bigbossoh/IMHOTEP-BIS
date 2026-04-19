@@ -1,21 +1,106 @@
-.mat-select{
-  max-width: max-content !important;
-  min-width: 100%;
+.reglement-header {
+  max-width: 960px;
 }
-.mat-form-field{
-  width: 100%;
+
+.reglement-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
-.widthForm{
-  width: 75%;
+
+.reglement-lead {
+  color: var(--muted);
+  line-height: 1.45;
 }
-.example-form {
-  min-width: 150px;
-  max-width: 500px;
-  width: 100%;
+
+.reglement-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
 }
-.example-full-width {
-  width: 100%;
+
+.reglement-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
-.tail-50{
-  width: 50%;
+
+.reglement-muted {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.reglement-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .reglement-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.reglement-meta__item {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reglement-balance {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.reglement-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.reglement-table-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reglement-search {
+  min-width: 280px;
+}
+
+@media (max-width: 575.98px) {
+  .reglement-search {
+    width: 100%;
+  }
+}
+
+.reglement-table {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.reglement-table mat-table {
+  min-width: 840px;
 }
