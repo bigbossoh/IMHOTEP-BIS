@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
 import { GetAllAppartementMeubleActions } from './../../../ngrx/appartement/appartement.actions';
 import {
   AppartementState,
@@ -23,9 +23,12 @@ import { UserService } from 'src/app/services/user/user.service';
 import {
   AppartementDto,
   PrixParCategorieChambreDto,
+  PrestationAdditionnelReservationSaveOrrUpdate,
+  PrestationSaveOrUpdateDto,
   ReservationAfficheDto,
   UtilisateurRequestDto,
 } from 'src/gs-api/src/models';
+import { ApiService } from 'src/gs-api/src/services';
 import { SaveReservationAction } from 'src/app/ngrx/reservation/reservation.actions';
 import { DialogData } from '../../baux/page-baux/page-baux.component';
 import { PageNewUtilisateurComponent } from '../../utilisateurs/page-new-utilisateur/page-new-utilisateur.component';
@@ -88,12 +91,22 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   private reservationToEdit: ReservationAfficheDto | null = null;
   private appartementSubscription?: Subscription;
   private clientSubscription?: Subscription;
+  private prestationsSubscription?: Subscription;
+  private prestationsLinkSubscription?: Subscription;
+
+  prestations: PrestationSaveOrUpdateDto[] = [];
+  filteredPrestations: PrestationSaveOrUpdateDto[] = [];
+  prestationSearch = '';
+  prestationsLoading = false;
+  prestationsError = '';
+  selectedPrestationIds = new Set<number>();
 
   constructor(
     public dialogRef: MatDialogRef<PageAjoutReservationComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     private store: Store<any>,
     private userService: UserService,
+    private apiService: ApiService,
     private fb: FormBuilder,
     public dialog: MatDialog
   ) {}
@@ -228,6 +241,24 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     return hasDates && hasRoom && hasPrice && hasGuest;
   }
 
+  get selectedPrestationsCount(): number {
+    return this.selectedPrestationIds.size;
+  }
+
+  get selectedPrestationsTotal(): number {
+    return this.selectedPrestations.reduce((sum, prestation) => sum + this.toNumber(prestation.amount), 0);
+  }
+
+  get selectedPrestations(): PrestationSaveOrUpdateDto[] {
+    if (!this.selectedPrestationIds.size) {
+      return [];
+    }
+
+    return this.prestations.filter((prestation) =>
+      this.selectedPrestationIds.has(this.toNumber(prestation.id))
+    );
+  }
+
   ngOnInit(): void {
     this.resetFormState();
     this.hydrateReservationIfNeeded();
@@ -243,11 +274,16 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
     this.bindAppartements();
     this.bindClients();
+
+    this.loadPrestationsCatalogue();
+    this.loadPrestationsLinks();
   }
 
   ngOnDestroy(): void {
     this.appartementSubscription?.unsubscribe();
     this.clientSubscription?.unsubscribe();
+    this.prestationsSubscription?.unsubscribe();
+    this.prestationsLinkSubscription?.unsubscribe();
   }
 
   ajoutClient(): void {
@@ -300,8 +336,16 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.encaissementform = this.fb.group(this.buildReservationPayload());
-    this.store.dispatch(new SaveReservationAction(this.encaissementform.value));
+    const reservationPayload = this.buildReservationPayload();
+    const prestationIds = Array.from(this.selectedPrestationIds.values());
+
+    this.encaissementform = this.fb.group(reservationPayload);
+    this.store.dispatch(
+      new SaveReservationAction({
+        reservation: this.encaissementform.value,
+        prestationIds,
+      })
+    );
     this.dialogRef.close();
   }
 
@@ -485,6 +529,12 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.residenceModel = null;
     this.selectedClient = null;
     this.reservationToEdit = null;
+    this.prestations = [];
+    this.filteredPrestations = [];
+    this.prestationSearch = '';
+    this.prestationsLoading = false;
+    this.prestationsError = '';
+    this.selectedPrestationIds.clear();
   }
 
   private toApiDate(value: Date | null): string {
@@ -507,5 +557,95 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   private toNumber(value: unknown): number {
     return Number(value ?? 0);
+  }
+
+  onPrestationSearch(value: string): void {
+    this.prestationSearch = value ?? '';
+    this.applyPrestationSearch();
+  }
+
+  isPrestationSelected(prestation: PrestationSaveOrUpdateDto): boolean {
+    const id = this.toNumber(prestation?.id);
+    return id > 0 && this.selectedPrestationIds.has(id);
+  }
+
+  togglePrestation(prestation: PrestationSaveOrUpdateDto, checked: boolean): void {
+    const id = this.toNumber(prestation?.id);
+    if (!id) {
+      return;
+    }
+
+    if (checked) {
+      this.selectedPrestationIds.add(id);
+      return;
+    }
+
+    this.selectedPrestationIds.delete(id);
+  }
+
+  trackByPrestation(index: number, prestation: PrestationSaveOrUpdateDto): number {
+    return this.toNumber(prestation?.id) || index;
+  }
+
+  private loadPrestationsCatalogue(): void {
+    this.prestationsSubscription?.unsubscribe();
+
+    this.prestationsLoading = true;
+    this.prestationsError = '';
+
+    this.prestationsSubscription = this.apiService
+      .findAllServiceAdditionnelPrestation()
+      .pipe(finalize(() => (this.prestationsLoading = false)))
+      .subscribe({
+        next: (data) => {
+          const idAgence = this.user?.idAgence;
+          const list = Array.isArray(data) ? data : [];
+          this.prestations = [...list]
+            .filter((p) => !idAgence || !p.idAgence || p.idAgence === idAgence)
+            .sort((left, right) =>
+              (left?.name ?? '').localeCompare(right?.name ?? '', 'fr', { sensitivity: 'base' })
+            );
+          this.applyPrestationSearch();
+        },
+        error: () => {
+          this.prestationsError = 'Impossible de charger le catalogue des prestations.';
+        },
+      });
+  }
+
+  private loadPrestationsLinks(): void {
+    this.prestationsLinkSubscription?.unsubscribe();
+
+    if (!this.idReservation) {
+      return;
+    }
+
+    this.prestationsLinkSubscription = this.apiService
+      .findAllServiceAdditionnelPrestationAdditionnel()
+      .subscribe({
+        next: (data: PrestationAdditionnelReservationSaveOrrUpdate[]) => {
+          const list = Array.isArray(data) ? data : [];
+          const linked = list.filter((link) => this.toNumber(link.idReservation) === this.idReservation);
+          for (const link of linked) {
+            const serviceId = this.toNumber(link.idServiceAdditionnelle);
+            if (serviceId) {
+              this.selectedPrestationIds.add(serviceId);
+            }
+          }
+        },
+      });
+  }
+
+  private applyPrestationSearch(): void {
+    const term = this.prestationSearch.trim().toLowerCase();
+    if (!term) {
+      this.filteredPrestations = [...this.prestations];
+      return;
+    }
+
+    this.filteredPrestations = this.prestations.filter((prestation) => {
+      const haystack = `${prestation.name ?? ''} ${prestation.amount ?? ''}`.toLowerCase();
+      return haystack.includes(term);
+    });
   }
 }

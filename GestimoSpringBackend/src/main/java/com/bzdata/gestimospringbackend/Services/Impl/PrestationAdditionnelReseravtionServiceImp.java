@@ -66,17 +66,35 @@ public class PrestationAdditionnelReseravtionServiceImp implements PrestationAdd
     @Override
     public PrestationAdditionnelReservationSaveOrrUpdate saveOrUpdate(
             PrestationAdditionnelReservationSaveOrrUpdate dto) {
+        if (dto == null || dto.getIdReservation() == null || dto.getIdServiceAdditionnelle() == null) {
+            return null;
+        }
+
         Reservation reservation = reservationRepository.findById(dto.getIdReservation()).orElse(null);
         Prestation prestation = prestationRepository.findById(dto.getIdServiceAdditionnelle()).orElse(null);
-        if (reservation!=null&&prestation!=null) {
-            PrestationAdditionnelReservation prestationAdditionnelReservation = new PrestationAdditionnelReservation();
-            prestationAdditionnelReservation.setReservation(reservation);
-            prestationAdditionnelReservation.setServiceAdditionnelle(prestation);
-            PrestationAdditionnelReservation sPrestationAdditionnelReservation = prestationAdditionnelReservationRepository
-                    .save(prestationAdditionnelReservation);
-            return GestimoWebMapperImpl.fromPrestationAdditionnelReservation(sPrestationAdditionnelReservation);
+        if (reservation == null || prestation == null) {
+            return null;
         }
-        return null;
+
+        PrestationAdditionnelReservation prestationAdditionnelReservation = null;
+
+        if (dto.getId() != null && dto.getId() != 0) {
+            prestationAdditionnelReservation = prestationAdditionnelReservationRepository.findById(dto.getId()).orElse(null);
+        }
+
+        if (prestationAdditionnelReservation == null) {
+            prestationAdditionnelReservation = prestationAdditionnelReservationRepository
+                    .findByReservation_IdAndServiceAdditionnelle_Id(dto.getIdReservation(), dto.getIdServiceAdditionnelle())
+                    .orElse(new PrestationAdditionnelReservation());
+        }
+
+        prestationAdditionnelReservation.setIdAgence(dto.getIdAgence());
+        prestationAdditionnelReservation.setIdCreateur(dto.getIdCreateur());
+        prestationAdditionnelReservation.setReservation(reservation);
+        prestationAdditionnelReservation.setServiceAdditionnelle(prestation);
+
+        PrestationAdditionnelReservation saved = prestationAdditionnelReservationRepository.save(prestationAdditionnelReservation);
+        return GestimoWebMapperImpl.fromPrestationAdditionnelReservation(saved);
     }
 
 }

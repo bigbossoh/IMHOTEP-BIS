@@ -25,6 +25,7 @@ public interface PrintService {
 
   byte[] releveCompteLocataireImpaye(Long idAgence, Long idLocataire);
 
-  
+  byte[] factureReservation(Long idReservation);
+
     // InputStreamSource downloadReportByPeriode(String periode,Long idAgence,String proprio) throws IOException,FileNotFoundException, JRException, SQLException;
 }

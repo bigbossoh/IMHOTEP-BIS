@@ -51,7 +51,7 @@ final SaveEncaissementReservationAvecRetourDeListService encaissementReservation
   @Operation(
     summary = "Creation et mise à jour d'une Reservation avec le bon dto"
   )
-  public ResponseEntity<Boolean> saveorupdatereservation(
+  public ResponseEntity<ReservationAfficheDto> saveorupdatereservation(
     @RequestBody ReservationRequestDto dto
   ) {
     log.info(" Reserrr ; {}", dto);

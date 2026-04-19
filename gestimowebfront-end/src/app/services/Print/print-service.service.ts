@@ -109,6 +109,10 @@ export class PrintServiceService {
       proprio
     );
   }
+  factureReservation(idReservation: number): Observable<Blob> {
+    return this.requestBlobWithFallback('api/v1/print/factureReservation', idReservation);
+  }
+
   printRecuEncaissement(idEncaissement: any): Observable<Blob> {
     return this.requestBlobWithFallback(
       'api/v1/print/recupaiment',

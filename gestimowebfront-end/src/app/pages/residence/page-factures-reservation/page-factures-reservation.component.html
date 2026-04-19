@@ -1,0 +1,184 @@
+<div class="factures-page container-fluid">
+
+  <!-- Hero -->
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Résidence meublée</span>
+      <h1>Factures des réservations</h1>
+      <p>
+        Retrouvez toutes les réservations et téléchargez la facture PDF
+        correspondante en un clic.
+      </p>
+    </div>
+    <div class="hero-panel__actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="load()" [disabled]="loading">
+        Actualiser
+      </button>
+    </div>
+  </section>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger page-alert">{{ errorMessage }}</div>
+  }
+
+  <!-- Toolbar -->
+  <section class="surface-card">
+    <div class="surface-card__body">
+
+      <div class="card-heading">
+        <div>
+          <span class="card-heading__eyebrow">Inventaire</span>
+          <h2>Liste des factures</h2>
+          <p>Recherchez par client, chambre ou numéro de facture.</p>
+        </div>
+        <span class="facture-count">{{ filteredReservations.length }} facture(s)</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <label for="factureSearch">Recherche</label>
+          <input
+            id="factureSearch"
+            type="search"
+            class="form-control"
+            [value]="searchTerm"
+            (input)="applySearch($event)"
+            placeholder="N° facture, client, chambre..."
+          />
+        </div>
+        <div class="toolbar-field">
+          <label for="facturePageSize">Lignes</label>
+          <select
+            id="facturePageSize"
+            class="toolbar-select"
+            [value]="pageSize"
+            (change)="onPageSizeChange($event)"
+          >
+            @for (size of pageSizeOptions; track size) {
+              <option [value]="size">{{ size }} / page</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="state-card">Chargement des réservations…</div>
+      }
+
+      @if (!loading && allReservations.length === 0 && !errorMessage) {
+        <div class="state-card">Aucune réservation enregistrée pour cette agence.</div>
+      }
+
+      @if (!loading && allReservations.length > 0 && filteredReservations.length === 0) {
+        <div class="state-card">Aucune réservation ne correspond à votre recherche.</div>
+      }
+
+      @if (!loading && filteredReservations.length > 0) {
+        <div class="table-shell">
+          <div class="table-responsive">
+            <table class="table align-middle factures-table">
+              <thead>
+                <tr>
+                  <th>N° Facture</th>
+                  <th>Client</th>
+                  <th>Chambre</th>
+                  <th>Période</th>
+                  <th>Total</th>
+                  <th>Payé</th>
+                  <th>Solde</th>
+                  <th>Statut</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of paginatedReservations; track trackBy($index, r)) {
+                  <tr>
+                    <td>
+                      <span class="facture-badge">{{ factureNumero(r) }}</span>
+                      <div class="row-helper">
+                        Créée le {{ r.creationDate | date : 'dd/MM/yyyy' }}
+                      </div>
+                    </td>
+
+                    <td>
+                      <strong>{{ guestName(r) }}</strong>
+                      <div class="row-helper">
+                        {{ r.nmbreAdulte }} adulte(s) · {{ r.nmbrEnfant }} enfant(s)
+                      </div>
+                    </td>
+
+                    <td>
+                      <strong>{{ roomName(r) }}</strong>
+                      <div class="row-helper">{{ r.nameCategori || '—' }}</div>
+                    </td>
+
+                    <td>
+                      <div>{{ r.dateDebut | date : 'dd/MM/yyyy' }}</div>
+                      <div class="row-helper">
+                        au {{ r.dateFin | date : 'dd/MM/yyyy' }} · {{ stayNights(r) }} nuit(s)
+                      </div>
+                    </td>
+
+                    <td>{{ formatCurrency(totalAmount(r)) }}</td>
+                    <td class="text-success">{{ formatCurrency(paidAmount(r)) }}</td>
+                    <td class="text-warning">{{ formatCurrency(balance(r)) }}</td>
+
+                    <td>
+                      <span [class]="statusClass(r)">{{ statusLabel(r) }}</span>
+                    </td>
+
+                    <td class="actions-col">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-primary me-2"
+                        [disabled]="isGenerating(r)"
+                        (click)="genererFacture(r)"
+                      >
+                        @if (isGenerating(r)) { Génération… } @else { Télécharger PDF }
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-success"
+                        [disabled]="isCertifying(r)"
+                        (click)="certifierReservation(r)"
+                      >
+                        @if (isCertifying(r)) { Certification… } @else { Certifier }
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-toolbar">
+          <p class="pagination-summary">
+            Affichage {{ paginationStart }} à {{ paginationEnd }} sur
+            {{ filteredReservations.length }} facture(s)
+          </p>
+          <div class="pagination-controls">
+            <button type="button" class="page-btn" [disabled]="safePage <= 1" (click)="prevPage()">
+              Précédent
+            </button>
+            @for (page of visiblePages; track page) {
+              <button
+                type="button"
+                class="page-btn"
+                [class.is-active]="page === safePage"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+            <button type="button" class="page-btn" [disabled]="safePage >= totalPages" (click)="nextPage()">
+              Suivant
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </section>
+</div>

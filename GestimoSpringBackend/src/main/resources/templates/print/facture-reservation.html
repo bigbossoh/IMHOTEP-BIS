@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="'Facture ' + ${view.factureNumero}">Facture de réservation</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 28px 32px 36px 32px;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #14213d;
+        font-size: 11px;
+        line-height: 1.55;
+        margin: 0;
+        padding: 0;
+      }
+
+      .page { width: 100%; }
+
+      /* ── En-tête ── */
+      .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+      }
+      .header-table td { vertical-align: top; }
+      .header-logo { width: 90px; }
+      .header-logo img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 8px;
+      }
+      .header-agency {
+        padding-left: 14px;
+      }
+      .header-agency strong {
+        display: block;
+        font-size: 15px;
+        color: #0f172a;
+        margin-bottom: 3px;
+      }
+      .header-agency span {
+        display: block;
+        font-size: 10px;
+        color: #64748b;
+        line-height: 1.6;
+      }
+      .header-facture {
+        text-align: right;
+        width: 200px;
+      }
+      .facture-badge {
+        display: inline-block;
+        background: #1d4ed8;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        padding: 8px 18px;
+        border-radius: 10px;
+        margin-bottom: 6px;
+      }
+      .facture-meta {
+        font-size: 10px;
+        color: #475569;
+        line-height: 1.8;
+      }
+      .facture-meta strong { color: #0f172a; }
+
+      /* ── Bandeau titre ── */
+      .title-band {
+        background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+        color: #ffffff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+      }
+      .title-band h1 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .title-band p {
+        margin: 3px 0 0;
+        font-size: 10px;
+        opacity: 0.82;
+      }
+
+      /* ── Grille infos ── */
+      .info-grid {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 8px;
+        margin: 0 -8px 16px;
+      }
+      .info-grid td { width: 50%; vertical-align: top; }
+      .info-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #f8fafc;
+      }
+      .info-card__label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 5px;
+        display: block;
+      }
+      .info-card strong {
+        display: block;
+        font-size: 11px;
+        color: #0f172a;
+        margin-bottom: 2px;
+      }
+      .info-card span {
+        display: block;
+        font-size: 10px;
+        color: #64748b;
+        line-height: 1.6;
+      }
+
+      /* ── Tableau lignes ── */
+      .lines-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+      }
+      .lines-table thead th {
+        background: #f1f5f9;
+        border-bottom: 2px solid #cbd5e1;
+        padding: 7px 10px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+      .lines-table thead th:last-child { text-align: right; }
+      .lines-table tbody td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 10.5px;
+        color: #1e293b;
+        vertical-align: top;
+      }
+      .lines-table tbody td:last-child { text-align: right; font-weight: 700; }
+      .lines-table tbody tr:last-child td { border-bottom: none; }
+      .line-desc { font-weight: 600; }
+      .line-sub {
+        display: block;
+        font-size: 9.5px;
+        color: #64748b;
+        margin-top: 2px;
+        font-weight: 400;
+      }
+
+      /* ── Section prestations ── */
+      .section-title {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+        padding: 6px 0 4px;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 4px;
+      }
+      .prestation-row td {
+        background: #fafafa;
+        font-size: 10px;
+      }
+
+      /* ── Récapitulatif totaux ── */
+      .totals-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      .totals-table td {
+        padding: 5px 10px;
+        font-size: 10.5px;
+      }
+      .totals-table td:first-child { color: #475569; }
+      .totals-table td:last-child { text-align: right; font-weight: 600; color: #0f172a; }
+      .totals-divider td {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 8px !important;
+      }
+      .totals-total td {
+        font-size: 12px;
+        font-weight: 800;
+        color: #1d4ed8 !important;
+        border-top: 2px solid #1d4ed8;
+        padding-top: 8px !important;
+      }
+      .totals-paid td:first-child { color: #047857 !important; }
+      .totals-paid td:last-child { color: #047857 !important; }
+      .totals-balance td:first-child { color: #b45309 !important; }
+      .totals-balance td:last-child { color: #b45309 !important; }
+
+      /* ── Statut ── */
+      .status-band {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      .status-chip {
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .status-chip--solde { background: #d1fae5; color: #047857; }
+      .status-chip--acompte { background: #fef3c7; color: #b45309; }
+      .status-chip--attente { background: #e0f2fe; color: #0369a1; }
+
+      /* ── Pied de page ── */
+      .footer {
+        border-top: 1px solid #e2e8f0;
+        padding-top: 10px;
+        text-align: center;
+        font-size: 9px;
+        color: #94a3b8;
+        line-height: 1.8;
+      }
+      .footer strong { color: #64748b; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+
+      <!-- En-tête -->
+      <table class="header-table">
+        <tr>
+          <td class="header-logo">
+            <img th:if="${view.agenceLogoDataUrl != null and !view.agenceLogoDataUrl.isEmpty()}"
+                 th:src="${view.agenceLogoDataUrl}"
+                 alt="Logo agence" />
+          </td>
+          <td class="header-agency">
+            <strong th:text="${view.agenceNom}">Nom agence</strong>
+            <span th:text="${view.agenceAdresse}">Adresse</span>
+            <span th:text="${view.agenceTelephone}">Téléphone</span>
+            <span th:text="${view.agenceEmail}">Email</span>
+          </td>
+          <td class="header-facture">
+            <div class="facture-badge">FACTURE</div>
+            <div class="facture-meta">
+              <span><strong th:text="${view.factureNumero}">FACT-00</strong></span>
+              <span>Date : <strong th:text="${view.factureDate}">—</strong></span>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Bandeau titre -->
+      <div class="title-band">
+        <h1>Facture de Réservation — Résidence Meublée</h1>
+        <p th:text="${view.agenceSigle} + ' · Document non contractuel généré le ' + ${view.factureDate}">
+          Sous-titre
+        </p>
+      </div>
+
+      <!-- Infos client / chambre -->
+      <table class="info-grid">
+        <tr>
+          <td>
+            <div class="info-card">
+              <span class="info-card__label">Client</span>
+              <strong th:text="${view.clientNom}">Nom client</strong>
+              <span th:text="${view.clientContact}">Contact</span>
+              <span th:text="${view.nombreAdultes} + ' adulte(s) · ' + ${view.nombreEnfants} + ' enfant(s)'">
+                Voyageurs
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="info-card">
+              <span class="info-card__label">Chambre / Résidence</span>
+              <strong th:text="${view.chambreNom}">Chambre</strong>
+              <span th:text="${view.chambreCategorie}">Catégorie</span>
+              <span th:text="'Du ' + ${view.dateDebut} + ' au ' + ${view.dateFin}">Période</span>
+              <span th:text="${view.nombreNuits} + ' nuit(s)'">Durée</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Lignes de facturation -->
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th style="width:50%">Désignation</th>
+            <th>Nuits</th>
+            <th>Prix / nuit</th>
+            <th>Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Séjour principal -->
+          <tr>
+            <td>
+              <span class="line-desc" th:text="'Séjour — ' + ${view.chambreNom}">Séjour</span>
+              <span class="line-sub"
+                    th:text="'Du ' + ${view.dateDebut} + ' au ' + ${view.dateFin}">
+                Période
+              </span>
+            </td>
+            <td th:text="${view.nombreNuits}">0</td>
+            <td th:text="${view.prixParNuit}">0 FCFA</td>
+            <td th:text="${view.sousTotal}">0 FCFA</td>
+          </tr>
+
+          <!-- Prestations additionnelles -->
+          <tr th:if="${view.hasPrestations}">
+            <td colspan="4" style="padding:0">
+              <div class="section-title">Services additionnels</div>
+            </td>
+          </tr>
+          <tr class="prestation-row"
+              th:each="prestation : ${view.prestations}">
+            <td colspan="3">
+              <span class="line-desc" th:text="${prestation.nom}">Prestation</span>
+            </td>
+            <td th:text="${prestation.montant}">0 FCFA</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Totaux -->
+      <table class="totals-table">
+        <tr>
+          <td style="width:60%"></td>
+          <td style="width:40%">
+            <table style="width:100%;border-collapse:collapse">
+              <tr>
+                <td>Sous-total séjour</td>
+                <td style="text-align:right;font-weight:600" th:text="${view.sousTotal}">0 FCFA</td>
+              </tr>
+              <tr th:if="${view.hasPrestations}">
+                <td>Total prestations</td>
+                <td style="text-align:right;font-weight:600" th:text="${view.totalPrestations}">0 FCFA</td>
+              </tr>
+              <tr th:if="${view.pourcentageReduction != '0'}">
+                <td th:text="'Réduction (' + ${view.pourcentageReduction} + ' %)'">Réduction</td>
+                <td style="text-align:right;font-weight:600;color:#b45309"
+                    th:text="'- ' + ${view.montantReduction}">0 FCFA</td>
+              </tr>
+              <tr style="border-top:2px solid #1d4ed8">
+                <td style="padding-top:8px;font-size:12px;font-weight:800;color:#1d4ed8">
+                  TOTAL
+                </td>
+                <td style="padding-top:8px;text-align:right;font-size:12px;font-weight:800;color:#1d4ed8"
+                    th:text="${view.montantTotal}">0 FCFA</td>
+              </tr>
+              <tr style="color:#047857">
+                <td>Montant encaissé</td>
+                <td style="text-align:right;font-weight:600" th:text="${view.montantPaye}">0 FCFA</td>
+              </tr>
+              <tr style="color:#b45309">
+                <td>Solde restant</td>
+                <td style="text-align:right;font-weight:600" th:text="${view.soldeRestant}">0 FCFA</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Statut -->
+      <table class="status-band">
+        <tr>
+          <td>
+            <span class="status-chip status-chip--solde"
+                  th:if="${view.statut == 'Soldée'}">
+              ✓ Soldée
+            </span>
+            <span class="status-chip status-chip--acompte"
+                  th:if="${view.statut == 'Acompte versé'}">
+              Acompte versé
+            </span>
+            <span class="status-chip status-chip--attente"
+                  th:if="${view.statut == 'En attente de paiement'}">
+              En attente de paiement
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Pied de page -->
+      <div class="footer">
+        <strong th:text="${view.agenceNom}">Agence</strong> ·
+        <span th:text="${view.agenceAdresse}">Adresse</span> ·
+        <span th:text="${view.agenceTelephone}">Téléphone</span> ·
+        <span th:text="${view.agenceEmail}">Email</span>
+        <br />
+        Document généré automatiquement par Gestimo —
+        <span th:text="${view.factureDate}">Date</span>
+      </div>
+
+    </div>
+  </body>
+</html>

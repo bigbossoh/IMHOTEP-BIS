@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Observable, of } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
 import { NotificationType } from 'src/app/enum/natification-type.enum';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { ApiService } from 'src/gs-api/src/services';
@@ -96,10 +96,99 @@ this.effectActions.pipe(
     this.effectActions.pipe(
       ofType(ReservationActionTypes.SAVE_RESERVATION),
       mergeMap((action: ReservationActions) => {
-        console.log("*** *** **** THE PAYLOAD *** *** **** ");
-        console.log(action.payload);
-        return this.apiService.saveorupdatereservation(action.payload).pipe(
-          map((q) => new SaveReservationActionsSuccess(q)),
+        const payload = (action as any).payload ?? {};
+        const reservationRequest = payload.reservation ?? payload;
+        const shouldSyncPrestations = Object.prototype.hasOwnProperty.call(
+          payload,
+          'prestationIds'
+        );
+        const prestationIds: number[] = Array.isArray(payload.prestationIds)
+          ? payload.prestationIds
+          : [];
+
+        return this.apiService.saveorupdatereservation(reservationRequest).pipe(
+          mergeMap((savedReservation) => {
+            const reservationId = (savedReservation as any)?.id;
+            if (!reservationId || !shouldSyncPrestations) {
+              return of(new SaveReservationActionsSuccess(savedReservation));
+            }
+
+            return this.apiService.findAllServiceAdditionnelPrestationAdditionnel().pipe(
+              mergeMap((links) => {
+                const allLinks = Array.isArray(links) ? links : [];
+                const reservationIdNumber = Number(reservationId);
+                const existingLinks = allLinks.filter(
+                  (link) =>
+                    Number((link as any)?.idReservation) === reservationIdNumber
+                );
+
+                const existingServiceIds = new Set<number>(
+                  existingLinks
+                    .map((link) => Number((link as any)?.idServiceAdditionnelle))
+                    .filter((id) => Number.isFinite(id) && id > 0)
+                );
+
+                const desiredServiceIds = new Set<number>(
+                  prestationIds
+                    .map((id) => Number(id))
+                    .filter((id) => Number.isFinite(id) && id > 0)
+                );
+
+                const toAdd = Array.from(desiredServiceIds).filter((id) => !existingServiceIds.has(id));
+                const toRemove = existingLinks.filter((link) => {
+                  const linkId = Number((link as any)?.id);
+                  const serviceId = Number((link as any)?.idServiceAdditionnelle);
+                  return (
+                    Number.isFinite(linkId) &&
+                    linkId > 0 &&
+                    Number.isFinite(serviceId) &&
+                    serviceId > 0 &&
+                    !desiredServiceIds.has(serviceId)
+                  );
+                });
+
+                const operations: Array<Observable<unknown>> = [];
+
+                for (const link of toRemove) {
+                  operations.push(this.apiService.deleteServiceAdditionnelPrestationAdditionnel(Number((link as any).id)));
+                }
+
+                for (const serviceId of toAdd) {
+                  operations.push(
+                    this.apiService.saveorupdatePrestationAdditionnel({
+                      id: 0,
+                      idAgence: reservationRequest?.idAgence,
+                      idCreateur: reservationRequest?.idCreateur,
+                      idReservation: reservationId,
+                      idServiceAdditionnelle: serviceId,
+                    } as any)
+                  );
+                }
+
+                if (!operations.length) {
+                  return of(new SaveReservationActionsSuccess(savedReservation));
+                }
+
+                return forkJoin(operations).pipe(
+                  map(() => new SaveReservationActionsSuccess(savedReservation)),
+                  catchError(() => {
+                    this.sendErrorNotification(
+                      NotificationType.ERROR,
+                      'Réservation enregistrée, mais impossible de synchroniser les prestations.'
+                    );
+                    return of(new SaveReservationActionsSuccess(savedReservation));
+                  })
+                );
+              }),
+              catchError(() => {
+                this.sendErrorNotification(
+                  NotificationType.ERROR,
+                  'Réservation enregistrée, mais impossible de charger les prestations.'
+                );
+                return of(new SaveReservationActionsSuccess(savedReservation));
+              })
+            );
+          }),
           catchError((err) => of(new SaveReservationActionsError(err.message)))
         );
       }),

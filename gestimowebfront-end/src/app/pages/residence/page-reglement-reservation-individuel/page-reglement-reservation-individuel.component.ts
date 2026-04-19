@@ -41,9 +41,9 @@ export class PageReglementReservationIndividuelComponent implements OnInit {
   readonly ReservationStateEnum = ReservationStateEnum;
   montant_Loyer: number = 0;
 
-
   modePaiement: string = 'ESPESE';
   montantEnacaisse: any;
+  dateEncaissement: string = new Date().toISOString().split('T')[0];
   constructor(
     public dialogRef: MatDialogRef<PageReglementReservationIndividuelComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
@@ -67,7 +67,7 @@ reservation:any;
         idAgence: this.user?.idAgence,
         idCreateur: this.user?.id,
         modePaiement: this.modePaiement,
-        dateEncaissement: '2023-12-22',
+        dateEncaissement: this.dateEncaissement,
         montantEncaissement: this.montantEnacaisse,
         encienSoldReservation: this.leLocataire.soldReservation,
         nvoSoldeReservation:

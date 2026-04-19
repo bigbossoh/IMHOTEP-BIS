@@ -4,6 +4,8 @@ import com.bzdata.gestimospringbackend.DTOs.AppelLoyerPeriodPrintView;
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyerPrintLine;
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailPrintView;
+import com.bzdata.gestimospringbackend.DTOs.FacturePrestationLine;
+import com.bzdata.gestimospringbackend.DTOs.FactureReservationView;
 import com.bzdata.gestimospringbackend.DTOs.RelanceComptePrintLine;
 import com.bzdata.gestimospringbackend.DTOs.RelanceComptePrintView;
 import com.bzdata.gestimospringbackend.Models.AppelLoyer;
@@ -21,7 +23,11 @@ import com.bzdata.gestimospringbackend.Models.Site;
 import com.bzdata.gestimospringbackend.Models.Villa;
 import com.bzdata.gestimospringbackend.Models.Ville;
 import com.bzdata.gestimospringbackend.Models.hotel.EncaissementReservation;
+import com.bzdata.gestimospringbackend.Models.hotel.Reservation;
+import com.bzdata.gestimospringbackend.Models.hotel.PrestationAdditionnelReservation;
 import com.bzdata.gestimospringbackend.Services.AppelLoyerService;
+import com.bzdata.gestimospringbackend.repository.ReservationRepository;
+import com.bzdata.gestimospringbackend.repository.PrestationAdditionnelReservationRepository;
 import com.bzdata.gestimospringbackend.Services.PrintService;
 import com.bzdata.gestimospringbackend.company.entity.AgenceImmobiliere;
 import com.bzdata.gestimospringbackend.company.repository.AgenceImmobiliereRepository;
@@ -128,6 +134,8 @@ public class PrintServiceImpl implements PrintService {
   final ImageRepository imageRepository;
   final MontantLoyerBailRepository montantLoyerBailRepository;
   final TemplateEngine templateEngine;
+  final ReservationRepository reservationRepository;
+  final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
 
   @Override
   public byte[] printBailProfessionnel(Long idBail) {
@@ -399,6 +407,112 @@ public class PrintServiceImpl implements PrintService {
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return null;
+    }
+  }
+
+  @Override
+  public byte[] factureReservation(Long idReservation) {
+    try {
+      Reservation reservation = reservationRepository
+        .findById(idReservation)
+        .orElseThrow(() -> new IllegalArgumentException("Reservation introuvable : " + idReservation));
+
+      AgenceImmobiliere agence = resolveAgenceById(reservation.getIdAgence());
+      Bienimmobilier bien = reservation.getBienImmobilierOperation();
+      Utilisateur client = reservation.getUtilisateurOperation();
+
+      List<PrestationAdditionnelReservation> prestationLinks =
+        prestationAdditionnelReservationRepository.findAllByReservation_Id(idReservation);
+
+      List<FacturePrestationLine> lignesPrestations = prestationLinks.stream()
+        .filter(link -> link.getServiceAdditionnelle() != null)
+        .map(link -> FacturePrestationLine.builder()
+          .nom(fallback(link.getServiceAdditionnelle().getName()))
+          .montant(formatAmount(link.getServiceAdditionnelle().getAmount()))
+          .build())
+        .toList();
+
+      double totalPrestations = prestationLinks.stream()
+        .filter(link -> link.getServiceAdditionnelle() != null)
+        .mapToDouble(link -> link.getServiceAdditionnelle().getAmount())
+        .sum();
+
+      int nombreNuits = 0;
+      if (reservation.getDateDebut() != null && reservation.getDateFin() != null) {
+        nombreNuits = (int) java.time.temporal.ChronoUnit.DAYS.between(
+          reservation.getDateDebut(), reservation.getDateFin()
+        );
+        nombreNuits = Math.max(nombreNuits, 1);
+      }
+
+      double montantTotal = reservation.getMontantDeReservation();
+      if (montantTotal <= 0) {
+        montantTotal = reservation.getMontantPaye() + reservation.getSoldReservation();
+      }
+      double prixParNuit = nombreNuits > 0 ? (montantTotal + reservation.getMontantReduction()) / nombreNuits : 0;
+      double sousTotal = montantTotal + reservation.getMontantReduction();
+
+      String statut;
+      if (reservation.getSoldReservation() <= 0 && montantTotal > 0) {
+        statut = "Soldée";
+      } else if (reservation.getMontantPaye() > 0) {
+        statut = "Acompte versé";
+      } else {
+        statut = "En attente de paiement";
+      }
+
+      String chambreCategorie = "";
+      if (bien instanceof Appartement appartement
+          && appartement.getCategorieChambreAppartement() != null
+          && appartement.getCategorieChambreAppartement().getName() != null) {
+        chambreCategorie = appartement.getCategorieChambreAppartement().getName();
+      }
+
+      FactureReservationView view = FactureReservationView.builder()
+        .agenceNom(fallback(agence != null ? agence.getNomAgence() : null))
+        .agenceSigle(fallback(agence != null ? agence.getSigleAgence() : null, "GESTIMO"))
+        .agenceAdresse(fallback(agence != null ? agence.getAdresseAgence() : null))
+        .agenceTelephone(fallback(agence != null ? agence.getMobileAgence() : null, agence != null ? agence.getTelAgence() : null))
+        .agenceEmail(fallback(agence != null ? agence.getEmailAgence() : null))
+        .agenceLogoDataUrl(resolveAgenceLogoDataUrl(agence))
+        .factureNumero("FACT-" + reservation.getId())
+        .factureDate(formatDate(LocalDate.now()))
+        .clientNom(formatFullName(client))
+        .clientContact(client != null ? fallback(client.getMobile(), client.getEmail()) : "Non renseigne")
+        .chambreNom(fallback(bien != null ? bien.getNomCompletBienImmobilier() : null, bien != null ? bien.getCodeAbrvBienImmobilier() : null))
+        .chambreCategorie(fallback(chambreCategorie))
+        .dateDebut(formatDate(reservation.getDateDebut()))
+        .dateFin(formatDate(reservation.getDateFin()))
+        .nombreNuits(nombreNuits)
+        .prixParNuit(formatAmount(prixParNuit))
+        .sousTotal(formatAmount(sousTotal))
+        .pourcentageReduction(String.valueOf((int) reservation.getPourcentageReduction()))
+        .montantReduction(formatAmount(reservation.getMontantReduction()))
+        .montantTotal(formatAmount(montantTotal))
+        .montantPaye(formatAmount(reservation.getMontantPaye()))
+        .soldeRestant(formatAmount(Math.max(reservation.getSoldReservation(), 0)))
+        .statut(statut)
+        .nombreAdultes(reservation.getNmbreAdulte())
+        .nombreEnfants(reservation.getNmbrEnfant())
+        .prestations(lignesPrestations)
+        .totalPrestations(formatAmount(totalPrestations))
+        .hasPrestations(!lignesPrestations.isEmpty())
+        .build();
+
+      Context context = new Context(FRENCH_LOCALE);
+      context.setVariable("view", view);
+
+      String html = templateEngine.process("print/facture-reservation", context);
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      ConverterProperties properties = new ConverterProperties();
+      properties.setCharset(StandardCharsets.UTF_8.name());
+      properties.setFontProvider(new DefaultFontProvider(true, true, true));
+
+      HtmlConverter.convertToPdf(html, outputStream, properties);
+      return outputStream.toByteArray();
+    } catch (Exception exception) {
+      log.error("Erreur generation facture reservation {}", idReservation, exception);
+      throw new IllegalStateException("Impossible de generer la facture de la reservation " + idReservation, exception);
     }
   }
 

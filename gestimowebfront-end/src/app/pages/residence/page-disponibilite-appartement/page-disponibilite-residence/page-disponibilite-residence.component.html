@@ -1,1 +1,364 @@
-<p>page-disponibilite-residence works!</p>
+<div class="dispo-page container-fluid">
+
+  <!-- Hero -->
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Résidence meublée</span>
+      <h1>Disponibilités</h1>
+      <p>Consultez l'état de toutes les chambres et vérifiez les disponibilités sur une période donnée.</p>
+    </div>
+    <div class="hero-panel__actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="load()" [disabled]="loading">
+        Actualiser
+      </button>
+    </div>
+  </section>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger page-alert">{{ errorMessage }}</div>
+  }
+
+  <!-- Stat cards -->
+  @if (!loading && allChambres.length > 0) {
+    <div class="dispo-stats">
+      <article class="stat-card">
+        <span class="stat-card__label">Total chambres</span>
+        <strong>{{ totalChambres }}</strong>
+        <small>Chambres meublées de la résidence</small>
+      </article>
+      <article class="stat-card stat-card--active">
+        <span class="stat-card__label">Disponibles</span>
+        <strong>{{ totalLibres }}</strong>
+        <small>Prêtes à être réservées</small>
+      </article>
+      <article class="stat-card stat-card--occupied">
+        <span class="stat-card__label">Occupées</span>
+        <strong>{{ totalOccupees }}</strong>
+        <small>Avec séjour en cours</small>
+      </article>
+    </div>
+  }
+
+  <!-- Vérification par période -->
+  <section class="surface-card period-card">
+    <div class="surface-card__body">
+      <div class="card-heading">
+        <div>
+          <span class="card-heading__eyebrow">Recherche par période</span>
+          <h2>Vérifier la disponibilité</h2>
+          <p>Entrez une période pour voir quelles chambres sont disponibles.</p>
+        </div>
+      </div>
+      <div class="period-toolbar">
+        <div class="toolbar-field toolbar-field--date">
+          <label for="dateDebut">Date d'arrivée</label>
+          <input id="dateDebut" type="date" class="toolbar-input" [(ngModel)]="dateDebut" />
+        </div>
+        <div class="toolbar-field toolbar-field--date">
+          <label for="dateFin">Date de départ</label>
+          <input id="dateFin" type="date" class="toolbar-input" [(ngModel)]="dateFin" />
+        </div>
+        <div class="period-actions">
+          <button type="button" class="btn btn-primary" (click)="applyDateFilter()"
+            [disabled]="!dateDebut || !dateFin">
+            Vérifier
+          </button>
+          @if (dateDebut || dateFin) {
+            <button type="button" class="btn btn-outline-secondary" (click)="resetDateFilter()">
+              Réinitialiser
+            </button>
+          }
+        </div>
+      </div>
+      @if (dateDebut && dateFin) {
+        <div class="period-result">
+          <span class="period-result__badge">{{ totalLibres }} chambre(s) disponible(s)</span>
+          du <strong>{{ dateDebut | date:'dd/MM/yyyy' }}</strong>
+          au <strong>{{ dateFin | date:'dd/MM/yyyy' }}</strong>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Main layout -->
+  <div [class]="selectedChambre ? 'dispo-layout' : 'dispo-layout dispo-layout--full'">
+
+    <!-- Liste chambres -->
+    <section class="surface-card">
+      <div class="surface-card__body">
+
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Inventaire</span>
+            <h2>Toutes les chambres</h2>
+            <p>Cliquez sur une chambre pour voir son détail et ses réservations.</p>
+          </div>
+          <span class="dispo-count">{{ filteredChambres.length }} chambre(s)</span>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="baux-toolbar">
+          <div class="search-box">
+            <label for="dispoSearch">Recherche</label>
+            <input
+              id="dispoSearch"
+              type="search"
+              class="form-control"
+              [value]="searchTerm"
+              (input)="applySearch($event)"
+              placeholder="Nom de chambre, catégorie…"
+            />
+          </div>
+          <div class="toolbar-controls">
+            <div class="segmented">
+              <button type="button" class="segmented__button"
+                [class.segmented__button--active]="filterStatus === 'toutes'"
+                (click)="setFilter('toutes')">Toutes</button>
+              <button type="button" class="segmented__button"
+                [class.segmented__button--active]="filterStatus === 'libres'"
+                (click)="setFilter('libres')">Libres</button>
+              <button type="button" class="segmented__button"
+                [class.segmented__button--active]="filterStatus === 'occupees'"
+                (click)="setFilter('occupees')">Occupées</button>
+            </div>
+            @if (categorieNames.length > 0) {
+              <div class="toolbar-field">
+                <label for="filterCat">Catégorie</label>
+                <select id="filterCat" class="toolbar-select"
+                  [(ngModel)]="filterCategorie" (change)="currentPage = 1">
+                  <option value="">Toutes</option>
+                  @for (cat of categorieNames; track cat) {
+                    <option [value]="cat">{{ cat }}</option>
+                  }
+                </select>
+              </div>
+            }
+            <div class="toolbar-field">
+              <label for="dispoPageSize">Lignes</label>
+              <select id="dispoPageSize" class="toolbar-select"
+                [value]="pageSize" (change)="onPageSizeChange($event)">
+                @for (size of pageSizeOptions; track size) {
+                  <option [value]="size">{{ size }} / page</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        @if (loading) {
+          <div class="state-card">Chargement des chambres…</div>
+        }
+
+        @if (!loading && allChambres.length === 0 && !errorMessage) {
+          <div class="state-card">Aucune chambre meublée enregistrée pour cette agence.</div>
+        }
+
+        @if (!loading && allChambres.length > 0 && filteredChambres.length === 0) {
+          <div class="state-card">Aucune chambre ne correspond à votre recherche.</div>
+        }
+
+        @if (!loading && filteredChambres.length > 0) {
+          <div class="table-shell">
+            <div class="table-responsive">
+              <table class="table align-middle bail-table">
+                <thead>
+                  <tr>
+                    <th>Chambre</th>
+                    <th>Catégorie</th>
+                    <th>Prix / nuit</th>
+                    <th>Occupant actuel</th>
+                    <th>Libre le</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of paginatedChambres; track trackById($index, c)) {
+                    <tr [class.row-selected]="isSelected(c)" (click)="selectChambre(c)">
+                      <td>
+                        <span class="bail-badge">{{ chambreName(c) }}</span>
+                        <div class="row-helper">{{ c.codeAbrvBienImmobilier || '—' }}</div>
+                      </td>
+                      <td>
+                        <div>{{ c.nameCategorie || '—' }}</div>
+                        <div class="row-helper">{{ c.nbreChambreApp }} ch. · {{ c.nbrPieceApp }} p.</div>
+                      </td>
+                      <td>{{ c.prixBase > 0 ? formatCurrency(c.prixBase) : '—' }}</td>
+                      <td>
+                        @if (c.reservationEnCours) {
+                          <div>{{ guestName(c.reservationEnCours) }}</div>
+                          <div class="row-helper">
+                            depuis le {{ c.reservationEnCours.dateDebut | date:'dd/MM/yyyy' }}
+                          </div>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        @if (c.prochainLibre) {
+                          {{ c.prochainLibre | date:'dd/MM/yyyy' }}
+                        } @else {
+                          <span class="text-muted">Dispo maintenant</span>
+                        }
+                      </td>
+                      <td>
+                        <span [class]="statusClass(c)">{{ statusLabel(c) }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination-toolbar">
+            <p class="pagination-summary">
+              Affichage {{ paginationStart }} à {{ paginationEnd }} sur {{ filteredChambres.length }} chambre(s)
+            </p>
+            <div class="pagination-controls">
+              <button type="button" class="page-btn" [disabled]="safePage <= 1" (click)="prevPage()">Précédent</button>
+              @for (page of visiblePages; track page) {
+                <button type="button" class="page-btn"
+                  [class.is-active]="page === safePage"
+                  (click)="goToPage(page)">{{ page }}</button>
+              }
+              <button type="button" class="page-btn" [disabled]="safePage >= totalPages" (click)="nextPage()">Suivant</button>
+            </div>
+          </div>
+        }
+
+      </div>
+    </section>
+
+    <!-- Détail chambre -->
+    @if (selectedChambre) {
+      <aside class="surface-card chambre-detail-card">
+        <div class="surface-card__body">
+
+          <div class="bail-preview">
+            <div class="bail-preview__header">
+              <div>
+                <span class="bail-preview__label">Détail chambre</span>
+                <strong>{{ chambreName(selectedChambre) }}</strong>
+                <small>{{ selectedChambre.nameCategorie || '—' }} · {{ selectedChambre.codeAbrvBienImmobilier || '' }}</small>
+              </div>
+              <span [class]="statusClass(selectedChambre)">{{ statusLabel(selectedChambre) }}</span>
+            </div>
+            <div class="detail-actions">
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="selectedChambre = null">
+                Fermer
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI chambre -->
+          <div class="detail-summary-grid">
+            <article class="summary-chip">
+              <span>Prix / nuit</span>
+              <strong>{{ selectedChambre.prixBase > 0 ? formatCurrency(selectedChambre.prixBase) : '—' }}</strong>
+            </article>
+            <article class="summary-chip">
+              <span>Réservations</span>
+              <strong>{{ selectedChambre.reservations.length }}</strong>
+            </article>
+            <article class="summary-chip">
+              <span>Superficie</span>
+              <strong>{{ selectedChambre.superficieBien ? selectedChambre.superficieBien + ' m²' : '—' }}</strong>
+            </article>
+            <article class="summary-chip">
+              <span>Libre le</span>
+              <strong>{{ selectedChambre.prochainLibre ? (selectedChambre.prochainLibre | date:'dd/MM/yyyy') : 'Maintenant' }}</strong>
+            </article>
+          </div>
+
+          <!-- Caractéristiques -->
+          <div class="card-heading card-heading--section">
+            <span class="card-heading__eyebrow">Caractéristiques</span>
+          </div>
+          <div class="detail-grid">
+            <article class="detail-item">
+              <span>Chambres</span>
+              <strong>{{ selectedChambre.nbreChambreApp ?? '—' }}</strong>
+            </article>
+            <article class="detail-item">
+              <span>Pièces</span>
+              <strong>{{ selectedChambre.nbrPieceApp ?? '—' }}</strong>
+            </article>
+            <article class="detail-item">
+              <span>Salons</span>
+              <strong>{{ selectedChambre.nbreSalonApp ?? '—' }}</strong>
+            </article>
+            <article class="detail-item">
+              <span>Salles d'eau</span>
+              <strong>{{ selectedChambre.nbreSalleEauApp ?? '—' }}</strong>
+            </article>
+          </div>
+
+          <!-- Réservation en cours -->
+          @if (selectedChambre.reservationEnCours) {
+            <div class="card-heading card-heading--section">
+              <span class="card-heading__eyebrow">Séjour en cours</span>
+            </div>
+            <div class="reservation-active-card">
+              <div class="reservation-active-card__guest">
+                <strong>{{ guestName(selectedChambre.reservationEnCours) }}</strong>
+                <span>{{ selectedChambre.reservationEnCours.nmbreAdulte }} adulte(s) · {{ selectedChambre.reservationEnCours.nmbrEnfant }} enfant(s)</span>
+              </div>
+              <div class="detail-grid">
+                <article class="detail-item">
+                  <span>Arrivée</span>
+                  <strong>{{ selectedChambre.reservationEnCours.dateDebut | date:'dd/MM/yyyy' }}</strong>
+                </article>
+                <article class="detail-item">
+                  <span>Départ</span>
+                  <strong>{{ selectedChambre.reservationEnCours.dateFin | date:'dd/MM/yyyy' }}</strong>
+                </article>
+                <article class="detail-item">
+                  <span>Durée</span>
+                  <strong>{{ stayNights(selectedChambre.reservationEnCours) }} nuit(s)</strong>
+                </article>
+                <article class="detail-item">
+                  <span>Solde</span>
+                  <strong>{{ formatCurrency(+(selectedChambre.reservationEnCours.soldReservation ?? 0)) }}</strong>
+                </article>
+              </div>
+            </div>
+          }
+
+          <!-- Historique réservations -->
+          @if (selectedChambre.reservations.length > 0) {
+            <div class="card-heading card-heading--section">
+              <span class="card-heading__eyebrow">Historique ({{ selectedChambre.reservations.length }})</span>
+            </div>
+            <div class="table-shell table-shell--compact">
+              <div class="table-responsive">
+                <table class="table align-middle loyer-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Période</th>
+                      <th>Nuits</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of selectedChambre.reservations; track r.id) {
+                      <tr>
+                        <td>{{ guestName(r) }}</td>
+                        <td>
+                          <div>{{ r.dateDebut | date:'dd/MM/yy' }}</div>
+                          <div class="row-helper">{{ r.dateFin | date:'dd/MM/yy' }}</div>
+                        </td>
+                        <td>{{ stayNights(r) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+
+        </div>
+      </aside>
+    }
+
+  </div>
+</div>

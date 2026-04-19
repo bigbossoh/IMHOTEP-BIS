@@ -343,7 +343,7 @@ export class PageBienImmobilierComponent implements OnInit {
       Proprietaire: item.owner,
       Details: item.details,
       Description: item.description || '',
-      Statut: item.occupied ? 'Occupe' : 'Libre',
+      Statut: item.occupied ? 'Occupé' : 'Libre',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(rows);

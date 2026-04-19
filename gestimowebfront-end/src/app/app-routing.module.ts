@@ -53,6 +53,10 @@ import { PageFonctionnalitesUtilisateursComponent } from './pages/utilisateurs/p
 import { PageGestionDepenseComponent } from './pages/depense/page-gestion-depense/page-gestion-depense.component';
 import { PageParametreDepenseComponent } from './pages/depense/page-parametre-depense/page-parametre-depense.component';
 import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-depense/page-categories-depense.component';
+import { PageParametreResidenceComponent } from './pages/residence/page-parametre-residence/page-parametre-residence/page-parametre-residence.component';
+import { PageCreationResidenceComponent } from './pages/residence/page-creation-residence/page-creation-residence/page-creation-residence.component';
+import { PagePrestationsResidenceComponent } from './pages/residence/page-prestations/page-prestations-residence/page-prestations-residence.component';
+import { PageFacturesReservationComponent } from './pages/residence/page-factures-reservation/page-factures-reservation.component';
 
 
 const routes: Routes = [
@@ -246,8 +250,28 @@ const routes: Routes = [
         canActivate: [ApplicationGuardService],
       },
       {
+        path: 'residences',
+        component: PageParametreResidenceComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'nouvelle-residence',
+        component: PageCreationResidenceComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
         path: 'paiement-residence',
         component: PageReglementResidenceComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'prestations-residence',
+        component: PagePrestationsResidenceComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'factures-reservation',
+        component: PageFacturesReservationComponent,
         canActivate: [ApplicationGuardService],
       },
       {

@@ -6,7 +6,6 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -32,8 +31,7 @@ public class Reservation extends Operation {
   int nmbreAdulte;
   int nmbrEnfant;
   String statutReservation;
-  @OneToMany
-  @JoinColumn(name = "idResvationServiceAdditionnel")
+  @OneToMany(mappedBy = "reservation")
   List<PrestationAdditionnelReservation> serviceAdditionnelreservations;
 
   @OneToMany(mappedBy="reservation")

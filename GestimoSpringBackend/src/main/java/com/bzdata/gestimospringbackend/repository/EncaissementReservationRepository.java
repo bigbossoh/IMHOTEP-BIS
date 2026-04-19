@@ -6,4 +6,5 @@ import com.bzdata.gestimospringbackend.Models.hotel.EncaissementReservation;
 
 public interface EncaissementReservationRepository  extends JpaRepository<EncaissementReservation,Long>{
 
+    void deleteAllByReservation_Id(Long reservationId);
 }

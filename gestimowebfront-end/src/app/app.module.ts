@@ -8,7 +8,8 @@ import { ImageEffects } from './ngrx/images/images.effects';
 import { PageStatistiqueJournalierComponent } from './pages/page-statistique-journalier/page-statistique-journalier.component';
 import { PageProfileComponent } from './pages/page-profile/page-profile.component';
 import { PageResetPasswordComponent } from './pages/page-reset-password/page-reset-password.component';
-import { LOCALE_ID, NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule, isDevMode } from '@angular/core';
+import { environment } from '../environments/environment';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { paginationPersonnalise } from './paginationPersonnalise';
@@ -153,6 +154,8 @@ import { suiviDepenseReducer } from './ngrx/journal-caisse/journal-caisse.reduce
 import { PageReservationResidenceComponent } from './pages/residence/page-reservation/page-reservation-residence/page-reservation-residence.component';
 import { PageReglementResidenceComponent } from './pages/residence/page-reglement/page-reglement-residence/page-reglement-residence.component';
 import { PageParametreResidenceComponent } from './pages/residence/page-parametre-residence/page-parametre-residence/page-parametre-residence.component';
+import { PageCreationResidenceComponent } from './pages/residence/page-creation-residence/page-creation-residence/page-creation-residence.component';
+import { PagePrestationsResidenceComponent } from './pages/residence/page-prestations/page-prestations-residence/page-prestations-residence.component';
 import { PageDisponibiliteResidenceComponent } from './pages/residence/page-disponibilite-appartement/page-disponibilite-residence/page-disponibilite-residence.component';
 import { PageClientResidenceComponent } from './pages/residence/page-client-residence/page-client-residence/page-client-residence.component';
 import { StatistiqueChartReducer } from './ngrx/statistique-chart/statistiquechart.reducer';
@@ -189,6 +192,7 @@ import { PageGestionDepenseComponent } from './pages/depense/page-gestion-depens
 import { PageNouvelleDepenseComponent } from './pages/depense/page-nouvelle-depense/page-nouvelle-depense.component';
 import { PageParametreDepenseComponent } from './pages/depense/page-parametre-depense/page-parametre-depense.component';
 import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-depense/page-categories-depense.component';
+import { PageFacturesReservationComponent } from './pages/residence/page-factures-reservation/page-factures-reservation.component';
 
 @NgModule({
   declarations: [
@@ -262,6 +266,8 @@ import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-
     PageReservationResidenceComponent,
     PageReglementResidenceComponent,
     PageParametreResidenceComponent,
+    PageCreationResidenceComponent,
+    PagePrestationsResidenceComponent,
     PageDisponibiliteResidenceComponent,
     PageClientResidenceComponent,
     PageChatIaComponent,
@@ -277,6 +283,7 @@ import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-
     MatTableExporterDirective,
     PageAuditComponent,
     PageAideComponent,
+    PageFacturesReservationComponent,
   ],
   imports: [
     CanvasJSAngularChartsModule,
@@ -386,7 +393,7 @@ import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-
       PrixParCategorieChambreEffects
     ]),
 
-    StoreDevtoolsModule.instrument(),
+    ...(environment.production ? [] : [StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() })]),
     BrowserAnimationsModule,
   ],
   providers: [

@@ -17,7 +17,7 @@ public interface ReservationService
 
   public ReservationAfficheDto findByIdGood(Long id);
 
-  public boolean saveOrUpdateReservation(ReservationRequestDto dto);
+  public ReservationAfficheDto saveOrUpdateReservation(ReservationRequestDto dto);
 
   List<EncaissementReservationDto> saveEncaissementReservationAvecREsrourDeList(
     EncaissementReservationRequestDto dto

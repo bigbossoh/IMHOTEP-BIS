@@ -3,7 +3,6 @@ package com.bzdata.gestimospringbackend.Models.hotel;
 import java.util.List;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 import com.bzdata.gestimospringbackend.Models.AbstractEntity;
@@ -24,7 +23,6 @@ public class Prestation  extends AbstractEntity{
     String name;
     double amount;
     String type;
-    @OneToMany
-    @JoinColumn(name = "idServiceAdditionnel")
+    @OneToMany(mappedBy = "serviceAdditionnelle")
     List<PrestationAdditionnelReservation>serviceAddits;
 }

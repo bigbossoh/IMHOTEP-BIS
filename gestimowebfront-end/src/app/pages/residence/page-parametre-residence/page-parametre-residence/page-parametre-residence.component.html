@@ -1,1 +1,248 @@
-<p>page-parametre-residence works!</p>
+<section class="residence-page container-fluid">
+  <header class="residence-page__header">
+    <div class="residence-page__copy">
+      <p class="page-eyebrow">Module residence</p>
+      <h1>Gestion des residences</h1>
+      <p>
+        Liste des appartements meubles (chambres) de l'agence courante.
+      </p>
+    </div>
+
+    <div class="residence-page__actions">
+      <div class="residence-page__buttons">
+        <button type="button" class="btn btn-primary" (click)="createResidence()">
+          <i class="fas fa-plus me-2" aria-hidden="true"></i>
+          Nouvelle residence
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          (click)="refresh()"
+          [disabled]="loading"
+        >
+          <i class="fas fa-sync-alt me-2" aria-hidden="true"></i>
+          Rafraichir
+        </button>
+      </div>
+      <small class="residence-page__meta">
+        Derniere mise a jour : {{ lastRefreshLabel || '-' }}
+      </small>
+    </div>
+  </header>
+
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <p class="text-muted mb-1">Total</p>
+          <h3 class="mb-0">{{ totalResidences }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <p class="text-muted mb-1">Libres</p>
+          <h3 class="mb-0 text-success">{{ availableResidences }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <p class="text-muted mb-1">Occupées</p>
+          <h3 class="mb-0 text-danger">{{ occupiedResidences }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="row g-3 align-items-end mb-2">
+        <div class="col-12 col-lg-4">
+          <label class="form-label mb-0 w-100">
+            <span class="d-block small text-muted mb-1">Recherche</span>
+            <input
+              type="search"
+              class="form-control"
+              [ngModel]="searchTerm"
+              (ngModelChange)="onSearchChange($event)"
+              placeholder="Code, nom, categorie..."
+            />
+          </label>
+        </div>
+
+        <div class="col-12 col-lg-3">
+          <label class="form-label mb-0 w-100">
+            <span class="d-block small text-muted mb-1">Catégorie</span>
+            <select
+              class="form-select"
+              [ngModel]="categoryFilter"
+              (ngModelChange)="onCategoryFilterChange($event)"
+            >
+              <option value="">Toutes les catégories</option>
+              <option [value]="noCategoryValue">Sans catégorie</option>
+              @for (cat of categoryOptions; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="col-12 col-lg-3">
+          <span class="d-block small text-muted mb-1">Statut</span>
+          <div class="btn-group w-100" role="group" aria-label="Filtre statut">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              [class.active]="statusFilter === 'all'"
+              (click)="setStatusFilter('all')"
+            >
+              Tous
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-success"
+              [class.active]="statusFilter === 'available'"
+              (click)="setStatusFilter('available')"
+            >
+              Libres
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              [class.active]="statusFilter === 'occupied'"
+              (click)="setStatusFilter('occupied')"
+            >
+              Occupées
+            </button>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-2">
+          <span class="d-block small text-muted mb-1">Prix (FCFA)</span>
+          <div class="d-flex gap-2">
+            <input
+              type="number"
+              min="0"
+              class="form-control"
+              [ngModel]="priceMin"
+              (ngModelChange)="onPriceMinChange($event)"
+              placeholder="Min"
+            />
+            <input
+              type="number"
+              min="0"
+              class="form-control"
+              [ngModel]="priceMax"
+              (ngModelChange)="onPriceMaxChange($event)"
+              placeholder="Max"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          @if (activeFilters.length) {
+            @for (filter of activeFilters; track filter) {
+              <span class="badge text-bg-light border">{{ filter }}</span>
+            }
+          } @else {
+            <span class="small text-muted">Aucun filtre actif.</span>
+          }
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary ms-1"
+            (click)="resetFilters()"
+            [disabled]="!activeFilters.length"
+          >
+            Réinitialiser
+          </button>
+        </div>
+
+        <div class="small text-muted">
+          {{ filteredResidences.length }} / {{ totalResidences }} affichee(s)
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="d-flex align-items-center gap-2 text-muted">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Chargement des residences...
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Residence</th>
+                <th scope="col">Categorie</th>
+                <th scope="col" class="text-end">Prix</th>
+                <th scope="col" class="text-center">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (residence of pagedResidences; track trackByResidence($index, residence)) {
+                <tr>
+                  <td class="text-muted">
+                    {{ residence.codeAbrvBienImmobilier || '-' }}
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ getResidenceDisplayName(residence) }}</div>
+                    <div class="small text-muted">
+                      @if (residence.nbrPieceApp) {
+                        {{ residence.nbrPieceApp }} piece(s)
+                      } @else {
+                        ID: {{ residence.id || '-' }}
+                      }
+                    </div>
+                  </td>
+                  <td>{{ getResidenceCategory(residence) }}</td>
+                  <td class="text-end">
+                    {{ formatPrice(residence.priceCategorie) }}
+                  </td>
+                  <td class="text-center">
+                    @if (residence.occupied === true) {
+                      <span class="badge text-bg-danger">Occupé</span>
+                    } @else {
+                      <span class="badge text-bg-success">Libre</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (filteredResidences.length) {
+          <div class="d-flex justify-content-end mt-3">
+            <mat-paginator
+              [length]="filteredResidences.length"
+              [pageIndex]="pageIndex"
+              [pageSize]="pageSize"
+              [pageSizeOptions]="pageSizeOptions"
+              (page)="onPageChange($event)"
+            ></mat-paginator>
+          </div>
+        }
+
+        @if (!filteredResidences.length) {
+          <div class="text-center text-muted py-4">
+            Aucune residence trouvee.
+          </div>
+        }
+      }
+    </div>
+  </div>
+</section>

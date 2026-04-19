@@ -11,8 +11,10 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,5 +51,11 @@ public abstract class Bienimmobilier extends AbstractEntity {
     List<ImageData>imageDatas;
       @ManyToOne
     Site site;
+
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public String getStatut() {
+        return this.isOccupied ? "Occupé" : "Libre";
+    }
 
 }

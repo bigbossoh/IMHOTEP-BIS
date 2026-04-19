@@ -1,0 +1,260 @@
+<div class="ps-page container-fluid">
+  <div class="ps-page-header">
+    <div class="ps-page-header__copy">
+      <span class="ps-eyebrow">Réservation</span>
+      <h1>Prestations & services</h1>
+      <p>Créez vos services additionnels et rattachez-les aux réservations.</p>
+    </div>
+
+    <div class="ps-page-header__actions">
+      <button type="button" class="ps-btn ps-btn--primary" (click)="startNew()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Nouvelle prestation
+      </button>
+    </div>
+  </div>
+
+  <div class="ps-kpi-row">
+    <div class="ps-kpi-card ps-kpi-card--blue">
+      <div class="ps-kpi-card__icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 7h18" />
+          <path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+          <path d="M5 7l1 14h12l1-14" />
+        </svg>
+      </div>
+      <div>
+        <span class="ps-kpi-card__label">Prestations</span>
+        <strong class="ps-kpi-card__value">{{ totalPrestations }}</strong>
+        <span class="ps-kpi-card__sub">au catalogue</span>
+      </div>
+    </div>
+
+    <div class="ps-kpi-card ps-kpi-card--teal">
+      <div class="ps-kpi-card__icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 1v22" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      </div>
+      <div>
+        <span class="ps-kpi-card__label">Prix moyen</span>
+        <strong class="ps-kpi-card__value">{{ averageAmount | currency : "XOF" : "symbol" : "1.0-0" }}</strong>
+        <span class="ps-kpi-card__sub">par prestation</span>
+      </div>
+    </div>
+
+    <div class="ps-kpi-card ps-kpi-card--green">
+      <div class="ps-kpi-card__icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M20 12V8H4v4" />
+          <path d="M4 16h16" />
+          <path d="M6 16v4" />
+          <path d="M18 16v4" />
+          <path d="M9 8V4h6v4" />
+        </svg>
+      </div>
+      <div>
+        <span class="ps-kpi-card__label">Sélection</span>
+        <strong class="ps-kpi-card__value ps-kpi-card__value--sm">{{
+          selectedPrestation?.name || "—"
+        }}</strong>
+        <span class="ps-kpi-card__sub">en édition</span>
+      </div>
+    </div>
+
+    <div class="ps-kpi-card ps-kpi-card--orange">
+      <div class="ps-kpi-card__icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7H4z" />
+          <path d="M16 3h-1a2 2 0 0 0-2 2v2" />
+          <path d="M8 3h1a2 2 0 0 1 2 2v2" />
+        </svg>
+      </div>
+      <div>
+        <span class="ps-kpi-card__label">Statut</span>
+        <strong class="ps-kpi-card__value ps-kpi-card__value--sm">{{
+          loading ? "Chargement..." : saving ? "Enregistrement..." : "Prêt"
+        }}</strong>
+        <span class="ps-kpi-card__sub">synchronisé</span>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger ps-alert">
+      <strong>Erreur:</strong> {{ errorMessage }}
+    </div>
+  }
+
+  <div class="ps-split-view">
+    <div class="ps-master-panel">
+      <div class="ps-panel-header">
+        <h2>Catalogue</h2>
+        <span class="ps-panel-badge">{{ filteredPrestations.length }}</span>
+      </div>
+
+      <div class="ps-panel-search">
+        <input
+          class="ps-input"
+          type="search"
+          [ngModel]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Rechercher une prestation..."
+        />
+      </div>
+
+      <div class="ps-panel-body">
+        @if (loading) {
+          <div class="ps-state-inline">
+            <div class="ps-spinner"></div>
+            <span>Chargement...</span>
+          </div>
+        } @else if (!filteredPrestations.length) {
+          <div class="ps-empty-list">
+            <p>Aucune prestation trouvée</p>
+            <span>Créez une nouvelle prestation pour démarrer.</span>
+          </div>
+        } @else {
+          <ul class="ps-list">
+            @for (p of filteredPrestations; track trackByPrestation($index, p)) {
+              <li
+                class="ps-item"
+                [class.ps-item--active]="selectedPrestation?.id === p.id"
+                (click)="selectPrestation(p)"
+              >
+                <div class="ps-item__avatar">{{ getInitials(p.name) }}</div>
+                <div class="ps-item__body">
+                  <strong>{{ p.name }}</strong>
+                  <span>{{ (p.amount ?? 0) | currency : "XOF" : "symbol" : "1.0-0" }}</span>
+                </div>
+                <svg
+                  class="ps-item__chevron"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <div class="ps-detail-panel">
+      <div class="ps-detail-heading">
+        <div class="ps-detail-heading__left">
+          <div class="ps-detail-avatar">
+            {{ getInitials(prestationForm.get("name")?.value) }}
+          </div>
+          <div>
+            <h2>{{ selectedPrestation ? "Modifier la prestation" : "Créer une prestation" }}</h2>
+            <p>Définissez le nom et le montant à facturer.</p>
+          </div>
+        </div>
+
+        <div class="ps-detail-heading__actions">
+          <button type="button" class="ps-btn ps-btn--outline" (click)="loadPrestations()">
+            Actualiser
+          </button>
+          <button
+            type="button"
+            class="ps-btn ps-btn--danger-ghost"
+            (click)="deleteSelected()"
+            [disabled]="!selectedPrestation?.id || saving"
+          >
+            Supprimer
+          </button>
+        </div>
+      </div>
+
+      <form class="ps-form" [formGroup]="prestationForm" (ngSubmit)="save()">
+        <div class="ps-form-grid">
+          <label class="ps-field">
+            <span>Nom <span class="ps-required">*</span></span>
+            <input class="ps-input" type="text" formControlName="name" placeholder="Ex. Petit déjeuner" />
+            <small *ngIf="prestationForm.get('name')?.touched && prestationForm.get('name')?.invalid"
+              >Nom requis (min. 2 caractères).</small
+            >
+          </label>
+
+          <label class="ps-field">
+            <span>Montant</span>
+            <input class="ps-input" type="number" min="0" formControlName="amount" placeholder="Ex. 5000" />
+            <small>En FCFA (XOF)</small>
+          </label>
+        </div>
+
+        <div class="ps-form-actions">
+          <button type="button" class="ps-btn ps-btn--outline" (click)="startNew()">Réinitialiser</button>
+          <button type="submit" class="ps-btn ps-btn--primary" [disabled]="saving">
+            <span *ngIf="saving" class="ps-btn__spinner"></span>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

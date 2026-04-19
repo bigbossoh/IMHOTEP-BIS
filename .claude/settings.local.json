@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls \"e:/My-Personnal-Project/Imhotep/gestimowebfront-end/node_modules/@angular/material/divider/\"*.d.ts)"
+      "Bash(ls \"e:/My-Personnal-Project/Imhotep/gestimowebfront-end/node_modules/@angular/material/divider/\"*.d.ts)",
+      "Bash(xargs cat *)",
+      "Bash(where pandoc *)"
     ]
   }
 }

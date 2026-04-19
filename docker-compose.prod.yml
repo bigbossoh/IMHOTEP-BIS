@@ -37,7 +37,7 @@ services:
       retries: 10
 
   backend:
-    image: astairenazaire/imhotep-bd10:latest
+    image: astairenazaire/imo-be1:latest
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
@@ -65,7 +65,7 @@ services:
       - "8287"
 
   frontend:
-    image: astairenazaire/imhotep-fd6:latest
+    image: astairenazaire/imo-fe2:latest
     restart: unless-stopped
     expose:
       - "80"

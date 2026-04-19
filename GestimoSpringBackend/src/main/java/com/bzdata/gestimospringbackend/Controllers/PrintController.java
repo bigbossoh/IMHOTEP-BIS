@@ -104,8 +104,21 @@ public class PrintController {
                                 .body(new InputStreamResource(bis));
         }      
               
+        @GetMapping(path = "/factureReservation/{idReservation}", produces = MediaType.APPLICATION_PDF_VALUE)
+        public ResponseEntity<InputStreamResource> factureReservation(
+                        @PathVariable Long idReservation) {
+                ByteArrayInputStream bis = new ByteArrayInputStream(
+                                this.printService.factureReservation(idReservation));
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Disposition", "inline; filename=facture-reservation-" + idReservation + ".pdf");
+                return ResponseEntity.ok()
+                                .headers(headers)
+                                .contentType(MediaType.APPLICATION_PDF)
+                                .body(new InputStreamResource(bis));
+        }
+
         @GetMapping(path = "/recupaiment/{idEncaissement}", produces = MediaType.APPLICATION_PDF_VALUE)
-        public ResponseEntity<InputStreamResource> recuPaiment(@PathVariable("idEncaissement") Long idEncaissement)
+        public ResponseEntity<InputStreamResource> recuPaiment(@PathVariable Long idEncaissement)
                         throws FileNotFoundException, JRException, SQLException, IOException {
                 // byte[] bytes = this.printService.quittancePeriodeString(periode, idAgence,
                 // proprio);
