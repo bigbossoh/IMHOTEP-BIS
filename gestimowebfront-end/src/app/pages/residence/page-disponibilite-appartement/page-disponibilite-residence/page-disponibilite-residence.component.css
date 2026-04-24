@@ -4,7 +4,7 @@
 
 .dispo-page {
   --page-bg: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
-  --surface: rgba(255, 255, 255, 0.94);
+  --surface: #ffffff;
   --surface-strong: #ffffff;
   --surface-muted: #f6f8fc;
   --border-soft: rgba(15, 23, 42, 0.08);
@@ -197,7 +197,6 @@
 .surface-card {
   border-radius: 28px;
   background: var(--surface);
-  backdrop-filter: blur(16px);
 }
 
 .surface-card__body { padding: 1.4rem; }
@@ -481,6 +480,324 @@
 .reservation-active-card__guest strong { font-size: 1.05rem; }
 .reservation-active-card__guest span { font-size: 0.88rem; color: var(--text-muted); }
 
+/* ── Gantt ── */
+.gantt-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0 0.75rem;
+  flex-wrap: wrap;
+}
+
+.gantt-nav__controls { display: flex; gap: 0.5rem; }
+.gantt-nav__controls .btn { border-radius: 999px; }
+
+.gantt-nav__range {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.gantt-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.gantt-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.gantt-legend__dot {
+  width: 16px;
+  height: 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Outer scrollable container */
+.gantt-outer {
+  overflow: auto;
+  max-height: 70vh;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  background: var(--surface-strong);
+  margin-top: 0.5rem;
+}
+
+/* Header row */
+.gantt-header-row {
+  display: flex;
+  border-bottom: 2px solid var(--border-soft);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface-muted);
+}
+
+/* Body */
+.gantt-body { display: flex; flex-direction: column; }
+
+/* Each chambre row */
+.gantt-row {
+  display: flex;
+  border-bottom: 1px solid var(--border-soft);
+  min-height: 54px;
+  cursor: pointer;
+  transition: background-color 140ms;
+}
+
+.gantt-row:last-child { border-bottom: none; }
+.gantt-row:hover .gantt-label-col { background: rgba(241,245,249,0.98); }
+.gantt-row--selected .gantt-label-col {
+  background: linear-gradient(90deg, rgba(219,234,254,0.7), rgba(239,246,255,0.5));
+}
+
+/* Left sticky column */
+.gantt-label-col {
+  width: 210px;
+  min-width: 210px;
+  flex-shrink: 0;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--surface-strong);
+  border-right: 1px solid var(--border-soft);
+  padding: 0.6rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.gantt-label-col--hdr {
+  background: var(--surface-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #475569;
+  justify-content: center;
+}
+
+.gantt-room-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-room-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.gantt-room-cat {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Timeline header */
+.gantt-timeline-hdr {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Header tiers */
+.gantt-hdr-tier {
+  display: flex;
+}
+
+.gantt-hdr-tier--weeks {
+  border-bottom: 1px solid rgba(226,232,240,0.7);
+}
+
+.gantt-week-hdr {
+  height: 26px;
+  min-height: 26px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #475569;
+  background: var(--surface-muted);
+  border-right: 1px solid rgba(226,232,240,0.7);
+  white-space: nowrap;
+}
+
+/* Individual day header cell */
+.gantt-day-hdr {
+  width: 40px;
+  min-width: 40px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0;
+  border-right: 1px solid rgba(226,232,240,0.7);
+  background: var(--surface-muted);
+  gap: 0.05rem;
+}
+
+.gantt-day-hdr.gantt-day--weekend { background: rgba(148,163,184,0.14); }
+.gantt-day-hdr.gantt-day--today   { background: rgba(37,99,235,0.1); }
+.gantt-day-hdr.gantt-day--weekstart { box-shadow: inset 2px 0 0 rgba(148,163,184,0.55); }
+
+.gantt-day__num {
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.gantt-day-hdr.gantt-day--today .gantt-day__num { color: #2563eb; }
+
+.gantt-day__label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+/* Row timeline area */
+.gantt-timeline {
+  display: flex;
+  flex: 1;
+  position: relative;
+  min-height: 54px;
+}
+
+/* Background shading cells */
+.gantt-cell {
+  width: 40px;
+  min-width: 40px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-right: 1px solid rgba(226,232,240,0.55);
+}
+
+.gantt-cell--weekend { background: rgba(148,163,184,0.07); }
+.gantt-cell--today   { background: rgba(37,99,235,0.05); }
+.gantt-cell--weekstart { box-shadow: inset 2px 0 0 rgba(148,163,184,0.35); }
+
+/* Reservation bars */
+.gantt-bar {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  min-width: 4px;
+  border-radius: 8px;
+  padding: 0 0.55rem;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 2;
+  transition: opacity 180ms ease, transform 180ms ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.gantt-bar:hover {
+  opacity: 0.88;
+  transform: scaleY(1.08);
+  z-index: 3;
+}
+
+.gantt-bar__label {
+  font-size: 0.71rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  pointer-events: none;
+}
+
+.gantt-bar--settled { background: linear-gradient(90deg, #059669, #047857); }
+.gantt-bar--partial { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.gantt-bar--pending { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+.gantt-bar--draft   { background: linear-gradient(90deg, #94a3b8, #64748b); }
+
+/* Selected period zone (body rows) */
+.gantt-period-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(37, 99, 235, 0.07);
+  border-left: 2px solid rgba(37, 99, 235, 0.45);
+  border-right: 2px solid rgba(37, 99, 235, 0.45);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Header day highlight for selected period */
+.gantt-day-hdr.gantt-day--inperiod {
+  background: rgba(37, 99, 235, 0.13);
+}
+
+.gantt-day-hdr.gantt-day--inperiod .gantt-day__num { color: #1d4ed8; font-weight: 800; }
+
+.gantt-period-hdr-zone {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.gantt-period-hdr-label {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #1d4ed8;
+  white-space: nowrap;
+  background: rgba(239,246,255,0.95);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+/* Today vertical line */
+.gantt-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ef4444;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.gantt-today-line::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.2);
+}
+
 /* ── Pagination ── */
 .pagination-toolbar {
   display: flex;
@@ -566,4 +883,7 @@
   .segmented { width: 100%; justify-content: stretch; }
   .segmented__button { flex: 1 1 calc(33.333% - 0.5rem); min-width: 0; }
   .period-actions .btn { width: 100%; }
+  .gantt-nav { flex-direction: column; align-items: flex-start; }
+  .gantt-legend { margin-left: 0; }
+  .gantt-label-col { width: 140px; min-width: 140px; }
 }

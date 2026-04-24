@@ -17,6 +17,11 @@ export interface ChambreVm extends AppartementDto {
   prixBase: number;
 }
 
+export interface GanttWeekSegment {
+  start: Date;
+  days: number;
+}
+
 @Component({
   standalone: false,
   selector: 'app-page-disponibilite-residence',
@@ -38,6 +43,15 @@ export class PageDisponibiliteResidenceComponent implements OnInit, OnDestroy {
   public dateDebut = '';
   public dateFin = '';
 
+  /* ── Gantt ── */
+  public ganttOffset = 0;
+  public ganttStartDate: Date = new Date();
+  public ganttEndDate: Date = new Date();
+  public ganttDaysArr: Date[] = [];
+  public ganttWeekSegments: GanttWeekSegment[] = [];
+  public ganttTotalDaysCount = 30;
+  public readonly ganttDayWidthPx = 40;
+
   allChambres: ChambreVm[] = [];
   categories: CategoryChambreSaveOrUpdateDto[] = [];
   private sub?: Subscription;
@@ -46,6 +60,7 @@ export class PageDisponibiliteResidenceComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.user = this.userService.getUserFromLocalCache();
+    this.refreshGantt();
     this.load();
   }
 
@@ -70,6 +85,7 @@ export class PageDisponibiliteResidenceComponent implements OnInit, OnDestroy {
         this.allChambres = (appartements ?? []).map((a) =>
           this.buildVm(a, reservations ?? [])
         );
+        this.refreshGantt();
         this.loading = false;
       },
       error: () => {
@@ -124,6 +140,7 @@ export class PageDisponibiliteResidenceComponent implements OnInit, OnDestroy {
     }));
     this.currentPage = 1;
     this.selectedChambre = null;
+    this.refreshGantt();
   }
 
   public resetDateFilter(): void {
@@ -135,6 +152,139 @@ export class PageDisponibiliteResidenceComponent implements OnInit, OnDestroy {
     }));
     this.currentPage = 1;
     this.selectedChambre = null;
+    this.refreshGantt();
+  }
+
+  /* ── Gantt navigation ── */
+  public ganttPrev(): void { this.ganttOffset -= 7; this.refreshGantt(); }
+  public ganttNext(): void { this.ganttOffset += 7; this.refreshGantt(); }
+  public ganttReset(): void { this.ganttOffset = 0; this.refreshGantt(); }
+
+  public isWeekStart(d: Date): boolean { return d.getDay() === 1; }
+
+  public isWeekend(d: Date): boolean { return d.getDay() === 0 || d.getDay() === 6; }
+
+  public isToday(d: Date): boolean {
+    const t = new Date();
+    return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+  }
+
+  public getTodayLeft(): number {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diff = (today.getTime() - this.ganttStartDate.getTime()) / 86400000;
+    return (diff / this.ganttTotalDaysCount) * 100;
+  }
+
+  public getBarLeft(r: ReservationAfficheDto): number {
+    if (!r.dateDebut) return 0;
+    const start = new Date(r.dateDebut); start.setHours(0, 0, 0, 0);
+    const clamped = start < this.ganttStartDate ? this.ganttStartDate : start;
+    const diff = (clamped.getTime() - this.ganttStartDate.getTime()) / 86400000;
+    return Math.max(0, (diff / this.ganttTotalDaysCount) * 100);
+  }
+
+  public getBarWidth(r: ReservationAfficheDto): number {
+    if (!r.dateDebut || !r.dateFin) return 0;
+    const start = new Date(r.dateDebut); start.setHours(0, 0, 0, 0);
+    const end = new Date(r.dateFin); end.setHours(0, 0, 0, 0);
+    const ganttEndPlusOne = new Date(this.ganttEndDate);
+    ganttEndPlusOne.setDate(ganttEndPlusOne.getDate() + 1);
+    const clampStart = start < this.ganttStartDate ? this.ganttStartDate : start;
+    const clampEnd = end > ganttEndPlusOne ? ganttEndPlusOne : end;
+    const days = (clampEnd.getTime() - clampStart.getTime()) / 86400000;
+    return Math.max(0, (days / this.ganttTotalDaysCount) * 100);
+  }
+
+  public getBarColor(r: ReservationAfficheDto): string {
+    const guest = (r.utilisateurOperation || '').trim().toUpperCase();
+    if (!guest || guest === 'XXX XXXXX') return 'gantt-bar--draft';
+    const balance = Number(r.soldReservation ?? 0);
+    const paid = Number(r.montantPaye ?? 0);
+    if (balance <= 0 && paid > 0) return 'gantt-bar--settled';
+    if (paid > 0) return 'gantt-bar--partial';
+    return 'gantt-bar--pending';
+  }
+
+  public getBarTooltip(r: ReservationAfficheDto): string {
+    const name = this.guestName(r);
+    const s = r.dateDebut ? new Date(r.dateDebut).toLocaleDateString('fr-FR') : '?';
+    const e = r.dateFin ? new Date(r.dateFin).toLocaleDateString('fr-FR') : '?';
+    return `${name} · ${s} → ${e} (${this.stayNights(r)} nuit(s))`;
+  }
+
+  public isInPeriod(d: Date): boolean {
+    if (!this.dateDebut || !this.dateFin) return false;
+    const start = new Date(this.dateDebut); start.setHours(0, 0, 0, 0);
+    const end = new Date(this.dateFin); end.setHours(0, 0, 0, 0);
+    return d >= start && d <= end;
+  }
+
+  public getPeriodLeft(): number {
+    if (!this.dateDebut) return 0;
+    const start = new Date(this.dateDebut); start.setHours(0, 0, 0, 0);
+    const clamped = start < this.ganttStartDate ? this.ganttStartDate : start;
+    const diff = (clamped.getTime() - this.ganttStartDate.getTime()) / 86400000;
+    return Math.max(0, (diff / this.ganttTotalDaysCount) * 100);
+  }
+
+  public getPeriodWidth(): number {
+    if (!this.dateDebut || !this.dateFin) return 0;
+    const start = new Date(this.dateDebut); start.setHours(0, 0, 0, 0);
+    const end = new Date(this.dateFin); end.setHours(0, 0, 0, 0);
+    end.setDate(end.getDate() + 1);
+    const clampStart = start < this.ganttStartDate ? this.ganttStartDate : start;
+    const ganttEndPlusOne = new Date(this.ganttEndDate);
+    ganttEndPlusOne.setDate(ganttEndPlusOne.getDate() + 1);
+    const clampEnd = end > ganttEndPlusOne ? ganttEndPlusOne : end;
+    const days = (clampEnd.getTime() - clampStart.getTime()) / 86400000;
+    return Math.max(0, (days / this.ganttTotalDaysCount) * 100);
+  }
+
+  public getBarsForChambre(c: ChambreVm): ReservationAfficheDto[] {
+    return c.reservations.filter((r) => {
+      if (!r.dateDebut || !r.dateFin) return false;
+      const s = new Date(r.dateDebut); const e = new Date(r.dateFin);
+      return s <= this.ganttEndDate && e >= this.ganttStartDate;
+    });
+  }
+
+  public refreshGantt(): void {
+    if (this.dateDebut) {
+      this.ganttStartDate = new Date(this.dateDebut);
+      this.ganttStartDate.setHours(0, 0, 0, 0);
+    } else {
+      this.ganttStartDate = new Date();
+      this.ganttStartDate.setHours(0, 0, 0, 0);
+      this.ganttStartDate.setDate(this.ganttStartDate.getDate() + this.ganttOffset);
+    }
+    if (this.dateFin) {
+      this.ganttEndDate = new Date(this.dateFin);
+      this.ganttEndDate.setHours(0, 0, 0, 0);
+    } else {
+      this.ganttEndDate = new Date(this.ganttStartDate);
+      this.ganttEndDate.setDate(this.ganttEndDate.getDate() + 29);
+    }
+    const days: Date[] = [];
+    const d = new Date(this.ganttStartDate);
+    while (d <= this.ganttEndDate) { days.push(new Date(d)); d.setDate(d.getDate() + 1); }
+    this.ganttDaysArr = days;
+    this.ganttTotalDaysCount = Math.max(days.length, 1);
+    this.ganttWeekSegments = this.buildWeekSegments(days);
+  }
+
+  private buildWeekSegments(days: Date[]): GanttWeekSegment[] {
+    if (!days.length) return [];
+    const segments: GanttWeekSegment[] = [];
+    let idx = 0;
+    while (idx < days.length) {
+      const start = days[idx];
+      const dayOfWeek = start.getDay(); // 0=Sun..6=Sat
+      const daysUntilSunday = (7 - dayOfWeek) % 7;
+      const endIdx = Math.min(idx + daysUntilSunday, days.length - 1);
+      segments.push({ start, days: endIdx - idx + 1 });
+      idx = endIdx + 1;
+    }
+    return segments;
   }
 
   get filteredChambres(): ChambreVm[] {
