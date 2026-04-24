@@ -52,11 +52,11 @@
       <div class="period-toolbar">
         <div class="toolbar-field toolbar-field--date">
           <label for="dateDebut">Date d'arrivée</label>
-          <input id="dateDebut" type="date" class="toolbar-input" [(ngModel)]="dateDebut" />
+          <input id="dateDebut" type="date" class="toolbar-input" [(ngModel)]="dateDebut" (ngModelChange)="refreshGantt()" />
         </div>
         <div class="toolbar-field toolbar-field--date">
           <label for="dateFin">Date de départ</label>
-          <input id="dateFin" type="date" class="toolbar-input" [(ngModel)]="dateFin" />
+          <input id="dateFin" type="date" class="toolbar-input" [(ngModel)]="dateFin" (ngModelChange)="refreshGantt()" />
         </div>
         <div class="period-actions">
           <button type="button" class="btn btn-primary" (click)="applyDateFilter()"
@@ -133,15 +133,6 @@
                 </select>
               </div>
             }
-            <div class="toolbar-field">
-              <label for="dispoPageSize">Lignes</label>
-              <select id="dispoPageSize" class="toolbar-select"
-                [value]="pageSize" (change)="onPageSizeChange($event)">
-                @for (size of pageSizeOptions; track size) {
-                  <option [value]="size">{{ size }} / page</option>
-                }
-              </select>
-            </div>
           </div>
         </div>
 
@@ -158,71 +149,138 @@
         }
 
         @if (!loading && filteredChambres.length > 0) {
-          <div class="table-shell">
-            <div class="table-responsive">
-              <table class="table align-middle bail-table">
-                <thead>
-                  <tr>
-                    <th>Chambre</th>
-                    <th>Catégorie</th>
-                    <th>Prix / nuit</th>
-                    <th>Occupant actuel</th>
-                    <th>Libre le</th>
-                    <th>Statut</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (c of paginatedChambres; track trackById($index, c)) {
-                    <tr [class.row-selected]="isSelected(c)" (click)="selectChambre(c)">
-                      <td>
-                        <span class="bail-badge">{{ chambreName(c) }}</span>
-                        <div class="row-helper">{{ c.codeAbrvBienImmobilier || '—' }}</div>
-                      </td>
-                      <td>
-                        <div>{{ c.nameCategorie || '—' }}</div>
-                        <div class="row-helper">{{ c.nbreChambreApp }} ch. · {{ c.nbrPieceApp }} p.</div>
-                      </td>
-                      <td>{{ c.prixBase > 0 ? formatCurrency(c.prixBase) : '—' }}</td>
-                      <td>
-                        @if (c.reservationEnCours) {
-                          <div>{{ guestName(c.reservationEnCours) }}</div>
-                          <div class="row-helper">
-                            depuis le {{ c.reservationEnCours.dateDebut | date:'dd/MM/yyyy' }}
-                          </div>
-                        } @else {
-                          <span class="text-muted">—</span>
-                        }
-                      </td>
-                      <td>
-                        @if (c.prochainLibre) {
-                          {{ c.prochainLibre | date:'dd/MM/yyyy' }}
-                        } @else {
-                          <span class="text-muted">Dispo maintenant</span>
-                        }
-                      </td>
-                      <td>
-                        <span [class]="statusClass(c)">{{ statusLabel(c) }}</span>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+
+          <!-- Navigation Gantt -->
+          <div class="gantt-nav">
+            <div class="gantt-nav__controls">
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                (click)="ganttPrev()" [disabled]="!!dateDebut">
+                ← 7 j
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                (click)="ganttReset()" [disabled]="!!dateDebut || ganttOffset === 0">
+                Aujourd'hui
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                (click)="ganttNext()" [disabled]="!!dateDebut">
+                7 j →
+              </button>
+            </div>
+            <span class="gantt-nav__range">
+              {{ ganttStartDate | date:'dd MMM yyyy':'':'fr' }}
+              &nbsp;—&nbsp;
+              {{ ganttEndDate | date:'dd MMM yyyy':'':'fr' }}
+              &nbsp;·&nbsp; {{ ganttDaysArr.length }} jours
+            </span>
+            <!-- Légende -->
+            <div class="gantt-legend">
+              <span class="gantt-legend__item">
+                <span class="gantt-legend__dot gantt-bar--pending"></span>Non payée
+              </span>
+              <span class="gantt-legend__item">
+                <span class="gantt-legend__dot gantt-bar--partial"></span>Acompte
+              </span>
+              <span class="gantt-legend__item">
+                <span class="gantt-legend__dot gantt-bar--settled"></span>Soldée
+              </span>
+              <span class="gantt-legend__item">
+                <span class="gantt-legend__dot gantt-bar--draft"></span>Pré-rés.
+              </span>
             </div>
           </div>
 
-          <div class="pagination-toolbar">
-            <p class="pagination-summary">
-              Affichage {{ paginationStart }} à {{ paginationEnd }} sur {{ filteredChambres.length }} chambre(s)
-            </p>
-            <div class="pagination-controls">
-              <button type="button" class="page-btn" [disabled]="safePage <= 1" (click)="prevPage()">Précédent</button>
-              @for (page of visiblePages; track page) {
-                <button type="button" class="page-btn"
-                  [class.is-active]="page === safePage"
-                  (click)="goToPage(page)">{{ page }}</button>
-              }
-              <button type="button" class="page-btn" [disabled]="safePage >= totalPages" (click)="nextPage()">Suivant</button>
+          <!-- Diagramme de Gantt -->
+          <div class="gantt-outer">
+
+            <!-- En-tête jours -->
+            <div class="gantt-header-row">
+              <div class="gantt-label-col gantt-label-col--hdr">Chambre</div>
+              <div class="gantt-timeline-hdr">
+                <!-- Semaine -->
+                <div class="gantt-hdr-tier gantt-hdr-tier--weeks">
+                  @for (seg of ganttWeekSegments; track seg.start.getTime()) {
+                    <div class="gantt-week-hdr" [style.width.px]="seg.days * ganttDayWidthPx">
+                      {{ seg.start | date:'dd MMM yyyy':'':'fr' }}
+                    </div>
+                  }
+                </div>
+
+                <!-- Jours -->
+                <div class="gantt-hdr-tier gantt-hdr-tier--days">
+                  @for (day of ganttDaysArr; track day.getTime()) {
+                    <div class="gantt-day-hdr"
+                      [class.gantt-day--weekend]="isWeekend(day)"
+                      [class.gantt-day--today]="isToday(day)"
+                      [class.gantt-day--weekstart]="isWeekStart(day)"
+                      [class.gantt-day--inperiod]="isInPeriod(day)">
+                      <span class="gantt-day__num">{{ day | date:'d' }}</span>
+                      <span class="gantt-day__label">{{ day | date:'EEE':'':'fr' }}</span>
+                    </div>
+                  }
+                </div>
+                <!-- Indicateurs début / fin période dans l'en-tête -->
+                @if (dateDebut && dateFin && getPeriodWidth() > 0) {
+                  <div class="gantt-period-hdr-zone"
+                    [style.left.%]="getPeriodLeft()"
+                    [style.width.%]="getPeriodWidth()">
+                    <span class="gantt-period-hdr-label">
+                      {{ dateDebut | date:'dd/MM' }} — {{ dateFin | date:'dd/MM' }}
+                    </span>
+                  </div>
+                }
+              </div>
             </div>
+
+            <!-- Lignes chambres -->
+            <div class="gantt-body">
+              @for (c of filteredChambres; track trackById($index, c)) {
+                <div class="gantt-row"
+                  [class.gantt-row--selected]="isSelected(c)"
+                  (click)="selectChambre(c)">
+
+                  <div class="gantt-label-col">
+                    <span class="gantt-room-name">{{ chambreName(c) }}</span>
+                    <div class="gantt-room-meta">
+                      <span [class]="statusClass(c)">{{ statusLabel(c) }}</span>
+                      <span class="gantt-room-cat">{{ c.nameCategorie || '' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="gantt-timeline">
+                    <!-- Cellules de fond (week-end + today) -->
+                    @for (day of ganttDaysArr; track day.getTime()) {
+                      <div class="gantt-cell"
+                        [class.gantt-cell--weekend]="isWeekend(day)"
+                        [class.gantt-cell--today]="isToday(day)"
+                        [class.gantt-cell--weekstart]="isWeekStart(day)">
+                      </div>
+                    }
+                    <!-- Zone période sélectionnée -->
+                    @if (dateDebut && dateFin && getPeriodWidth() > 0) {
+                      <div class="gantt-period-zone"
+                        [style.left.%]="getPeriodLeft()"
+                        [style.width.%]="getPeriodWidth()">
+                      </div>
+                    }
+                    <!-- Barres de réservation -->
+                    @for (r of getBarsForChambre(c); track r.id) {
+                      <div [class]="'gantt-bar ' + getBarColor(r)"
+                        [style.left.%]="getBarLeft(r)"
+                        [style.width.%]="getBarWidth(r)"
+                        [title]="getBarTooltip(r)">
+                        <span class="gantt-bar__label">{{ guestName(r) }}</span>
+                      </div>
+                    }
+                    <!-- Ligne aujourd'hui -->
+                    @if (getTodayLeft() >= 0 && getTodayLeft() <= 100) {
+                      <div class="gantt-today-line" [style.left.%]="getTodayLeft()"></div>
+                    }
+                  </div>
+
+                </div>
+              }
+            </div>
+
           </div>
         }
 

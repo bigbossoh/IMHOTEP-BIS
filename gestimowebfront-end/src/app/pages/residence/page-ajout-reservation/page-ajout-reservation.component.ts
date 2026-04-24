@@ -226,6 +226,20 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     return Math.max(this.toNumber(this.montantPayer), 0);
   }
 
+  get paidPercent(): number {
+    const total = this.totalAmountPreview;
+    if (total <= 0) {
+      return 0;
+    }
+
+    const percent = (this.amountPaid / total) * 100;
+    if (!Number.isFinite(percent)) {
+      return 0;
+    }
+
+    return Math.min(Math.max(percent, 0), 100);
+  }
+
   get submitButtonLabel(): string {
     return this.isCheckInMode
       ? 'Valider l’entrée en chambre'
@@ -319,7 +333,9 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   onStayChange(): void {
     if (!this.dateDebutSejour || !this.dateFinSejour) {
       this.dateDiff = 0;
-      this.laNuiteMontant = 0;
+      if (!this.laNuiteMontant) {
+        this.laNuiteMontant = this.toNumber(this.residenceModel?.priceCategorie);
+      }
       return;
     }
 
@@ -380,10 +396,19 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   }
 
   getDiffDays(startDate: Date, endDate: Date): void {
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    const diffInMs = Math.abs(end - start);
-    this.dateDiff = Math.ceil(diffInMs / 86400000);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    const diffInMs = end.getTime() - start.getTime();
+    if (diffInMs < 0) {
+      this.dateDiff = 0;
+      return;
+    }
+
+    const days = Math.ceil(diffInMs / 86400000);
+    this.dateDiff = Math.max(days, 1);
   }
 
   private buildReservationPayload(): Record<string, unknown> {

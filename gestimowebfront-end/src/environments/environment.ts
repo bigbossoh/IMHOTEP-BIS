@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   // Dev local (backend sur ta machine)
   serverUrl: '/actuator',
   // Dev contre le serveur HTTPS (via Caddy)

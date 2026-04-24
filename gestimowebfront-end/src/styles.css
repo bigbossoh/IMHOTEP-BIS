@@ -50,7 +50,7 @@ textarea.form-control,
 .toolbar-input,
 input[type="date"].form-control,
 input[type="search"].form-control {
-  --field-radius: 16px;
+  --field-radius: 10px;
   --field-border: rgba(148, 163, 184, 0.4);
   --field-border-hover: rgba(37, 99, 235, 0.35);
   --field-border-focus: #2563eb;
@@ -340,7 +340,7 @@ td {
 .mdc-text-field--filled,
 .mdc-text-field--outlined {
   min-height: 48px !important;
-  border-radius: 14px !important;
+  border-radius: 10px !important;
   background: #fff !important;
   box-shadow: none !important;
 }
@@ -360,7 +360,7 @@ td {
 .mat-mdc-autocomplete-panel {
   background: #fff !important;
   border: 1px solid var(--border) !important;
-  border-radius: 14px !important;
+  border-radius: 10px !important;
   box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12) !important;
 }
 
@@ -438,6 +438,12 @@ td {
 .mat-datepicker-content {
   border-radius: 18px !important;
   overflow: hidden;
+  background: #ffffff !important;
+}
+
+.mat-datepicker-content {
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12) !important;
 }
 
 .mat-mdc-table {
