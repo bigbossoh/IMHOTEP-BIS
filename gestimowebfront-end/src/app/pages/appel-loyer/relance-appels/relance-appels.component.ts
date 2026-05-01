@@ -1,7 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { AppelLoyersFactureDto, UtilisateurRequestDto } from 'src/gs-api/src/models';
+import {
+  AppelLoyersFactureDto,
+  OperationDto,
+  UtilisateurRequestDto,
+} from 'src/gs-api/src/models';
 import { NotificationType } from 'src/app/enum/natification-type.enum';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { RelanceService } from 'src/app/services/relance/relance.service';
@@ -15,20 +19,26 @@ import { UserService } from 'src/app/services/user/user.service';
 })
 export class RelanceAppelsComponent implements OnInit {
   public readonly pageSizeOptions = [10, 25, 50, 100];
+  public readonly bailAlertDelayDays = 60;
 
   public user: UtilisateurRequestDto | null = null;
   public relances: AppelLoyersFactureDto[] = [];
+  public bauxPresqueATerme: OperationDto[] = [];
   public searchTerm = '';
   public currentPage = 1;
   public pageSize = 10;
   public isLoading = false;
   public isSendingBulk = false;
   public isSendingGlobalBulk = false;
+  public isLoadingBauxATerme = false;
+  public isSendingBailBulk = false;
   public pageErrorMessage = '';
 
   private readonly selectedIds = new Set<number>();
   private readonly sendingIds = new Set<number>();
   private readonly sendingGlobalKeys = new Set<string>();
+  private readonly selectedBailIds = new Set<number>();
+  private readonly sendingBailIds = new Set<number>();
 
   constructor(
     private readonly relanceService: RelanceService,
@@ -46,6 +56,7 @@ export class RelanceAppelsComponent implements OnInit {
     }
 
     this.loadRelances();
+    this.loadBauxPresqueATerme();
   }
 
   public get totalRelances(): number {
@@ -65,6 +76,18 @@ export class RelanceAppelsComponent implements OnInit {
 
   public get missingEmailCount(): number {
     return this.relances.filter((relance) => !this.hasEmail(relance)).length;
+  }
+
+  public get totalBauxPresqueATerme(): number {
+    return this.bauxPresqueATerme.length;
+  }
+
+  public get selectedBauxATermeCount(): number {
+    return this.selectedBauxATerme.length;
+  }
+
+  public get canSendBailBulk(): boolean {
+    return !this.isBulkActionRunning && this.selectedBauxATerme.length > 0;
   }
 
   public get filteredRelances(): AppelLoyersFactureDto[] {
@@ -143,7 +166,7 @@ export class RelanceAppelsComponent implements OnInit {
   }
 
   public get isBulkActionRunning(): boolean {
-    return this.isSendingBulk || this.isSendingGlobalBulk;
+    return this.isSendingBulk || this.isSendingGlobalBulk || this.isSendingBailBulk;
   }
 
   private get selectedRelances(): AppelLoyersFactureDto[] {
@@ -166,6 +189,13 @@ export class RelanceAppelsComponent implements OnInit {
     });
 
     return Array.from(uniqueRelances.values());
+  }
+
+  private get selectedBauxATerme(): OperationDto[] {
+    return this.bauxPresqueATerme.filter((bail) => {
+      const id = this.toPositiveNumber(bail.id);
+      return id !== null && this.selectedBailIds.has(id);
+    });
   }
 
   public loadRelances(): void {
@@ -197,6 +227,37 @@ export class RelanceAppelsComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  public loadBauxPresqueATerme(): void {
+    if (!this.user?.idAgence) {
+      return;
+    }
+
+    this.isLoadingBauxATerme = true;
+    this.selectedBailIds.clear();
+    this.sendingBailIds.clear();
+
+    this.relanceService
+      .getBauxPresqueATerme(this.user.idAgence, this.bailAlertDelayDays)
+      .subscribe({
+        next: (result) => {
+          this.bauxPresqueATerme = [...(result ?? [])].sort((left, right) =>
+            this.getDateSortValue(left.dateFin) - this.getDateSortValue(right.dateFin)
+          );
+          this.isLoadingBauxATerme = false;
+        },
+        error: (error) => {
+          this.isLoadingBauxATerme = false;
+          this.notify(
+            NotificationType.ERROR,
+            this.extractErrorMessage(
+              error,
+              "Impossible de charger les baux proches de leur terme."
+            )
+          );
+        },
+      });
   }
 
   public onSearchChange(value: string): void {
@@ -492,6 +553,145 @@ export class RelanceAppelsComponent implements OnInit {
     });
   }
 
+  public toggleBailSelection(bail: OperationDto, checked: boolean): void {
+    const id = this.toPositiveNumber(bail.id);
+    if (id === null) {
+      return;
+    }
+
+    if (checked) {
+      this.selectedBailIds.add(id);
+    } else {
+      this.selectedBailIds.delete(id);
+    }
+  }
+
+  public toggleAllBauxSelection(checked: boolean): void {
+    this.bauxPresqueATerme.forEach((bail) => {
+      const id = this.toPositiveNumber(bail.id);
+      if (id === null) {
+        return;
+      }
+
+      if (checked) {
+        this.selectedBailIds.add(id);
+      } else {
+        this.selectedBailIds.delete(id);
+      }
+    });
+  }
+
+  public isBailSelected(bail: OperationDto): boolean {
+    const id = this.toPositiveNumber(bail.id);
+    return id !== null && this.selectedBailIds.has(id);
+  }
+
+  public areAllBauxSelected(): boolean {
+    return (
+      this.bauxPresqueATerme.length > 0 &&
+      this.bauxPresqueATerme.every((bail) => this.isBailSelected(bail))
+    );
+  }
+
+  public sendSingleBailRelance(bail: OperationDto): void {
+    const id = this.toPositiveNumber(bail.id);
+    if (id === null || this.sendingBailIds.has(id) || this.isBulkActionRunning) {
+      return;
+    }
+
+    this.sendingBailIds.add(id);
+    this.relanceService.sendRelanceFinBailMail(id).subscribe({
+      next: (result) => {
+        this.sendingBailIds.delete(id);
+        if (result) {
+          this.notify(
+            NotificationType.SUCCESS,
+            `Relance de fin de bail envoyee pour ${this.getBailLabel(bail)}.`
+          );
+          return;
+        }
+
+        this.notify(
+          NotificationType.ERROR,
+          `Impossible d'envoyer la relance de fin de bail pour ${this.getBailLabel(bail)}.`
+        );
+      },
+      error: (error) => {
+        this.sendingBailIds.delete(id);
+        this.notify(
+          NotificationType.ERROR,
+          this.extractErrorMessage(
+            error,
+            `Impossible d'envoyer la relance de fin de bail pour ${this.getBailLabel(bail)}.`
+          )
+        );
+      },
+    });
+  }
+
+  public sendBulkBailRelances(): void {
+    const selected = this.selectedBauxATerme;
+    if (selected.length === 0 || this.isBulkActionRunning) {
+      this.notify(NotificationType.ERROR, 'Aucun bail a terme n est selectionne.');
+      return;
+    }
+
+    this.isSendingBailBulk = true;
+    selected.forEach((bail) => {
+      const id = this.toPositiveNumber(bail.id);
+      if (id !== null) {
+        this.sendingBailIds.add(id);
+      }
+    });
+
+    forkJoin(
+      selected.map((bail) =>
+        this.relanceService.sendRelanceFinBailMail(this.toPositiveNumber(bail.id)!)
+      )
+    ).subscribe({
+      next: (results) => {
+        this.isSendingBailBulk = false;
+        selected.forEach((bail) => {
+          const id = this.toPositiveNumber(bail.id);
+          if (id !== null) {
+            this.sendingBailIds.delete(id);
+          }
+        });
+
+        const successCount = results.filter((result) => result === true).length;
+        const errorCount = results.length - successCount;
+        if (successCount > 0) {
+          this.notify(
+            NotificationType.SUCCESS,
+            `${successCount} relance(s) de fin de bail envoyee(s).`
+          );
+        }
+        if (errorCount > 0) {
+          this.notify(
+            NotificationType.ERROR,
+            `${errorCount} relance(s) de fin de bail n'ont pas pu etre envoyees.`
+          );
+        }
+      },
+      error: (error) => {
+        this.isSendingBailBulk = false;
+        selected.forEach((bail) => {
+          const id = this.toPositiveNumber(bail.id);
+          if (id !== null) {
+            this.sendingBailIds.delete(id);
+          }
+        });
+        this.notify(
+          NotificationType.ERROR,
+          this.extractErrorMessage(
+            error,
+            "Impossible d'envoyer les relances de fin de bail selectionnees."
+          )
+        );
+      },
+    });
+  }
+
   public hasEmail(relance: AppelLoyersFactureDto): boolean {
     return !!relance.emailLocatire?.trim();
   }
@@ -506,6 +706,11 @@ export class RelanceAppelsComponent implements OnInit {
     return !!key && this.sendingGlobalKeys.has(key);
   }
 
+  public isSendingBailRelance(bail: OperationDto): boolean {
+    const id = this.toPositiveNumber(bail.id);
+    return id !== null && this.sendingBailIds.has(id);
+  }
+
   public getLocataireLabel(relance: AppelLoyersFactureDto): string {
     const fullName = [relance.nomLocataire, relance.prenomLocataire]
       .filter((value): value is string => !!value && !!value.trim())
@@ -518,6 +723,34 @@ export class RelanceAppelsComponent implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }) + ' FCFA';
+  }
+
+  public getBailLabel(bail: OperationDto): string {
+    return bail.abrvCodeBail || bail.designationBail || `BAIL-${bail.id ?? '-'}`;
+  }
+
+  public getBailTenantAssetLabel(bail: OperationDto): string {
+    const locataire = bail.utilisateurOperation || 'Locataire inconnu';
+    const bien = bail.codeAbrvBienImmobilier || bail.bienImmobilierOperation || 'Bien inconnu';
+    return `${locataire} / ${bien}`;
+  }
+
+  public getBailDaysRemaining(bail: OperationDto): number {
+    const endDate = this.parseDateOnly(bail.dateFin);
+    if (!endDate) {
+      return 0;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.max(
+      0,
+      Math.ceil((endDate.getTime() - today.getTime()) / 86400000)
+    );
+  }
+
+  public trackByBail(index: number, bail: OperationDto): number | string {
+    return bail.id ?? bail.abrvCodeBail ?? index;
   }
 
   public formatPeriod(relance: AppelLoyersFactureDto): string {
@@ -568,6 +801,25 @@ export class RelanceAppelsComponent implements OnInit {
     return typeof value === 'number' && Number.isFinite(value) && value > 0
       ? value
       : null;
+  }
+
+  private parseDateOnly(value: string | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) {
+      return null;
+    }
+
+    const [, year, month, day] = match;
+    const parsedDate = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  }
+
+  private getDateSortValue(value: string | undefined): number {
+    return this.parseDateOnly(value)?.getTime() ?? Number.POSITIVE_INFINITY;
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {

@@ -44,6 +44,12 @@
       <small>Contrats actuellement actifs</small>
     </article>
 
+    <article class="stat-card stat-card--warning">
+      <span class="stat-card__label">Baux bientot a terme</span>
+      <strong>{{ totalBauxPresqueATerme }}</strong>
+      <small>Fin prevue sous {{ bailAlertDelayDays }} jours</small>
+    </article>
+
     <article class="stat-card stat-card--closed">
       <span class="stat-card__label">Baux clotures</span>
       <strong>{{ totalBauxClotures }}</strong>
@@ -93,6 +99,14 @@
                 (click)="setStatusFilter('encours')"
               >
                 En cours
+              </button>
+              <button
+                type="button"
+                class="segmented__button"
+                [class.segmented__button--active]="statusFilter === 'aterme'"
+                (click)="setStatusFilter('aterme')"
+              >
+                A terme
               </button>
               <button
                 type="button"
@@ -190,6 +204,11 @@
                         <span [class]="getBailStatusClass(bail)">
                           {{ getBailStatusLabel(bail) }}
                         </span>
+                        @if (isBailAlmostExpired(bail)) {
+                          <div class="row-helper">
+                            {{ getBailDaysRemaining(bail) }} jour(s) restant(s)
+                          </div>
+                        }
                       </td>
                       <td class="actions-column" (click)="$event.stopPropagation()">
                         <button
@@ -206,6 +225,14 @@
                           (click)="openModifMontantDialog(bail)"
                         >
                           Loyer
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-info"
+                          (click)="openExtendBailModal(bail)"
+                          [disabled]="isExtending(bail) || bail.enCoursBail === false"
+                        >
+                          {{ isExtending(bail) ? 'Prolongation...' : 'Prolonger' }}
                         </button>
                         <button
                           type="button"
@@ -328,6 +355,14 @@
               </button>
               <button
                 type="button"
+                class="btn btn-sm btn-outline-info"
+                (click)="openExtendBailModal(selectedBail)"
+                [disabled]="isExtending(selectedBail) || selectedBail.enCoursBail === false"
+              >
+                {{ isExtending(selectedBail) ? 'Prolongation...' : 'Prolonger le bail' }}
+              </button>
+              <button
+                type="button"
                 class="btn btn-sm btn-outline-warning"
                 (click)="closeBail(selectedBail)"
                 [disabled]="isClosing(selectedBail) || selectedBail.enCoursBail === false"
@@ -380,6 +415,11 @@
             <div class="detail-item">
               <span>Date de fin</span>
               <strong>{{ selectedBail.dateFin | date: 'dd/MM/yyyy' }}</strong>
+              @if (isBailAlmostExpired(selectedBail)) {
+                <small class="term-warning">
+                  {{ getBailDaysRemaining(selectedBail) }} jour(s) restant(s)
+                </small>
+              }
             </div>
             <div class="detail-item">
               <span>Caution</span>
@@ -641,6 +681,86 @@
         [disabled]="closingBailId !== null || isLoadingCloseBailOptions"
       >
         {{ closingBailId !== null ? 'Cloture...' : 'Cloturer le bail' }}
+      </button>
+    </div>
+  </section>
+}
+
+@if (isExtendBailModalOpen) {
+  <div class="close-bail-modal-backdrop" (click)="cancelExtendBailModal()"></div>
+
+  <section
+    class="close-bail-modal extend-bail-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="extend-bail-title"
+  >
+    <div class="close-bail-modal__header">
+      <div>
+        <span class="close-bail-modal__eyebrow">Prolongation de bail</span>
+        <h2 id="extend-bail-title">Reporter la date de fin</h2>
+        <p>
+          Choisissez une date posterieure a la fin actuelle du bail. Les appels
+          de loyer manquants seront crees jusqu'a cette nouvelle date.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cancelExtendBailModal()"
+        [disabled]="extendingBailId !== null"
+      >
+        Fermer
+      </button>
+    </div>
+
+    <div class="close-bail-modal__content">
+      <section class="close-bail-hero">
+        <div class="close-bail-hero__copy">
+          <span class="close-bail-hero__label">{{ extendBailTargetLabel }}</span>
+          <strong>{{ getBailTenantAssetLabel(extendBailTarget) }}</strong>
+          <p>
+            Date de fin actuelle : {{ extendBailCurrentEndDateLabel }}.
+          </p>
+        </div>
+      </section>
+
+      @if (extendBailModalErrorMessage) {
+        <div class="alert alert-danger close-bail-alert">
+          {{ extendBailModalErrorMessage }}
+        </div>
+      }
+
+      <div class="extend-bail-form">
+        <label for="extendBailDateFin">Nouvelle date de fin</label>
+        <input
+          id="extendBailDateFin"
+          type="date"
+          class="form-control"
+          [value]="extendBailDateFin"
+          (input)="onExtendBailDateChange($event)"
+        />
+      </div>
+    </div>
+
+    <div class="close-bail-modal__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="cancelExtendBailModal()"
+        [disabled]="extendingBailId !== null"
+      >
+        Annuler
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-info text-white"
+        (click)="confirmExtendBail()"
+        [disabled]="extendingBailId !== null"
+      >
+        {{ extendingBailId !== null ? 'Prolongation...' : 'Prolonger le bail' }}
       </button>
     </div>
   </section>

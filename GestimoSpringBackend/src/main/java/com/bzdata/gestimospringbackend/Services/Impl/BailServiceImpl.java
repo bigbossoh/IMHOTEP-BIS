@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
+import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailModifDto;
 import com.bzdata.gestimospringbackend.DTOs.EncaissementPrincipalDTO;
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
@@ -51,6 +52,8 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BailServiceImpl implements BailService {
+    private static final int DEFAULT_JOURS_AVANT_TERME = 60;
+
     final MontantLoyerBailService montantLoyerBailService;
     final BailLocationRepository bailLocationRepository;
     final AppelLoyerService appelLoyerService;
@@ -345,6 +348,63 @@ public class BailServiceImpl implements BailService {
     }
 
     @Override
+    public OperationDto prolongerBail(Long id, BailExtensionRequestDto requestDto) {
+        if (id == null) {
+            throw new EntityNotFoundException("Aucune Operation avec l'ID = " + id,
+                    ErrorCodes.BAILLOCATION_NOT_FOUND);
+        }
+
+        if (requestDto == null || requestDto.getNouvelleDateFin() == null) {
+            throw new InvalidEntityException("Veuillez renseigner la nouvelle date de fin du bail.",
+                    ErrorCodes.BAILLOCATION_NOT_VALID);
+        }
+
+        BailLocation bailLocation = bailLocationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aucune Operation avec l'ID = " + id,
+                        ErrorCodes.BAILLOCATION_NOT_FOUND));
+
+        if (!bailLocation.isEnCoursBail()) {
+            throw new InvalidEntityException("Impossible de prolonger un bail deja cloture.",
+                    ErrorCodes.BAILLOCATION_NOT_VALID);
+        }
+
+        LocalDate ancienneDateFin = bailLocation.getDateFin();
+        LocalDate nouvelleDateFin = requestDto.getNouvelleDateFin();
+        if (ancienneDateFin != null && !nouvelleDateFin.isAfter(ancienneDateFin)) {
+            throw new InvalidEntityException("La nouvelle date de fin doit etre posterieure a la date de fin actuelle.",
+                    ErrorCodes.BAILLOCATION_NOT_VALID);
+        }
+
+        bailLocation.setDateFin(nouvelleDateFin);
+        BailLocation bailSauvegarde = bailLocationRepository.save(bailLocation);
+
+        Double montantActif = montantLoyerBailRepository.findByBailLocation(bailSauvegarde)
+                .stream()
+                .filter(MontantLoyerBail::isStatusLoyer)
+                .map(MontantLoyerBail::getNouveauMontantLoyer)
+                .findFirst()
+                .orElse(0.0);
+
+        if (montantActif == null || montantActif <= 0) {
+            throw new InvalidEntityException("Aucun montant de loyer actif n'a ete trouve pour generer les appels.",
+                    ErrorCodes.MONTANTLOYERBAIL_NOT_VALID);
+        }
+
+        YearMonth premierePeriodeExtension = ancienneDateFin != null
+                ? YearMonth.from(ancienneDateFin).plusMonths(1)
+                : YearMonth.from(bailSauvegarde.getDateDebut());
+        YearMonth dernierePeriodeExtension = YearMonth.from(nouvelleDateFin);
+
+        appelLoyerService.generateMissingAppelsForBailPeriodRange(
+                bailSauvegarde.getId(),
+                premierePeriodeExtension,
+                dernierePeriodeExtension
+        );
+
+        return bailMapperImpl.fromOperation(bailSauvegarde);
+    }
+
+    @Override
     public OperationDto findOperationById(Long id) {
         BailLocation findBailLocation = bailLocationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aucune Operation avec l'ID = " + id,
@@ -365,5 +425,32 @@ public class BailServiceImpl implements BailService {
 
         }
         return null;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OperationDto> findBauxPresqueATerme(Long idAgence, Integer joursAvantTerme) {
+        if (idAgence == null) {
+            throw new InvalidEntityException("L'agence est obligatoire pour rechercher les baux a terme.",
+                    ErrorCodes.AGENCE_NOT_VALID);
+        }
+
+        int delai = joursAvantTerme == null || joursAvantTerme <= 0
+                ? DEFAULT_JOURS_AVANT_TERME
+                : joursAvantTerme;
+        LocalDate today = LocalDate.now();
+        LocalDate limitDate = today.plusDays(delai);
+
+        return bailLocationRepository.findAll()
+                .stream()
+                .filter(bail -> Objects.equals(bail.getIdAgence(), idAgence))
+                .filter(BailLocation::isEnCoursBail)
+                .filter(bail -> !bail.isArchiveBail())
+                .filter(bail -> bail.getDateFin() != null)
+                .filter(bail -> !bail.getDateFin().isBefore(today))
+                .filter(bail -> !bail.getDateFin().isAfter(limitDate))
+                .sorted(java.util.Comparator.comparing(BailLocation::getDateFin))
+                .map(bailMapperImpl::fromOperation)
+                .collect(Collectors.toList());
     }
 }

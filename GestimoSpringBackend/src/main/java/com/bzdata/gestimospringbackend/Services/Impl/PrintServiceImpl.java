@@ -174,23 +174,29 @@ public class PrintServiceImpl implements PrintService {
   @Override
   public byte[] quittanceLoyer(Long id)
     throws FileNotFoundException, JRException, SQLException {
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("idQuit", id);
-
-    InputStream jrxmlStream = openClasspathResource(
-      "classpath:templates/print/Recu_paiement.jrxml"
-    );
-    try {
-      JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
-      JasperPrint print = JasperFillManager.fillReport(
-        jasperReport,
-        withFrenchLocale(parameters),
-        dataSourceSQL.getConnection()
-      );
-      return JasperExportManager.exportReportToPdf(print);
-    } finally {
-      closeQuietly(jrxmlStream);
+    if (id == null) {
+      throw new IllegalArgumentException("L'id de l'appel de loyer est obligatoire.");
     }
+
+    AppelLoyer appelLoyer = appelLoyerRepository
+      .findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Aucun appel de loyer trouve avec l'id " + id));
+    String periode = appelLoyer.getPeriodeAppelLoyer();
+    if (!StringUtils.hasText(periode)) {
+      throw new IllegalStateException("La periode de l'appel de loyer " + id + " est vide.");
+    }
+
+    BailLocation bailLocation = appelLoyer.getBailLocationAppelLoyer();
+    Utilisateur locataire = bailLocation != null ? bailLocation.getUtilisateurOperation() : null;
+    AgenceImmobiliere agence = resolveAgenceById(appelLoyer.getIdAgence());
+
+    return renderIndividualQuittancePdf(
+      periode,
+      locataire != null ? locataire.getId() : null,
+      appelLoyer.getId(),
+      resolveProprietaireName(appelLoyer, agence),
+      agence
+    );
   }
 
   @Override
@@ -283,32 +289,63 @@ public class PrintServiceImpl implements PrintService {
     throws FileNotFoundException, JRException, SQLException {
     try {
       AgenceImmobiliere agence = resolveAgenceForLocataireAndPeriode(periode, id);
-      try (
-        InputStream jrxmlStream = openClasspathResource(
-          "classpath:templates/print/quittance_appel_loyer_indiv_pour_mail.jrxml"
-        );
-        InputStream logoMagiser = resolveAgenceLogoStream(
-          agence,
-          "classpath:templates/print/magiser.jpeg"
-        )
-      ) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("PARAMETER_PERIODE", periode);
-        parameters.put("ID_UTILISATEUR", id.toString());
-        parameters.put("NOM_PROPRIO", proprio);
-        parameters.put("LOGO", logoMagiser);
-
-        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
-        JasperPrint print = JasperFillManager.fillReport(
-          jasperReport,
-          withFrenchLocale(parameters),
-          dataSourceSQL.getConnection()
-        );
-        return JasperExportManager.exportReportToPdf(print);
-      }
+      return renderIndividualQuittancePdf(periode, id, null, proprio, agence);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
+      log.error(
+        "Erreur lors de la generation de la quittance individuelle pour periode={} locataire={}",
+        periode,
+        id,
+        e
+      );
       return null;
+    }
+  }
+
+  private byte[] renderIndividualQuittancePdf(
+    String periode,
+    Long idLocataire,
+    Long idAppel,
+    String proprio,
+    AgenceImmobiliere agence
+  ) throws FileNotFoundException, JRException, SQLException {
+    InputStream jrxmlStream = openClasspathResource(
+      "classpath:templates/print/quittance_appel_loyer_indiv_pour_mail.jrxml"
+    );
+    InputStream logoMagiser = resolveAgenceLogoStream(
+      agence,
+      "classpath:templates/print/magiser.jpeg"
+    );
+
+    try {
+      Map<String, Object> parameters = new HashMap<>();
+      parameters.put("PARAMETER_PERIODE", periode);
+      parameters.put("ID_UTILISATEUR", idLocataire);
+      parameters.put("ID_APPEL", idAppel);
+      parameters.put("NOM_PROPRIO", StringUtils.hasText(proprio) ? proprio.trim() : "GESTIMO");
+      parameters.put("LOGO", logoMagiser);
+
+      JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
+      JasperPrint print = JasperFillManager.fillReport(
+        jasperReport,
+        withFrenchLocale(parameters),
+        dataSourceSQL.getConnection()
+      );
+
+      if (print.getPages().isEmpty()) {
+        throw new IllegalStateException(
+          "Aucune donnee trouvee pour la quittance individuelle periode=" +
+          periode +
+          ", locataire=" +
+          idLocataire +
+          ", appel=" +
+          idAppel
+        );
+      }
+
+      return JasperExportManager.exportReportToPdf(print);
+    } finally {
+      closeQuietly(logoMagiser);
+      closeQuietly(jrxmlStream);
     }
   }
 
@@ -1154,6 +1191,19 @@ public class PrintServiceImpl implements PrintService {
   private String buildDisplayName(String nom, String prenom) {
     String displayName = ((nom == null ? "" : nom.trim()) + " " + (prenom == null ? "" : prenom.trim())).trim();
     return StringUtils.hasText(displayName) ? displayName : "";
+  }
+
+  private String resolveProprietaireName(AppelLoyer appelLoyer, AgenceImmobiliere agence) {
+    BailLocation bailLocation = appelLoyer != null ? appelLoyer.getBailLocationAppelLoyer() : null;
+    Bienimmobilier bien = bailLocation != null ? bailLocation.getBienImmobilierOperation() : null;
+    Utilisateur proprietaire = bien != null ? bien.getUtilisateurProprietaire() : null;
+    String proprietaireName = BailDisplayUtils.buildLocataireDisplayName(proprietaire);
+
+    if (StringUtils.hasText(proprietaireName)) {
+      return proprietaireName;
+    }
+
+    return agence != null ? fallback(agence.getNomAgence(), "GESTIMO") : "GESTIMO";
   }
 
   private String fallback(String value) {

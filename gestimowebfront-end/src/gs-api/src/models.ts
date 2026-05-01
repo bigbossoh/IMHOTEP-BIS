@@ -10,6 +10,7 @@ export { AppelLoyerRequestDto } from './models/appel-loyer-request-dto';
 export { AppelLoyersFactureDto } from './models/appel-loyers-facture-dto';
 export { AuthRequestDto } from './models/auth-request-dto';
 export { BailAppartementDto } from './models/bail-appartement-dto';
+export { BailExtensionRequestDto } from './models/bail-extension-request-dto';
 export { BailLocation } from './models/bail-location';
 export { BailMagasinDto } from './models/bail-magasin-dto';
 export { BailModifDto } from './models/bail-modif-dto';

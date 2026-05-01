@@ -13,9 +13,14 @@ import org.springframework.util.StringUtils;
 import jakarta.mail.internet.MimeMessage;
 
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
+import com.bzdata.gestimospringbackend.Models.BailLocation;
 import com.bzdata.gestimospringbackend.Services.AppelLoyerService;
 import com.bzdata.gestimospringbackend.Services.EmailService;
 import com.bzdata.gestimospringbackend.Services.PrintService;
+import com.bzdata.gestimospringbackend.Utils.BailDisplayUtils;
+import com.bzdata.gestimospringbackend.company.entity.AgenceImmobiliere;
+import com.bzdata.gestimospringbackend.company.repository.AgenceImmobiliereRepository;
+import com.bzdata.gestimospringbackend.repository.BailLocationRepository;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -39,6 +44,8 @@ public class EmailServiceImpl implements EmailService {
     final JavaMailSender mailSender;
     final AppelLoyerService appelLoyerService;
     final PrintService printService;
+    final BailLocationRepository bailLocationRepository;
+    final AgenceImmobiliereRepository agenceImmobiliereRepository;
 
     @Value("${spring.mail.username}")
     private String mailFrom;
@@ -281,6 +288,72 @@ public class EmailServiceImpl implements EmailService {
             );
         } catch (Exception exception) {
             log.error("Erreur lors de l'envoi du mail de relance globale pour l'appel {}", id, exception);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean sendMailRelanceFinBail(Long idBail) {
+        if (idBail == null) {
+            return false;
+        }
+
+        BailLocation bailLocation = bailLocationRepository.findById(idBail).orElse(null);
+        if (
+                bailLocation == null ||
+                !bailLocation.isEnCoursBail() ||
+                bailLocation.getDateFin() == null ||
+                bailLocation.getUtilisateurOperation() == null ||
+                !StringUtils.hasText(bailLocation.getUtilisateurOperation().getEmail())
+        ) {
+            return false;
+        }
+
+        try {
+            String civilite = resolveCivilite(bailLocation.getUtilisateurOperation().getGenre());
+            String fullName = buildDisplayName(
+                    bailLocation.getUtilisateurOperation().getNom(),
+                    bailLocation.getUtilisateurOperation().getPrenom()
+            );
+            String agenceName = agenceImmobiliereRepository
+                    .findById(bailLocation.getIdAgence())
+                    .map(AgenceImmobiliere::getNomAgence)
+                    .filter(StringUtils::hasText)
+                    .orElse("votre agence");
+            String bienLabel = bailLocation.getBienImmobilierOperation() != null
+                    ? defaultText(
+                            bailLocation.getBienImmobilierOperation().getNomCompletBienImmobilier(),
+                            bailLocation.getBienImmobilierOperation().getCodeAbrvBienImmobilier()
+                    )
+                    : "-";
+            String bailCode = BailDisplayUtils.resolveBailCode(bailLocation);
+            long joursRestants = java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), bailLocation.getDateFin());
+
+            String body = String.format(
+                    "Bonjour %s %s,%n%n" +
+                    "Nous vous informons que votre bail %s concernant le bien %s arrive a terme le %s.%n" +
+                    "Il reste %d jour(s) avant cette echeance.%n%n" +
+                    "Merci de vous rapprocher de %s pour confirmer la suite a donner : prolongation, renouvellement ou cloture.%n%n" +
+                    "Cordialement,%n%s",
+                    civilite,
+                    fullName,
+                    defaultText(bailCode, "votre bail"),
+                    defaultText(bienLabel, "le bien loue"),
+                    bailLocation.getDateFin(),
+                    Math.max(0, joursRestants),
+                    agenceName,
+                    agenceName
+            );
+
+            return sendMailWithAttachment(
+                    bailLocation.getDateFin().toString(),
+                    bailLocation.getUtilisateurOperation().getEmail(),
+                    "Votre bail arrive bientot a terme - " + defaultText(bailCode, "Bail"),
+                    body,
+                    null
+            );
+        } catch (Exception exception) {
+            log.error("Erreur lors de l'envoi du mail de fin de bail {}", idBail, exception);
             return false;
         }
     }

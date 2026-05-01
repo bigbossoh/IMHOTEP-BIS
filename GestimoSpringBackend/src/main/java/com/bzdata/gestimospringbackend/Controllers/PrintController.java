@@ -35,13 +35,17 @@ import net.sf.jasperreports.engine.JRException;
 public class PrintController {
         final PrintService printService;
 
-        @GetMapping("/quittance/{id}")
+        @GetMapping(path = "/quittance/{id}", produces = MediaType.APPLICATION_PDF_VALUE)
         public ResponseEntity<byte[]> sampleQuitance(@PathVariable("id") Long id)
                         throws FileNotFoundException, JRException, SQLException {
 
                 byte[] donnees = printService.quittanceLoyer(id);
-                System.out.println(donnees);
-                return ResponseEntity.ok(donnees);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Disposition", "inline; filename=Quittance-" + id + ".pdf");
+                return ResponseEntity.ok()
+                                .headers(headers)
+                                .contentType(MediaType.APPLICATION_PDF)
+                                .body(donnees);
         }
 
         @GetMapping(path = "/bail/{idBail}", produces = MediaType.APPLICATION_PDF_VALUE)

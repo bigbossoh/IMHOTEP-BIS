@@ -29,7 +29,7 @@ interface CloseBailPeriodOption {
   loyer: AppelLoyerDto;
 }
 
-type BailFilter = 'all' | 'encours' | 'cloture';
+type BailFilter = 'all' | 'encours' | 'aterme' | 'cloture';
 
 @Component({
   standalone: false,
@@ -49,6 +49,7 @@ export class PageBauxComponent implements OnInit {
   });
   public readonly bauxPageSizeOptions = [10, 25, 50];
   public readonly loyerPageSizeOptions = [5, 10, 25, 50];
+  public readonly bailAlertDelayDays = 60;
 
   public user: UtilisateurRequestDto | null = null;
 
@@ -60,10 +61,14 @@ export class PageBauxComponent implements OnInit {
   public loyerCurrentPage = 1;
   public loyerPageSize = 10;
   public isCloseBailModalOpen = false;
+  public isExtendBailModalOpen = false;
   public isLoadingCloseBailOptions = false;
   public closeBailModalErrorMessage = '';
   public closeBailTarget: OperationDto | null = null;
   public closeBailPeriodOptions: CloseBailPeriodOption[] = [];
+  public extendBailTarget: OperationDto | null = null;
+  public extendBailDateFin = '';
+  public extendBailModalErrorMessage = '';
 
   public searchTerm = '';
   public statusFilter: BailFilter = 'all';
@@ -72,6 +77,7 @@ export class PageBauxComponent implements OnInit {
   public isLoadingDetails = false;
   public deletingBailId: number | null = null;
   public closingBailId: number | null = null;
+  public extendingBailId: number | null = null;
   public printingBailId: number | null = null;
 
   public pageErrorMessage = '';
@@ -103,6 +109,7 @@ export class PageBauxComponent implements OnInit {
       const matchesStatus =
         this.statusFilter === 'all' ||
         (this.statusFilter === 'encours' && bail.enCoursBail === true) ||
+        (this.statusFilter === 'aterme' && this.isBailAlmostExpired(bail)) ||
         (this.statusFilter === 'cloture' && bail.enCoursBail === false);
 
       if (!matchesStatus) {
@@ -146,6 +153,10 @@ export class PageBauxComponent implements OnInit {
 
   public get totalBauxClotures(): number {
     return this.baux.filter((bail) => bail.enCoursBail === false).length;
+  }
+
+  public get totalBauxPresqueATerme(): number {
+    return this.baux.filter((bail) => this.isBailAlmostExpired(bail)).length;
   }
 
   public get bauxTotalPages(): number {
@@ -227,6 +238,24 @@ export class PageBauxComponent implements OnInit {
     return this.closeBailDateFormatter.format(new Date());
   }
 
+  public get extendBailTargetLabel(): string {
+    const bail = this.extendBailTarget;
+    if (!bail) {
+      return 'Bail';
+    }
+
+    return this.getBailTitleLabel(bail);
+  }
+
+  public get extendBailCurrentEndDateLabel(): string {
+    const currentEndDate = this.parseDateOnly(this.extendBailTarget?.dateFin);
+    if (!currentEndDate) {
+      return '-';
+    }
+
+    return this.closeBailDateFormatter.format(currentEndDate);
+  }
+
   public get selectedOutstandingBalance(): number {
     return this.bailLoyers.reduce(
       (total, loyer) => total + (loyer.soldeAppelLoyer ?? 0),
@@ -265,6 +294,23 @@ export class PageBauxComponent implements OnInit {
         this.loadLoyers(this.toPositiveNumber(bail.id)!);
       }
     });
+  }
+
+  public openExtendBailModal(bail: OperationDto): void {
+    const bailId = this.toPositiveNumber(bail.id);
+    if (bailId === null) {
+      return;
+    }
+
+    if (bail.enCoursBail === false) {
+      this.notify(NotificationType.ERROR, 'Ce bail est deja cloture.');
+      return;
+    }
+
+    this.extendBailTarget = bail;
+    this.extendBailDateFin = this.buildDefaultExtensionDate(bail);
+    this.extendBailModalErrorMessage = '';
+    this.isExtendBailModalOpen = true;
   }
 
   public selectBail(bail: OperationDto): void {
@@ -365,6 +411,19 @@ export class PageBauxComponent implements OnInit {
     this.resetCloseBailModal();
   }
 
+  public cancelExtendBailModal(): void {
+    if (this.extendingBailId !== null) {
+      return;
+    }
+
+    this.resetExtendBailModal();
+  }
+
+  public onExtendBailDateChange(event: Event): void {
+    this.extendBailDateFin = (event.target as HTMLInputElement).value ?? '';
+    this.extendBailModalErrorMessage = '';
+  }
+
   public toggleCloseBailPeriod(periodCode: string, checked: boolean): void {
     this.closeBailPeriodOptions = this.closeBailPeriodOptions.map((option) =>
       option.periodCode === periodCode ? { ...option, selected: checked } : option
@@ -399,6 +458,49 @@ export class PageBauxComponent implements OnInit {
             'Impossible de cloturer le bail.'
           );
           this.notify(NotificationType.ERROR, this.closeBailModalErrorMessage);
+        },
+      });
+  }
+
+  public confirmExtendBail(): void {
+    const bailId = this.toPositiveNumber(this.extendBailTarget?.id);
+    if (bailId === null) {
+      return;
+    }
+
+    const validationError = this.validateExtensionDate(
+      this.extendBailTarget,
+      this.extendBailDateFin
+    );
+    if (validationError) {
+      this.extendBailModalErrorMessage = validationError;
+      return;
+    }
+
+    this.extendingBailId = bailId;
+    this.extendBailModalErrorMessage = '';
+
+    this.apiService
+      .prolongerBail({
+        id: bailId,
+        body: { nouvelleDateFin: this.extendBailDateFin },
+      })
+      .pipe(finalize(() => (this.extendingBailId = null)))
+      .subscribe({
+        next: () => {
+          this.notify(NotificationType.SUCCESS, 'Le bail a bien ete prolonge.');
+          this.resetExtendBailModal();
+          this.loadBaux();
+          if (this.selectedBailId !== null) {
+            this.loadLoyers(this.selectedBailId);
+          }
+        },
+        error: (error) => {
+          this.extendBailModalErrorMessage = this.extractErrorMessage(
+            error,
+            'Impossible de prolonger le bail.'
+          );
+          this.notify(NotificationType.ERROR, this.extendBailModalErrorMessage);
         },
       });
   }
@@ -492,6 +594,10 @@ export class PageBauxComponent implements OnInit {
     return this.closingBailId === this.toPositiveNumber(bail.id);
   }
 
+  public isExtending(bail: OperationDto): boolean {
+    return this.extendingBailId === this.toPositiveNumber(bail.id);
+  }
+
   public isPrinting(bail: OperationDto): boolean {
     return this.printingBailId === this.toPositiveNumber(bail.id);
   }
@@ -558,11 +664,45 @@ export class PageBauxComponent implements OnInit {
   }
 
   public getBailStatusLabel(bail: OperationDto): string {
+    if (this.isBailAlmostExpired(bail)) {
+      return 'Bientot a terme';
+    }
     return bail.enCoursBail ? 'En cours' : 'Cloture';
   }
 
   public getBailStatusClass(bail: OperationDto): string {
+    if (this.isBailAlmostExpired(bail)) {
+      return 'status-badge status-badge--warning';
+    }
     return bail.enCoursBail ? 'status-badge status-badge--active' : 'status-badge';
+  }
+
+  public isBailAlmostExpired(bail: OperationDto | null | undefined): boolean {
+    if (!bail || bail.enCoursBail !== true || !bail.dateFin) {
+      return false;
+    }
+
+    const endDate = this.parseDateOnly(bail.dateFin);
+    if (!endDate) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const limitDate = new Date(today);
+    limitDate.setDate(limitDate.getDate() + this.bailAlertDelayDays);
+    return endDate.getTime() >= today.getTime() && endDate.getTime() <= limitDate.getTime();
+  }
+
+  public getBailDaysRemaining(bail: OperationDto | null | undefined): number {
+    const endDate = this.parseDateOnly(bail?.dateFin);
+    if (!endDate) {
+      return 0;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / 86400000));
   }
 
   public getLoyerStatusLabel(loyer: AppelLoyerDto): string {
@@ -812,6 +952,55 @@ export class PageBauxComponent implements OnInit {
     return new Date(today.getFullYear(), today.getMonth(), 1);
   }
 
+  private buildDefaultExtensionDate(bail: OperationDto): string {
+    const currentEndDate = this.parseDateOnly(bail.dateFin) ?? new Date();
+    currentEndDate.setFullYear(currentEndDate.getFullYear() + 1);
+    return this.formatDateInputValue(currentEndDate);
+  }
+
+  private validateExtensionDate(
+    bail: OperationDto | null,
+    dateFin: string
+  ): string {
+    const newEndDate = this.parseDateOnly(dateFin);
+    if (!newEndDate) {
+      return 'Veuillez renseigner une nouvelle date de fin valide.';
+    }
+
+    const currentEndDate = this.parseDateOnly(bail?.dateFin);
+    if (currentEndDate && newEndDate.getTime() <= currentEndDate.getTime()) {
+      return 'La nouvelle date de fin doit etre posterieure a la date de fin actuelle.';
+    }
+
+    return '';
+  }
+
+  private parseDateOnly(value: string | null | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) {
+      return null;
+    }
+
+    const [, year, month, day] = match;
+    const parsedDate = new Date(Number(year), Number(month) - 1, Number(day));
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    return parsedDate;
+  }
+
+  private formatDateInputValue(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   private buildVisiblePages(currentPage: number, totalPages: number): number[] {
     const start = Math.max(1, currentPage - 2);
     const end = Math.min(totalPages, start + 4);
@@ -868,5 +1057,12 @@ export class PageBauxComponent implements OnInit {
     this.closeBailModalErrorMessage = '';
     this.closeBailTarget = null;
     this.closeBailPeriodOptions = [];
+  }
+
+  private resetExtendBailModal(): void {
+    this.isExtendBailModalOpen = false;
+    this.extendBailTarget = null;
+    this.extendBailDateFin = '';
+    this.extendBailModalErrorMessage = '';
   }
 }

@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.Services.AppelLoyerService;
 import com.bzdata.gestimospringbackend.Services.PrintService;
+import com.bzdata.gestimospringbackend.company.repository.AgenceImmobiliereRepository;
+import com.bzdata.gestimospringbackend.repository.BailLocationRepository;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import java.time.LocalDate;
@@ -37,11 +39,23 @@ class EmailServiceImplTest {
   @Mock
   private PrintService printService;
 
+  @Mock
+  private BailLocationRepository bailLocationRepository;
+
+  @Mock
+  private AgenceImmobiliereRepository agenceImmobiliereRepository;
+
   private EmailServiceImpl service;
 
   @BeforeEach
   void setUp() {
-    service = new EmailServiceImpl(mailSender, appelLoyerService, printService);
+    service = new EmailServiceImpl(
+      mailSender,
+      appelLoyerService,
+      printService,
+      bailLocationRepository,
+      agenceImmobiliereRepository
+    );
     ReflectionTestUtils.setField(service, "mailFrom", "info@molibetycenter.com");
   }
 

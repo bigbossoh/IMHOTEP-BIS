@@ -11,4 +11,5 @@ public interface EmailService {
     boolean sendMailQuittanceWithAttachment( Long id);
     boolean sendMailRelanceLoyer(Long id);
     boolean sendMailRelanceGlobaleLoyer(Long id);
+    boolean sendMailRelanceFinBail(Long idBail);
 }

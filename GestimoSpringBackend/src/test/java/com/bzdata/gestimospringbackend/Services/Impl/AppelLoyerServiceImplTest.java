@@ -3,12 +3,14 @@ package com.bzdata.gestimospringbackend.Services.Impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.PeriodeDto;
 import com.bzdata.gestimospringbackend.Models.AppelLoyer;
 import com.bzdata.gestimospringbackend.Models.BailLocation;
+import com.bzdata.gestimospringbackend.Models.MontantLoyerBail;
 import com.bzdata.gestimospringbackend.Utils.SmsOrangeConfig;
 import com.bzdata.gestimospringbackend.company.repository.AgenceImmobiliereRepository;
 import com.bzdata.gestimospringbackend.mappers.GestimoWebMapperImpl;
@@ -20,10 +22,13 @@ import com.bzdata.gestimospringbackend.repository.MontantLoyerBailRepository;
 import com.bzdata.gestimospringbackend.repository.OperationRepository;
 import com.bzdata.gestimospringbackend.user.repository.UtilisateurRepository;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -145,6 +150,10 @@ class AppelLoyerServiceImplTest {
 
   @Test
   void relanceListOnlyContainsUnpaidPeriodsBeforeCurrentMonth() {
+    YearMonth currentMonth = YearMonth.now();
+    YearMonth previousMonth = currentMonth.minusMonths(1);
+    YearMonth paidMonth = currentMonth.minusMonths(2);
+
     BailLocation activeBail = new BailLocation();
     activeBail.setId(91L);
     activeBail.setIdAgence(7L);
@@ -153,8 +162,8 @@ class AppelLoyerServiceImplTest {
     AppelLoyer oldUnpaidAppel = new AppelLoyer();
     oldUnpaidAppel.setId(10L);
     oldUnpaidAppel.setIdAgence(7L);
-    oldUnpaidAppel.setPeriodeAppelLoyer("2026-03");
-    oldUnpaidAppel.setDateDebutMoisAppelLoyer(LocalDate.of(2026, 3, 1));
+    oldUnpaidAppel.setPeriodeAppelLoyer(previousMonth.toString());
+    oldUnpaidAppel.setDateDebutMoisAppelLoyer(previousMonth.atDay(1));
     oldUnpaidAppel.setSoldeAppelLoyer(250000.0);
     oldUnpaidAppel.setSolderAppelLoyer(false);
     oldUnpaidAppel.setCloturer(false);
@@ -163,8 +172,8 @@ class AppelLoyerServiceImplTest {
     AppelLoyer currentUnpaidAppel = new AppelLoyer();
     currentUnpaidAppel.setId(11L);
     currentUnpaidAppel.setIdAgence(7L);
-    currentUnpaidAppel.setPeriodeAppelLoyer("2026-04");
-    currentUnpaidAppel.setDateDebutMoisAppelLoyer(LocalDate.of(2026, 4, 1));
+    currentUnpaidAppel.setPeriodeAppelLoyer(currentMonth.toString());
+    currentUnpaidAppel.setDateDebutMoisAppelLoyer(currentMonth.atDay(1));
     currentUnpaidAppel.setSoldeAppelLoyer(250000.0);
     currentUnpaidAppel.setSolderAppelLoyer(false);
     currentUnpaidAppel.setCloturer(false);
@@ -173,8 +182,8 @@ class AppelLoyerServiceImplTest {
     AppelLoyer paidOldAppel = new AppelLoyer();
     paidOldAppel.setId(12L);
     paidOldAppel.setIdAgence(7L);
-    paidOldAppel.setPeriodeAppelLoyer("2026-02");
-    paidOldAppel.setDateDebutMoisAppelLoyer(LocalDate.of(2026, 2, 1));
+    paidOldAppel.setPeriodeAppelLoyer(paidMonth.toString());
+    paidOldAppel.setDateDebutMoisAppelLoyer(paidMonth.atDay(1));
     paidOldAppel.setSoldeAppelLoyer(0.0);
     paidOldAppel.setSolderAppelLoyer(true);
     paidOldAppel.setCloturer(false);
@@ -196,6 +205,50 @@ class AppelLoyerServiceImplTest {
 
     assertEquals(1, relances.size());
     assertEquals(10L, relances.get(0).getId());
-    assertEquals("2026-03", relances.get(0).getPeriodeAppelLoyer());
+    assertEquals(previousMonth.toString(), relances.get(0).getPeriodeAppelLoyer());
+  }
+
+  @Test
+  void generateMissingAppelsForBailPeriodRangeCreatesOnlyRequestedExtensionPeriods() {
+    BailLocation bail = new BailLocation();
+    bail.setId(44L);
+    bail.setIdAgence(12L);
+    bail.setEnCoursBail(true);
+    bail.setDateDebut(LocalDate.of(2026, 1, 1));
+    bail.setDateFin(LocalDate.of(2026, 9, 30));
+
+    MontantLoyerBail montantActif = new MontantLoyerBail();
+    montantActif.setStatusLoyer(true);
+    montantActif.setNouveauMontantLoyer(100000D);
+
+    AppelLoyer julyExisting = new AppelLoyer();
+    julyExisting.setId(7L);
+    julyExisting.setBailLocationAppelLoyer(bail);
+    julyExisting.setPeriodeAppelLoyer("2026-07");
+    julyExisting.setSoldeAppelLoyer(25000D);
+    julyExisting.setSolderAppelLoyer(false);
+
+    when(bailLocationRepository.findById(44L)).thenReturn(Optional.of(bail));
+    when(montantLoyerBailRepository.findByBailLocation(bail)).thenReturn(List.of(montantActif));
+    when(appelLoyerRepository.findAllByBailLocationAppelLoyer(bail)).thenReturn(List.of(julyExisting));
+
+    List<String> generatedPeriods = service.generateMissingAppelsForBailPeriodRange(
+      44L,
+      YearMonth.of(2026, 7),
+      YearMonth.of(2026, 9)
+    );
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<List<AppelLoyer>> appelsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(appelLoyerRepository).saveAll(appelsCaptor.capture());
+
+    List<AppelLoyer> generatedAppels = appelsCaptor.getValue();
+    assertEquals(List.of("2026-08", "2026-09"), generatedPeriods);
+    assertEquals(
+      List.of("2026-08", "2026-09"),
+      generatedAppels.stream().map(AppelLoyer::getPeriodeAppelLoyer).toList()
+    );
+    assertTrue(generatedAppels.stream().allMatch(appel -> appel.getSoldeAppelLoyer() == 100000D));
+    assertTrue(generatedAppels.stream().noneMatch(AppelLoyer::isSolderAppelLoyer));
   }
 }

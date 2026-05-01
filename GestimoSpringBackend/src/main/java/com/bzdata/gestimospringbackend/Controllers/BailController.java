@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
+import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailModifDto;
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.DTOs.OperationDto;
@@ -78,6 +79,14 @@ public class BailController {
         return ResponseEntity.ok(bailService.findOperationById(id));
     }
 
+    @Operation(summary = "Baux actifs proches de leur date de fin", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/presqueATerme/{idAgence}")
+    public ResponseEntity<List<OperationDto>> findBauxPresqueATerme(
+            @PathVariable("idAgence") Long idAgence,
+            @RequestParam(name = "jours", required = false) Integer jours) {
+        return ResponseEntity.ok(bailService.findBauxPresqueATerme(idAgence, jours));
+    }
+
     @GetMapping("/bailLocataireetbien/{locataire}/{bien}")
     public ResponseEntity<LocataireEncaisDTO> bailByLocataireEtBien(@PathVariable("locataire") Long locataire,
             @PathVariable("bien") Long bien) {
@@ -97,5 +106,13 @@ public class BailController {
     public ResponseEntity<OperationDto> modifierUnBail(@RequestBody BailModifDto dto) {
         // log.info("We are going to save a new Bail Appartement {}", dto);
         return ResponseEntity.ok(bailService.modifierUnBail(dto));
+    }
+
+    @PostMapping("/prolongerBail/{id}")
+    @Operation(summary = "Prolongation d'un bail jusqu'a une nouvelle date de fin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<OperationDto> prolongerBail(
+            @PathVariable("id") Long id,
+            @RequestBody BailExtensionRequestDto requestDto) {
+        return ResponseEntity.ok(bailService.prolongerBail(id, requestDto));
     }
 }

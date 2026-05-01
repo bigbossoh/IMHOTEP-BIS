@@ -46,4 +46,9 @@ public class EmailController {
     public ResponseEntity<Boolean> sendMailRelanceGlobale(@PathVariable("id") Long id) {
         return ResponseEntity.ok(emailService.sendMailRelanceGlobaleLoyer(id));
     }
+
+    @PostMapping("/sendmailrelancefinbail/{idBail}")
+    public ResponseEntity<Boolean> sendMailRelanceFinBail(@PathVariable("idBail") Long idBail) {
+        return ResponseEntity.ok(emailService.sendMailRelanceFinBail(idBail));
+    }
 }

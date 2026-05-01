@@ -23,6 +23,7 @@ import { Utilisateur } from '../models/utilisateur';
 import { AuthRequestDto } from '../models/auth-request-dto';
 import { LocataireEncaisDTO } from '../models/locataire-encais-dto';
 import { OperationDto } from '../models/operation-dto';
+import { BailExtensionRequestDto } from '../models/bail-extension-request-dto';
 import { BailModifDto } from '../models/bail-modif-dto';
 import { BailAppartementDto } from '../models/bail-appartement-dto';
 import { BailMagasinDto } from '../models/bail-magasin-dto';
@@ -121,6 +122,7 @@ class ApiService extends __BaseService {
   static readonly listDesBauxPourUnLocatairePath = 'api/v1/bail/getallbailbylocataire/{id}';
   static readonly nombrebailactifPath = 'api/v1/bail/nombrebailactif/{idAgence}';
   static readonly nombrebailnonactifPath = 'api/v1/bail/nombrebailnonactif/{idAgence}';
+  static readonly prolongerBailPath = 'api/v1/bail/prolongerBail/{id}';
   static readonly modifierUnBailPath = 'api/v1/bail/save';
   static readonly supprimerBailPath = 'api/v1/bail/supprimerBail/{id}';
   static readonly findAllBailAppartementPath = 'api/v1/bailappartement/all/{idAgence}';
@@ -2304,6 +2306,53 @@ class ApiService extends __BaseService {
   nombrebailnonactif(idAgence: number): __Observable<number> {
     return this.nombrebailnonactifResponse(idAgence).pipe(
       __map(_r => _r.body as number)
+    );
+  }
+
+  /**
+   * @param params The `ApiService.ProlongerBailParams` containing the following parameters:
+   *
+   * - `id`:
+   *
+   * - `body`:
+   *
+   * @return successful operation
+   */
+  prolongerBailResponse(params: ApiService.ProlongerBailParams): __Observable<__StrictHttpResponse<OperationDto>> {
+    let __params = this.newParams();
+    let __headers = new HttpHeaders();
+    let __body: any = null;
+    __body = params.body;
+
+    let req = new HttpRequest<any>(
+      'POST',
+      this.rootUrl + `api/v1/bail/prolongerBail/${params.id}`,
+      __body,
+      {
+        headers: __headers,
+        params: __params,
+        responseType: 'json'
+      });
+
+    return this.http.request<any>(req).pipe(
+      __filter(_r => _r instanceof HttpResponse),
+      __map((_r) => {
+        return _r as __StrictHttpResponse<OperationDto>;
+      })
+    );
+  }
+  /**
+   * @param params The `ApiService.ProlongerBailParams` containing the following parameters:
+   *
+   * - `id`:
+   *
+   * - `body`:
+   *
+   * @return successful operation
+   */
+  prolongerBail(params: ApiService.ProlongerBailParams): __Observable<OperationDto> {
+    return this.prolongerBailResponse(params).pipe(
+      __map(_r => _r.body as OperationDto)
     );
   }
 
@@ -8880,6 +8929,14 @@ module ApiService {
   export interface BailByLocataireEtBienParams {
     locataire: number;
     bien: number;
+  }
+
+  /**
+   * Parameters for prolongerBail
+   */
+  export interface ProlongerBailParams {
+    id: number;
+    body?: BailExtensionRequestDto;
   }
 
   /**
