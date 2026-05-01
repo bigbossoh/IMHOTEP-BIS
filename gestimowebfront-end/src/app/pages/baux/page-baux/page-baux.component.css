@@ -102,7 +102,7 @@
 
 .baux-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 1rem;
   margin-top: 1.25rem;
 }
@@ -129,6 +129,11 @@
 .stat-card--closed {
   background: linear-gradient(135deg, rgba(255, 247, 237, 0.95), #ffffff);
   border-color: rgba(194, 65, 12, 0.14);
+}
+
+.stat-card--warning {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.96), #ffffff);
+  border-color: rgba(202, 138, 4, 0.18);
 }
 
 .baux-layout {
@@ -396,6 +401,19 @@
 .status-badge--active {
   background: var(--success-soft);
   color: var(--success);
+}
+
+.status-badge--warning {
+  background: rgba(254, 243, 199, 0.9);
+  color: #92400e;
+}
+
+.term-warning {
+  display: block;
+  margin-top: 0.35rem;
+  color: #92400e;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .bail-preview {
@@ -800,6 +818,33 @@
 
 .close-bail-modal__actions .btn {
   border-radius: 999px;
+}
+
+.extend-bail-modal {
+  width: min(680px, 94vw);
+}
+
+.extend-bail-form {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.05rem 1.1rem;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.extend-bail-form label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.extend-bail-form .form-control {
+  min-height: 3rem;
+  border-radius: 16px;
+  border-color: rgba(148, 163, 184, 0.35);
 }
 
 @media (max-width: 1199.98px) {

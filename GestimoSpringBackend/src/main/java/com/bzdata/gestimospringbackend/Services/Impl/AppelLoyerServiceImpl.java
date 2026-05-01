@@ -129,6 +129,58 @@ public class AppelLoyerServiceImpl implements AppelLoyerService {
   }
 
   @Override
+  public List<String> generateMissingAppelsForBailPeriodRange(
+    Long idBailLocation,
+    YearMonth periodeDebut,
+    YearMonth periodeFin
+  ) {
+    if (idBailLocation == null) {
+      throw new InvalidEntityException(
+        "Le bail est obligatoire pour generer les appels de loyer.",
+        ErrorCodes.BAILLOCATION_NOT_VALID
+      );
+    }
+
+    if (periodeDebut == null || periodeFin == null || periodeDebut.isAfter(periodeFin)) {
+      return List.of();
+    }
+
+    BailLocation bailLocation = bailLocationRepository
+      .findById(idBailLocation)
+      .orElseThrow(() ->
+        new InvalidEntityException(
+          "Aucun BailLocation has been found with Code " + idBailLocation,
+          ErrorCodes.BAILLOCATION_NOT_FOUND
+        )
+      );
+
+    Double montantBail = findMontantLoyerActif(bailLocation);
+    if (montantBail == null || montantBail <= 0) {
+      throw new InvalidEntityException(
+        "Aucun montant de loyer actif n'a ete trouve pour generer les appels.",
+        ErrorCodes.MONTANTLOYERBAIL_NOT_VALID
+      );
+    }
+
+    List<AppelLoyer> appelLoyerList = buildMissingAppels(
+      bailLocation,
+      bailLocation.getIdAgence(),
+      montantBail,
+      periodeDebut,
+      periodeFin
+    );
+
+    if (!appelLoyerList.isEmpty()) {
+      appelLoyerRepository.saveAll(appelLoyerList);
+    }
+
+    return appelLoyerList
+      .stream()
+      .map(AppelLoyer::getPeriodeAppelLoyer)
+      .collect(Collectors.toList());
+  }
+
+  @Override
   public boolean cloturerAppelDto(Long id) {
     if (id == null) {
       return false;

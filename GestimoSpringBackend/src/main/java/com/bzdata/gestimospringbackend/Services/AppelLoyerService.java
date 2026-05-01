@@ -8,10 +8,17 @@ import com.bzdata.gestimospringbackend.DTOs.PeriodeDto;
 import com.bzdata.gestimospringbackend.DTOs.PourcentageAppelDto;
 import com.bzdata.gestimospringbackend.DTOs.StatistiquePeriodeDto;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 public interface AppelLoyerService {
   List<String> save(AppelLoyerRequestDto dto);
+
+  List<String> generateMissingAppelsForBailPeriodRange(
+    Long idBailLocation,
+    YearMonth periodeDebut,
+    YearMonth periodeFin
+  );
 
   boolean cloturerAppelDto(Long id);
 

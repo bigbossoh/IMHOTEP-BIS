@@ -13,8 +13,8 @@
       <button
         type="button"
         class="btn btn-outline-secondary"
-        (click)="loadRelances()"
-        [disabled]="isLoading || isBulkActionRunning"
+        (click)="loadRelances(); loadBauxPresqueATerme()"
+        [disabled]="isLoading || isLoadingBauxATerme || isBulkActionRunning"
       >
         Actualiser
       </button>
@@ -33,6 +33,14 @@
         [disabled]="!canSendBulkGlobal"
       >
         Envoyer les relances globales
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-warning"
+        (click)="sendBulkBailRelances()"
+        [disabled]="!canSendBailBulk"
+      >
+        Relancer les fins de bail
       </button>
     </div>
   </header>
@@ -67,6 +75,95 @@
       <strong>{{ missingEmailCount }}</strong>
       <small>Locataires a completer avant envoi</small>
     </article>
+
+    <article class="summary-card" data-tone="warning">
+      <span class="summary-card__label">Baux bientot a terme</span>
+      <strong>{{ totalBauxPresqueATerme }}</strong>
+      <small>Contrats actifs finissant sous {{ bailAlertDelayDays }} jours</small>
+    </article>
+  </section>
+
+  <section class="relance-card">
+    <div class="section-head">
+      <div>
+        <span class="section-head__kicker">Fin de bail</span>
+        <h2>Baux proches de leur terme</h2>
+      </div>
+      <span class="section-head__status">
+        {{ selectedBauxATermeCount }} bail(x) selectionne(s)
+      </span>
+    </div>
+
+    @if (isLoadingBauxATerme) {
+      <div class="empty-state">
+        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+        <p>Chargement des baux proches de leur terme...</p>
+      </div>
+    } @else if (bauxPresqueATerme.length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <p>Aucun bail actif n'arrive a terme sous {{ bailAlertDelayDays }} jours.</p>
+      </div>
+    } @else {
+      <div class="table-shell">
+        <table class="relance-table bail-term-table">
+          <thead>
+            <tr>
+              <th class="select-col">
+                <input
+                  type="checkbox"
+                  [checked]="areAllBauxSelected()"
+                  (change)="toggleAllBauxSelection($any($event.target).checked)"
+                />
+              </th>
+              <th>Bail</th>
+              <th>Locataire / Bien</th>
+              <th>Date de fin</th>
+              <th>Delai</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (bail of bauxPresqueATerme; track trackByBail($index, bail)) {
+              <tr>
+                <td class="select-col">
+                  <input
+                    type="checkbox"
+                    [checked]="isBailSelected(bail)"
+                    [disabled]="isSendingBailRelance(bail)"
+                    (change)="toggleBailSelection(bail, $any($event.target).checked)"
+                  />
+                </td>
+                <td>
+                  <strong>{{ getBailLabel(bail) }}</strong>
+                  <small class="table-note">{{ bail.designationBail || '-' }}</small>
+                </td>
+                <td>
+                  <strong>{{ getBailTenantAssetLabel(bail) }}</strong>
+                </td>
+                <td>{{ bail.dateFin | date: 'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="term-chip">{{ getBailDaysRemaining(bail) }} jour(s)</span>
+                </td>
+                <td class="text-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-warning"
+                    (click)="sendSingleBailRelance(bail)"
+                    [disabled]="isSendingBailRelance(bail) || isBulkActionRunning"
+                  >
+                    @if (isSendingBailRelance(bail)) {
+                      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    }
+                    Relancer fin bail
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </section>
 
   <section class="relance-card">

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
+import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.Models.Appartement;
 import com.bzdata.gestimospringbackend.Models.AppelLoyer;
 import com.bzdata.gestimospringbackend.Models.BailLocation;
@@ -25,6 +26,7 @@ import com.bzdata.gestimospringbackend.repository.EncaissementPrincipalRepositor
 import com.bzdata.gestimospringbackend.repository.MontantLoyerBailRepository;
 import com.bzdata.gestimospringbackend.user.repository.UtilisateurRepository;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -253,5 +255,66 @@ class BailServiceImplTest {
 
     verify(appelLoyerRepository, never()).delete(currentMonthAppel);
     verify(appelLoyerRepository).delete(futureMonthAppel);
+  }
+
+  @Test
+  void prolongerBail_updatesEndDateAndGeneratesOnlyExtensionRentCalls() {
+    BailLocation bail = new BailLocation();
+    bail.setId(44L);
+    bail.setIdAgence(12L);
+    bail.setIdCreateur(4L);
+    bail.setEnCoursBail(true);
+    bail.setDateDebut(LocalDate.of(2026, 1, 1));
+    bail.setDateFin(LocalDate.of(2026, 6, 30));
+
+    MontantLoyerBail montantActif = new MontantLoyerBail();
+    montantActif.setStatusLoyer(true);
+    montantActif.setNouveauMontantLoyer(125000D);
+
+    when(bailLocationRepository.findById(44L)).thenReturn(Optional.of(bail));
+    when(bailLocationRepository.save(bail)).thenReturn(bail);
+    when(montantLoyerBailRepository.findByBailLocation(bail)).thenReturn(List.of(montantActif));
+
+    service.prolongerBail(
+      44L,
+      new BailExtensionRequestDto(LocalDate.of(2026, 12, 31))
+    );
+
+    assertEquals(LocalDate.of(2026, 12, 31), bail.getDateFin());
+    verify(bailLocationRepository).save(bail);
+    verify(appelLoyerService).generateMissingAppelsForBailPeriodRange(
+      44L,
+      YearMonth.of(2026, 7),
+      YearMonth.of(2026, 12)
+    );
+  }
+
+  @Test
+  void findBauxPresqueATerme_returnsOnlyActiveBailsEndingWithinDelay() {
+    BailLocation endingSoon = new BailLocation();
+    endingSoon.setId(51L);
+    endingSoon.setIdAgence(3L);
+    endingSoon.setEnCoursBail(true);
+    endingSoon.setDateFin(LocalDate.now().plusDays(20));
+
+    BailLocation endingLater = new BailLocation();
+    endingLater.setId(52L);
+    endingLater.setIdAgence(3L);
+    endingLater.setEnCoursBail(true);
+    endingLater.setDateFin(LocalDate.now().plusDays(90));
+
+    BailLocation closed = new BailLocation();
+    closed.setId(53L);
+    closed.setIdAgence(3L);
+    closed.setEnCoursBail(false);
+    closed.setDateFin(LocalDate.now().plusDays(10));
+
+    when(bailLocationRepository.findAll()).thenReturn(List.of(endingLater, closed, endingSoon));
+    when(bailMapperImpl.fromOperation(endingSoon)).thenReturn(new com.bzdata.gestimospringbackend.DTOs.OperationDto());
+
+    assertEquals(1, service.findBauxPresqueATerme(3L, 60).size());
+    verify(bailMapperImpl).fromOperation(endingSoon);
+    verify(bailMapperImpl, never()).fromOperation(endingLater);
+    verify(bailMapperImpl, never()).fromOperation(closed);
   }
 }

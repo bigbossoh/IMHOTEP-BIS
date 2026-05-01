@@ -7,7 +7,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="675"/>
 	<parameter name="PARAMETER_PERIODE" class="java.lang.String"/>
 	<parameter name="NOM_PROPRIO" class="java.lang.String"/>
-	<parameter name="ID_UTILISATEUR" class="java.lang.String"/>
+	<parameter name="ID_UTILISATEUR" class="java.lang.Long"/>
+	<parameter name="ID_APPEL" class="java.lang.Long"/>
 	<parameter name="LOGO" class="java.io.InputStream"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
@@ -60,9 +61,10 @@ WHERE
  AND  dbgestimoweb.operation.utilisateur_operation_id= dbgestimoweb.utilisateur.id
 AND	 dbgestimoweb.appel_loyer.bail_location_appel_loyer_id = dbgestimoweb.operation.id
 AND    dbgestimoweb.appel_loyer.periode_appel_loyer = $P{PARAMETER_PERIODE}
-AND  dbgestimoweb.utilisateur.id =$P{ID_UTILISATEUR}
+AND ($P{ID_UTILISATEUR} IS NULL OR dbgestimoweb.utilisateur.id = $P{ID_UTILISATEUR})
+AND ($P{ID_APPEL} IS NULL OR dbgestimoweb.appel_loyer.id = $P{ID_APPEL})
  AND dbgestimoweb.appel_loyer.is_cloturer = 0
-ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC, dbgestimoweb.bienimmobilier.code_abrv_bien_immobilier asc]]>
+ORDER BY nom ASC, prenom ASC, code_abrv_bien_immobilier ASC]]>
 	</queryString>
 	<field name="id" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.name" value="id"/>
@@ -363,7 +365,7 @@ ORDER BY dbgestimoweb.utilisateur.nom ASC , dbgestimoweb.utilisateur.prenom ASC,
 			</image>
 			<textField>
 				<reportElement x="0" y="293" width="554" height="46" forecolor="#FC0F17" uuid="dffc69bc-3e29-4fdd-afa3-4d438d539755"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle" markup="">
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 					<font fontName="SansSerif" size="14" isBold="true"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
