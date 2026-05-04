@@ -37,7 +37,7 @@ services:
       retries: 10
 
   backend:
-    image: astairenazaire/b:latest
+    image: astairenazaire/new-back:latest
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
@@ -65,7 +65,7 @@ services:
       - "8287"
 
   frontend:
-    image: astairenazaire/f:latest
+    image: astairenazaire/new-front:latest
     restart: unless-stopped
     expose:
       - "80"

@@ -58,7 +58,7 @@ jwt:
   secret: "[a-zA-Z0-9._]^+$GuidelinAurorees8SaisonACfsewwsikkoggishherforAlphabeticalArraNumeralsandOtherSymbo$"
 
 app:
-  password-reset-url: http://51.75.142.41/reset-password
+  password-reset-url: http://57.129.122.65/reset-password
   default-user-email: bossohpaulin@gmail.com
   user-security:
     inactivity-disable-days: 30

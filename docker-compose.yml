@@ -33,7 +33,7 @@ services:
 #       MAIL_PORT: ${MAIL_PORT:-587}
 #       MAIL_USERNAME: ${MAIL_USERNAME:-}
 #       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-#       PASSWORD_RESET_URL: ${PASSWORD_RESET_URL:-http://51.75.142.41/reset-password}
+#       PASSWORD_RESET_URL: ${PASSWORD_RESET_URL:-http://57.129.122.65/reset-password}
 #       DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL:-bossohpaulin@gmail.com}
 #       TZ: ${TZ:-Africa/Abidjan}
 #     volumes:
