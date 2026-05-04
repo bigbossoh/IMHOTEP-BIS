@@ -21,7 +21,7 @@ gestimoweb.com, www.gestimoweb.com {
 }
 
 # Accès par IP (HTTP uniquement) — utile pour tests (pas de TLS sur une IP).
-http://51.75.142.41 {
+http://57.129.122.65 {
 	import gestimo_common
 }
 

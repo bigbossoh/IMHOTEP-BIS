@@ -1,6 +1,6 @@
 # Déploiement production sur VPS (Docker Compose)
 
-Ce guide déploie le projet sur un VPS (ex: `51.75.142.41`) avec :
+Ce guide déploie le projet sur un VPS (ex: `57.129.122.65`) avec :
 
 - MySQL (`db`)
 - Backend Spring Boot (`backend`)
@@ -34,7 +34,7 @@ sudo ufw status
 
 ### Conflit port 80 (Nginx sur le VPS)
 
-Si vous voyez la page "Welcome to nginx!" en allant sur `http://51.75.142.41/`, c'est souvent le Nginx du VPS (installé sur la machine) qui répond, pas le conteneur `frontend`.
+Si vous voyez la page "Welcome to nginx!" en allant sur `http://57.129.122.65/`, c'est souvent le Nginx du VPS (installé sur la machine) qui répond, pas le conteneur `frontend`.
 
 Deux options :
 
@@ -43,7 +43,7 @@ Deux options :
   sudo systemctl stop nginx
   sudo systemctl disable nginx
   ```
-- Ou changer le port publié par Docker (ex: `HTTP_PORT=8080` dans `.env`) et accéder à `http://51.75.142.41:8080/`.
+- Ou changer le port publié par Docker (ex: `HTTP_PORT=8080` dans `.env`) et accéder à `http://57.129.122.65:8080/`.
 
 ## 2) Récupérer le projet sur le serveur
 
@@ -85,8 +85,8 @@ Note : en profil `prod`, le backend est en `ddl-auto: validate` (il faut donc un
 
 Accès :
 
-- Front : `http://51.75.142.41/`
-- Swagger (via proxy Nginx) : `http://51.75.142.41/swagger-ui/index.html`
+- Front : `http://57.129.122.65/`
+- Swagger (via proxy Nginx) : `http://57.129.122.65/swagger-ui/index.html`
 - Actuator : non exposé publiquement (sécurité). Accessible uniquement depuis le réseau Docker.
 
 ### Supervision (Prometheus / Grafana)
