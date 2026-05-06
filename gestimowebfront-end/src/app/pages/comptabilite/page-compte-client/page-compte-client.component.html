@@ -155,6 +155,12 @@
         <span class="cc-loyer-banner__bail">{{ locataire?.codeDescBail }}</span>
       </div>
 
+      @if (dataError) {
+        <div class="cc-inline-alert no-print">
+          {{ dataError }}
+        </div>
+      }
+
       <!-- ══════════════════════════════════════════════════════
            ONGLETS
       ══════════════════════════════════════════════════════ -->
@@ -206,6 +212,14 @@
             </div>
             <div class="cc-toolbar-right">
               <span class="cc-count-pill">{{ filteredAppelLoyers.length }} ligne(s)</span>
+              <label class="cc-page-size">
+                <span>Afficher</span>
+                <select [value]="appelPageSize" (change)="onAppelPageSizeChange($event)">
+                  @for (option of appelPageSizeOptions; track option) {
+                    <option [value]="option">{{ option }}</option>
+                  }
+                </select>
+              </label>
               <button type="button" class="cc-btn cc-btn--outline" (click)="exportAppelsToExcel()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -245,7 +259,7 @@
                       <td colspan="6" class="cc-no-result">Aucun résultat pour cette recherche.</td>
                     </tr>
                   }
-                  @for (row of filteredAppelLoyers; track row.id ?? $index) {
+                  @for (row of pagedAppelLoyers; track row.id ?? $index) {
                     <tr>
                       <td><span class="cc-id-badge">#{{ row.id }}</span></td>
                       <td>
@@ -263,6 +277,20 @@
                         </span>
                       </td>
                       <td class="cc-col-actions no-print">
+                        <button
+                          type="button"
+                          class="cc-btn cc-btn--primary-ghost cc-btn--sm"
+                          (click)="printQuittanceLoyer(row)"
+                          [disabled]="isPrintingQuittance(row)"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"/>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                            <rect x="6" y="14" width="12" height="8"/>
+                          </svg>
+                          {{ isPrintingQuittance(row) ? 'Impression...' : 'Quittance' }}
+                        </button>
                         @if (row.statusAppelLoyer !== 'Impayé') {
                           <button
                             type="button"
@@ -278,6 +306,34 @@
                 </tbody>
               </table>
             </div>
+            @if (filteredAppelLoyers.length > 0) {
+              <div class="cc-pagination no-print">
+                <span class="cc-pagination__summary">
+                  {{ appelPageStart }}-{{ appelPageEnd }} sur {{ filteredAppelLoyers.length }}
+                </span>
+                <div class="cc-pagination__actions">
+                  <button
+                    type="button"
+                    class="cc-btn cc-btn--outline cc-btn--sm"
+                    (click)="previousAppelPage()"
+                    [disabled]="appelPage <= 1"
+                  >
+                    Précédent
+                  </button>
+                  <span class="cc-pagination__page">
+                    Page {{ appelPage }} / {{ appelTotalPages }}
+                  </span>
+                  <button
+                    type="button"
+                    class="cc-btn cc-btn--outline cc-btn--sm"
+                    (click)="nextAppelPage()"
+                    [disabled]="appelPage >= appelTotalPages"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            }
           }
         </div>
       }

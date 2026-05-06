@@ -491,6 +491,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     return bailrepository
       .findAll()
       .stream()
+      .filter(this::isCompteClientBailUsable)
       .filter(bailActif -> idAgence != null && idAgence.equals(bailActif.getIdAgence()))
       .filter(bailActif -> bailActif.isEnCoursBail() == true)
       .map(bailMapper::fromOperationBailLocation)
@@ -500,27 +501,93 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
   @Override
   public List<LocataireEncaisDTO> listOfLocataireCompteClient(Long idAgence) {
+    List<LocataireEncaisDTO> locataires = findCompteClientBails(idAgence)
+      .stream()
+      .map(this::toCompteClientLocataireDto)
+      .sorted(this::compareCompteClientLocataires)
+      .collect(Collectors.toList());
+
+    if (!locataires.isEmpty() || idAgence == null) {
+      return locataires;
+    }
+
+    Set<Long> agenceAliases = resolveAgenceAliases(idAgence);
+    if (agenceAliases.isEmpty()) {
+      return locataires;
+    }
+
+    locataires = bailrepository
+      .findAll()
+      .stream()
+      .filter(this::isCompteClientBailUsable)
+      .filter(bail -> agenceAliases.contains(bail.getIdAgence()))
+      .map(this::toCompteClientLocataireDto)
+      .sorted(this::compareCompteClientLocataires)
+      .collect(Collectors.toList());
+
+    if (!locataires.isEmpty()) {
+      return locataires;
+    }
+
+    log.warn(
+      "Aucun bail trouve pour l'agence {} sur compte-client. Fallback sur tous les baux exploitables.",
+      idAgence
+    );
+
     return bailrepository
       .findAll()
       .stream()
-      .filter(bail -> idAgence != null && idAgence.equals(bail.getIdAgence()))
-      .filter(bail -> bail.getUtilisateurOperation() != null)
-      .filter(bail ->
-        bail.getUtilisateurOperation().getUrole() != null &&
-        "LOCATAIRE".equals(bail.getUtilisateurOperation().getUrole().getRoleName())
-      )
-      .filter(bail -> bail.getUtilisateurOperation().isActive())
+      .filter(this::isCompteClientBailUsable)
       .map(this::toCompteClientLocataireDto)
-      .sorted(
-        Comparator
-          .comparing(LocataireEncaisDTO::isBailEnCours)
-          .reversed()
-          .thenComparing(
-            dto -> StringUtils.hasText(dto.getCodeDescBail()) ? dto.getCodeDescBail() : "",
-            String.CASE_INSENSITIVE_ORDER
-          )
-      )
+      .sorted(this::compareCompteClientLocataires)
       .collect(Collectors.toList());
+  }
+
+  private List<BailLocation> findCompteClientBails(Long idAgence) {
+    return bailrepository
+      .findAll()
+      .stream()
+      .filter(this::isCompteClientBailUsable)
+      .filter(bail -> idAgence != null && idAgence.equals(bail.getIdAgence()))
+      .collect(Collectors.toList());
+  }
+
+  private boolean isCompteClientBailUsable(BailLocation bail) {
+    return bail != null &&
+      bail.getUtilisateurOperation() != null &&
+      bail.getBienImmobilierOperation() != null &&
+      bail.getId() != null;
+  }
+
+  private int compareCompteClientLocataires(
+    LocataireEncaisDTO left,
+    LocataireEncaisDTO right
+  ) {
+    Comparator<LocataireEncaisDTO> comparator = Comparator
+      .comparing(LocataireEncaisDTO::isBailEnCours)
+      .reversed()
+      .thenComparing(
+        dto -> StringUtils.hasText(dto.getCodeDescBail()) ? dto.getCodeDescBail() : "",
+        String.CASE_INSENSITIVE_ORDER
+      );
+    return comparator.compare(left, right);
+  }
+
+  private Set<Long> resolveAgenceAliases(Long idAgence) {
+    if (idAgence == null) {
+      return Set.of();
+    }
+
+    return agenceImmobiliereRepository
+      .findAll()
+      .stream()
+      .filter(agence ->
+        Objects.equals(agence.getId(), idAgence) ||
+        Objects.equals(agence.getIdAgence(), idAgence)
+      )
+      .flatMap(agence -> Stream.of(agence.getId(), agence.getIdAgence()))
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
   }
 
   @Override

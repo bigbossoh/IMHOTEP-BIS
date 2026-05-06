@@ -343,6 +343,17 @@
   margin-left: auto;
 }
 
+.cc-inline-alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(185, 28, 28, 0.22);
+  border-radius: var(--cc-radius);
+  background: rgba(254, 226, 226, 0.75);
+  color: var(--cc-danger);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 /* ══════════════════════════════════════════════════════════════════
    ONGLETS
 ══════════════════════════════════════════════════════════════════ */
@@ -425,6 +436,27 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.cc-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--cc-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cc-page-size select {
+  height: 2rem;
+  min-width: 4.2rem;
+  padding: 0 0.55rem;
+  border: 1px solid var(--cc-border-input);
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .cc-search-box {
@@ -523,6 +555,30 @@
   background: rgba(37, 99, 235, 0.03);
 }
 
+.cc-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  background: #fafbfd;
+}
+
+.cc-pagination__summary,
+.cc-pagination__page {
+  color: var(--cc-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cc-pagination__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 /* Cell helpers */
 .cc-cell-main {
   display: block;
@@ -553,6 +609,10 @@
   white-space: nowrap;
   width: 1%;
   text-align: center;
+}
+
+.cc-col-actions .cc-btn + .cc-btn {
+  margin-left: 0.4rem;
 }
 
 .cc-no-result {
