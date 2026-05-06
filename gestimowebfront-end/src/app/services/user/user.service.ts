@@ -207,6 +207,14 @@ export class UserService {
     );
   }
 
+  public getLocatairesAvecBail(
+    idAgence: number
+  ): Observable<LocataireEncaisDTO[]> {
+    return this.http.get<LocataireEncaisDTO[]>(
+      `${this.apiService.rootUrl}api/v1/utilisateur/locataires/ayanbail/${idAgence}`
+    );
+  }
+
   public saveUser(
     formData: UtilisateurRequestDto
   ): Observable<UtilisateurAfficheDto> {

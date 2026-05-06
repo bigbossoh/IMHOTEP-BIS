@@ -1,80 +1,177 @@
-
-<div class="col">
-  <div class="row m-3">
-    <div class="col-md-8 p-0">
-      <h1>Cloture des caisses</h1>
+<div class="ca-page container-fluid">
+  <div class="ca-page-header">
+    <div>
+      <span class="ca-eyebrow">Comptabilite</span>
+      <h1>Compte agence</h1>
+      <p>Suivi des loyers appeles, encaissements et soldes consolides de l'agence.</p>
     </div>
-    <div class="col-md-4 text-right"></div>
+    <div class="ca-page-header__actions no-print">
+      <button type="button" class="ca-btn ca-btn--ghost" (click)="loadCompteAgence()" [disabled]="isLoading">
+        Actualiser
+      </button>
+      <button type="button" class="ca-btn ca-btn--ghost" (click)="printPage()">
+        Imprimer
+      </button>
+    </div>
   </div>
 
-  <div class="row">
+  @if (errorMessage) {
+    <div class="ca-inline-alert">
+      {{ errorMessage }}
+    </div>
+  }
 
-
+  <div class="ca-kpi-row">
+    <article class="ca-kpi-card ca-kpi-card--blue">
+      <span class="ca-kpi-card__label">Loyers appeles</span>
+      <strong>{{ formatCurrency(montantLoyer) }}</strong>
+      <small>{{ totalReglements }} reglement(s)</small>
+    </article>
+    <article class="ca-kpi-card ca-kpi-card--green">
+      <span class="ca-kpi-card__label">Total encaisse</span>
+      <strong>{{ formatCurrency(montantEncaisse) }}</strong>
+      <small>Moyenne {{ formatCurrency(moyenneEncaisse) }}</small>
+    </article>
+    <article class="ca-kpi-card ca-kpi-card--orange">
+      <span class="ca-kpi-card__label">Solde en attente</span>
+      <strong>{{ formatCurrency(totalSolde) }}</strong>
+      <small>{{ tauxRecouvrement }}% de recouvrement</small>
+    </article>
+    <article class="ca-kpi-card ca-kpi-card--teal">
+      <span class="ca-kpi-card__label">Derniere operation</span>
+      <strong>
+        @if (derniereOperation) {
+          {{ derniereOperation.dateEncaissement | date:'dd/MM/yyyy' }}
+        } @else {
+          -
+        }
+      </strong>
+      <small>Agence #{{ currentAgenceId || '-' }}</small>
+    </article>
   </div>
 
-  <div>
-    <div class="mat-elevation-z8">
-      <div class="example-header">
-        <mat-form-field class="tail-50" style="margin-left: 12px;">
-          <mat-label>Rechercher</mat-label>
-          <input matInput (keyup)="applyFilterAppel($event)" #input placeholder="Rechercher un Appel" />
-        </mat-form-field>
+  <div class="ca-table-panel">
+    <div class="ca-period-bar no-print">
+      <label>
+        <span>Debut</span>
+        <input type="date" [(ngModel)]="dateDebut" />
+      </label>
+      <label>
+        <span>Fin</span>
+        <input type="date" [(ngModel)]="dateFin" />
+      </label>
+      <button type="button" class="ca-btn ca-btn--outline" (click)="onDateChange()" [disabled]="isLoading">
+        Rechercher
+      </button>
+    </div>
+
+    <div class="ca-table-toolbar no-print">
+      <div class="ca-search-box">
+        <input
+          type="search"
+          placeholder="Rechercher locataire, bien, periode, montant..."
+          (input)="onSearch($event)"
+        />
       </div>
-      <mat-paginator #paginator showFirstLastButtons [length]="100" [pageSizeOptions] ="pageSizeAppel" aria-label="Select page of users">
-      </mat-paginator>
-      <mat-table #tableAppel [dataSource]="dataSource" matSort>
-        <!-- Code colonne -->
-        <ng-container matColumnDef="caissiere">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>
-            Personne
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row">
-            {{ row.caissiere }}
-          </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="dateDeDCloture">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>
-           Periode
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row">
-          Du  {{ row.dateDeDCloture | date: "dd-MM-yyyy" }} à {{ row.dateFinCloture | date: "dd-MM-yyyy" }}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="intervalNextCloture">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>
-            Prochaine cloture
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row">
-         Dans   {{ row.dateNextCloture| date: "dd-MM-yyyy" }} jours
-          </mat-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="totalEncaisse">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>
-            Total Encaissé
-          </mat-header-cell>
-          <mat-cell *matCellDef="let row">
-            {{ row.totalEncaisse |currency:'XOF'}}</mat-cell>
-        </ng-container>
-
-        <mat-header-row *matHeaderRowDef="displayedColumns"> </mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-        <!-- Row shown when there is no matching data. -->
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4">
-            Aucune donnée enregistrée {{ input.value }}
-          </td>
-        </tr>
-      </mat-table>
+      <div class="ca-toolbar-right">
+        <span class="ca-count-pill">{{ filteredReglements.length }} ligne(s)</span>
+        <label class="ca-page-size">
+          <span>Afficher</span>
+          <select [value]="pageSize" (change)="onPageSizeChange($event)">
+            @for (option of pageSizeOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+        <button type="button" class="ca-btn ca-btn--outline" (click)="exportToExcel()" [disabled]="filteredReglements.length === 0">
+          Exporter Excel
+        </button>
+      </div>
     </div>
-  </div>
-  <!-- LISTE DES APPELS PAR BIEN -->
 
-  <div>
+    @if (isLoading) {
+      <div class="ca-empty-state">
+        <p>Chargement du compte agence...</p>
+      </div>
+    } @else if (allReglements.length === 0) {
+      <div class="ca-empty-state">
+        <p>Aucun encaissement disponible pour cette periode.</p>
+      </div>
+    } @else {
+      <div class="ca-table-shell">
+        <table class="ca-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Periode</th>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Loyer</th>
+              <th>Encaisse</th>
+              <th>Solde</th>
+              <th>Paiement</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredReglements.length === 0) {
+              <tr>
+                <td colspan="9" class="ca-no-result">Aucun resultat pour cette recherche.</td>
+              </tr>
+            }
+            @for (row of pagedReglements; track trackByReglement($index, row)) {
+              <tr>
+                <td><span class="ca-id-badge">#{{ row.id }}</span></td>
+                <td>
+                  <strong>{{ row.periodeAppelLoyer || '-' }}</strong>
+                  <span class="ca-cell-sub">{{ row.periodeLettre || '-' }}</span>
+                </td>
+                <td>
+                  <strong>{{ getLocataireName(row) }}</strong>
+                  <span class="ca-cell-sub">Bail #{{ row.idBailLocation || '-' }}</span>
+                </td>
+                <td>
+                  <span class="ca-cell-main">{{ row.bienImmobilierFullName || row.abrvBienimmobilier || '-' }}</span>
+                  <span class="ca-cell-sub">{{ row.commune || '-' }}</span>
+                </td>
+                <td>
+                  <strong>{{ formatCurrency(row.montantLoyerBailLPeriode) }}</strong>
+                </td>
+                <td>
+                  <strong class="ca-amount">{{ formatCurrency(row.montantPaye) }}</strong>
+                  <span class="ca-cell-sub">{{ row.dateEncaissement | date:'dd/MM/yyyy' }}</span>
+                </td>
+                <td>
+                  <strong>{{ formatCurrency(row.soldeAppelLoyer) }}</strong>
+                </td>
+                <td>
+                  <span class="ca-mode-pill">{{ row.typePaiement || '-' }}</span>
+                </td>
+                <td>
+                  <span class="ca-status-pill" [class.ca-status-pill--paid]="row.solderAppelLoyer">
+                    {{ row.statusAppelLoyer || (row.solderAppelLoyer ? 'Solde' : 'En attente') }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-  </div>
-
-  <div>
-
+      @if (filteredReglements.length > 0) {
+        <div class="ca-pagination no-print">
+          <span>{{ pageStart }}-{{ pageEnd }} sur {{ filteredReglements.length }}</span>
+          <div class="ca-pagination__actions">
+            <button type="button" class="ca-btn ca-btn--outline ca-btn--sm" (click)="previousPage()" [disabled]="page <= 1">
+              Precedent
+            </button>
+            <span>Page {{ page }} / {{ totalPages }}</span>
+            <button type="button" class="ca-btn ca-btn--outline ca-btn--sm" (click)="nextPage()" [disabled]="page >= totalPages">
+              Suivant
+            </button>
+          </div>
+        </div>
+      }
+    }
   </div>
 </div>
-

@@ -1,8 +1,6 @@
 export const environment = {
-  production: true,
-  // Dev local (backend sur ta machine)
-  // serverUrl: '/actuator',
-  ///*  */ Dev contre le serveur HTTPS (via Caddy)
-  serverUrl: 'https://localhost/actuator',
+  production: false,
+  // Dev local: backend Spring Boot sur ta machine.
+  serverUrl: 'http://localhost:8287/actuator',
   openAiApiKey: '',
 };

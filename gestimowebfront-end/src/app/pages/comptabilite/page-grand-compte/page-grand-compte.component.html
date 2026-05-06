@@ -1,1 +1,242 @@
-<p>page-grand-compte works!</p>
+<div class="gc-page container-fluid">
+  <div class="gc-page-header">
+    <div>
+      <span class="gc-eyebrow">Comptabilite</span>
+      <h1>Grand compte</h1>
+      <p>Balance generale des loyers, encaissements et soldes par locataire.</p>
+    </div>
+    <div class="gc-page-header__actions no-print">
+      <button type="button" class="gc-btn gc-btn--ghost" (click)="loadGrandCompte()" [disabled]="isLoading">
+        Actualiser
+      </button>
+      <button type="button" class="gc-btn gc-btn--ghost" (click)="printPage()">
+        Imprimer
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="gc-inline-alert">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="gc-kpi-row">
+    <article class="gc-kpi-card gc-kpi-card--blue">
+      <span class="gc-kpi-card__label">Loyers appeles</span>
+      <strong>{{ formatCurrency(montantLoyer) }}</strong>
+      <small>{{ balanceRows.length }} compte(s)</small>
+    </article>
+    <article class="gc-kpi-card gc-kpi-card--green">
+      <span class="gc-kpi-card__label">Total encaisse</span>
+      <strong>{{ formatCurrency(montantEncaisse) }}</strong>
+      <small>{{ operations.length }} operation(s)</small>
+    </article>
+    <article class="gc-kpi-card gc-kpi-card--orange">
+      <span class="gc-kpi-card__label">Solde global</span>
+      <strong>{{ formatCurrency(totalSolde) }}</strong>
+      <small>{{ comptesDebiteurs }} compte(s) debiteur(s)</small>
+    </article>
+    <article class="gc-kpi-card gc-kpi-card--teal">
+      <span class="gc-kpi-card__label">Recouvrement</span>
+      <strong>{{ tauxRecouvrement }}%</strong>
+      <small>Agence #{{ currentAgenceId || '-' }}</small>
+    </article>
+  </div>
+
+  <div class="gc-table-panel">
+    <div class="gc-period-bar no-print">
+      <label>
+        <span>Debut</span>
+        <input type="date" [(ngModel)]="dateDebut" />
+      </label>
+      <label>
+        <span>Fin</span>
+        <input type="date" [(ngModel)]="dateFin" />
+      </label>
+      <label>
+        <span>Statut</span>
+        <select [value]="statusFilter" (change)="onStatusChange($event)">
+          @for (option of statusOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="gc-btn gc-btn--outline" (click)="onDateChange()" [disabled]="isLoading">
+        Rechercher
+      </button>
+    </div>
+
+    <div class="gc-table-toolbar no-print">
+      <div class="gc-tabs">
+        <button
+          type="button"
+          class="gc-tab"
+          [class.gc-tab--active]="activeView === 'balance'"
+          (click)="setView('balance')"
+        >
+          Balance
+        </button>
+        <button
+          type="button"
+          class="gc-tab"
+          [class.gc-tab--active]="activeView === 'operations'"
+          (click)="setView('operations')"
+        >
+          Operations
+        </button>
+      </div>
+      <div class="gc-search-box">
+        <input
+          type="search"
+          placeholder="Rechercher locataire, bail, bien, montant..."
+          (input)="onSearch($event)"
+        />
+      </div>
+      <div class="gc-toolbar-right">
+        <span class="gc-count-pill">{{ sourceLength }} ligne(s)</span>
+        <label class="gc-page-size">
+          <span>Afficher</span>
+          <select [value]="pageSize" (change)="onPageSizeChange($event)">
+            @for (option of pageSizeOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+        <button type="button" class="gc-btn gc-btn--outline" (click)="exportToExcel()" [disabled]="sourceLength === 0">
+          Exporter Excel
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="gc-empty-state">
+        <p>Chargement du grand compte...</p>
+      </div>
+    } @else if (operations.length === 0) {
+      <div class="gc-empty-state">
+        <p>Aucune operation disponible pour cette periode.</p>
+      </div>
+    } @else if (activeView === 'balance') {
+      <div class="gc-table-shell">
+        <table class="gc-table">
+          <thead>
+            <tr>
+              <th>Locataire</th>
+              <th>Bail</th>
+              <th>Bien</th>
+              <th>Loyers appeles</th>
+              <th>Encaisse</th>
+              <th>Solde</th>
+              <th>Derniere operation</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredBalanceRows.length === 0) {
+              <tr>
+                <td colspan="8" class="gc-no-result">Aucun resultat pour cette recherche.</td>
+              </tr>
+            }
+            @for (row of pagedBalanceRows; track trackByBalance($index, row)) {
+              <tr>
+                <td>
+                  <strong>{{ row.locataire }}</strong>
+                  <span class="gc-cell-sub">Locataire #{{ row.idLocataire || '-' }}</span>
+                </td>
+                <td>
+                  <span class="gc-id-badge">{{ row.bail }}</span>
+                </td>
+                <td>
+                  <span class="gc-cell-main">{{ row.bien }}</span>
+                  <span class="gc-cell-sub">{{ row.commune }}</span>
+                </td>
+                <td><strong>{{ formatCurrency(row.loyersAppeles) }}</strong></td>
+                <td><strong class="gc-amount">{{ formatCurrency(row.totalEncaisse) }}</strong></td>
+                <td><strong [class.gc-danger-text]="row.solde > 0">{{ formatCurrency(row.solde) }}</strong></td>
+                <td>
+                  <span class="gc-cell-main">{{ row.derniereOperation | date:'dd/MM/yyyy' }}</span>
+                  <span class="gc-cell-sub">{{ row.nbOperations }} operation(s)</span>
+                </td>
+                <td>
+                  <span class="gc-status-pill" [class.gc-status-pill--paid]="row.statut === 'Solde'" [class.gc-status-pill--partial]="row.statut === 'Partiel'">
+                    {{ row.statut }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="gc-table-shell">
+        <table class="gc-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Periode</th>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Loyer</th>
+              <th>Encaisse</th>
+              <th>Solde</th>
+              <th>Paiement</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredOperations.length === 0) {
+              <tr>
+                <td colspan="9" class="gc-no-result">Aucun resultat pour cette recherche.</td>
+              </tr>
+            }
+            @for (row of pagedOperations; track trackByOperation($index, row)) {
+              <tr>
+                <td><span class="gc-id-badge">#{{ row.id }}</span></td>
+                <td>
+                  <strong>{{ row.periodeAppelLoyer || '-' }}</strong>
+                  <span class="gc-cell-sub">{{ row.periodeLettre || '-' }}</span>
+                </td>
+                <td>
+                  <strong>{{ getLocataireName(row) }}</strong>
+                  <span class="gc-cell-sub">Bail #{{ row.idBailLocation || '-' }}</span>
+                </td>
+                <td>
+                  <span class="gc-cell-main">{{ row.bienImmobilierFullName || row.abrvBienimmobilier || '-' }}</span>
+                  <span class="gc-cell-sub">{{ row.commune || '-' }}</span>
+                </td>
+                <td><strong>{{ formatCurrency(row.montantLoyerBailLPeriode) }}</strong></td>
+                <td>
+                  <strong class="gc-amount">{{ formatCurrency(row.montantPaye) }}</strong>
+                  <span class="gc-cell-sub">{{ row.dateEncaissement | date:'dd/MM/yyyy' }}</span>
+                </td>
+                <td><strong>{{ formatCurrency(row.soldeAppelLoyer) }}</strong></td>
+                <td><span class="gc-mode-pill">{{ row.typePaiement || '-' }}</span></td>
+                <td>
+                  <span class="gc-status-pill" [class.gc-status-pill--paid]="row.solderAppelLoyer">
+                    {{ getOperationStatus(row) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!isLoading && sourceLength > 0) {
+      <div class="gc-pagination no-print">
+        <span>{{ pageStart }}-{{ pageEnd }} sur {{ sourceLength }}</span>
+        <div class="gc-pagination__actions">
+          <button type="button" class="gc-btn gc-btn--outline gc-btn--sm" (click)="previousPage()" [disabled]="page <= 1">
+            Precedent
+          </button>
+          <span>Page {{ page }} / {{ totalPages }}</span>
+          <button type="button" class="gc-btn gc-btn--outline gc-btn--sm" (click)="nextPage()" [disabled]="page >= totalPages">
+            Suivant
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

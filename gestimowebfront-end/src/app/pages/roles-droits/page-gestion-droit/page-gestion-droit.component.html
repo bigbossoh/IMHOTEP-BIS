@@ -1,17 +1,276 @@
-<div class="mat-headline">This is a heading for h1</div>
-<div class="mat-title">This is a heading for h2</div>
-<div class="mat-subheading-2">This is a heading for h3</div>
-<div class="mat-subheading-1">This is a heading for h4</div>
-<div class="mat-display-4">This is display 4</div>
-<div class="mat-display-3">This is display 3</div>
-<div class="mat-display-2">This is display 2</div>
-<div class="mat-display-1">This is display 1</div>
-<div class="mat-body-1">This is body text</div>
-<div class="mat-body-2">This is bold body text</div>
-<div class="mat-caption">This is caption text</div>
-<div class="mat-typography">
-  <h1>This is a heading for h1</h1>
-  <h2>This is a heading for h2</h2>
-  <h3>This is a heading for h3</h3>
-  <h4>This is a heading for h4</h4>
+<div class="rd-page container-fluid">
+  <div class="rd-page-header">
+    <div>
+      <span class="rd-eyebrow">Utilisateurs</span>
+      <h1>Attribution des droits</h1>
+      <p>Consultez les roles, les droits applicatifs et les groupes de droits de l'agence.</p>
+    </div>
+    <div class="rd-page-header__actions">
+      <button type="button" class="rd-btn rd-btn--ghost" (click)="loadData()" [disabled]="isLoading">
+        Actualiser
+      </button>
+      <button type="button" class="rd-btn rd-btn--ghost" (click)="exportToExcel()" [disabled]="isLoading">
+        Exporter Excel
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="rd-inline-alert rd-inline-alert--danger">{{ errorMessage }}</div>
+  }
+  @if (successMessage) {
+    <div class="rd-inline-alert rd-inline-alert--success">{{ successMessage }}</div>
+  }
+
+  <div class="rd-kpi-row">
+    <article class="rd-kpi-card rd-kpi-card--blue">
+      <span class="rd-kpi-card__label">Utilisateurs</span>
+      <strong>{{ totalUsers }}</strong>
+      <small>{{ activeUsers }} actif(s)</small>
+    </article>
+    <article class="rd-kpi-card rd-kpi-card--green">
+      <span class="rd-kpi-card__label">Roles</span>
+      <strong>{{ roleSummaries.length }}</strong>
+      <small>Catalogue applicatif</small>
+    </article>
+    <article class="rd-kpi-card rd-kpi-card--orange">
+      <span class="rd-kpi-card__label">Droits</span>
+      <strong>{{ totalDroits }}</strong>
+      <small>Droits declares</small>
+    </article>
+    <article class="rd-kpi-card rd-kpi-card--teal">
+      <span class="rd-kpi-card__label">Groupes</span>
+      <strong>{{ totalGroupes }}</strong>
+      <small>Agence #{{ currentAgenceId || '-' }}</small>
+    </article>
+  </div>
+
+  <div class="rd-panel">
+    <div class="rd-toolbar">
+      <div class="rd-tabs">
+        <button type="button" class="rd-tab" [class.rd-tab--active]="activeTab === 'roles'" (click)="setTab('roles')">
+          Roles
+        </button>
+        <button type="button" class="rd-tab" [class.rd-tab--active]="activeTab === 'droits'" (click)="setTab('droits')">
+          Droits
+        </button>
+        <button type="button" class="rd-tab" [class.rd-tab--active]="activeTab === 'groupes'" (click)="setTab('groupes')">
+          Groupes
+        </button>
+      </div>
+      <div class="rd-search-box">
+        <input type="search" placeholder="Rechercher role, utilisateur, droit..." (input)="onSearch($event)" />
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="rd-empty-state">
+        <p>Chargement des roles et droits...</p>
+      </div>
+    } @else if (activeTab === 'roles') {
+      <div class="rd-grid">
+        <section class="rd-list-panel">
+          <div class="rd-section-header">
+            <h2>Roles applicatifs</h2>
+            <span class="rd-count-pill">{{ roleSummaries.length }} role(s)</span>
+          </div>
+          <div class="rd-role-list">
+            @for (role of roleSummaries; track trackByRole($index, role)) {
+              <article class="rd-role-card">
+                <div>
+                  <strong>{{ role.label }}</strong>
+                  <span>{{ role.value }}</span>
+                  <p>{{ role.description }}</p>
+                </div>
+                <div class="rd-role-meta">
+                  <span class="rd-count-pill">{{ role.count }} utilisateur(s)</span>
+                  <div class="rd-authorities">
+                    @for (authority of role.authorities; track authority) {
+                      <span>{{ authority }}</span>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="rd-list-panel">
+          <div class="rd-section-header">
+            <h2>Utilisateurs et roles</h2>
+            <span class="rd-count-pill">{{ filteredUsers.length }} ligne(s)</span>
+          </div>
+          <div class="rd-table-shell">
+            <table class="rd-table">
+              <thead>
+                <tr>
+                  <th>Utilisateur</th>
+                  <th>Role</th>
+                  <th>Contact</th>
+                  <th>Etat</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (filteredUsers.length === 0) {
+                  <tr>
+                    <td colspan="4" class="rd-no-result">Aucun utilisateur trouve.</td>
+                  </tr>
+                }
+                @for (item of filteredUsers; track trackByUser($index, item)) {
+                  <tr>
+                    <td>
+                      <strong>{{ getUserFullName(item) }}</strong>
+                      <span class="rd-cell-sub">#{{ item.id || '-' }}</span>
+                    </td>
+                    <td>
+                      <span class="rd-role-pill">{{ getRoleLabel(item.roleUsed) }}</span>
+                    </td>
+                    <td>
+                      <span class="rd-cell-main">{{ item.email || '-' }}</span>
+                      <span class="rd-cell-sub">{{ item.mobile || item.username || '-' }}</span>
+                    </td>
+                    <td>
+                      <span class="rd-status-pill" [class.rd-status-pill--off]="item.active === false || item.activated === false">
+                        {{ item.active === false || item.activated === false ? 'Inactif' : 'Actif' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    } @else if (activeTab === 'droits') {
+      <div class="rd-grid rd-grid--form">
+        <section class="rd-form-panel">
+          <div class="rd-section-header">
+            <h2>{{ editingDroit ? 'Modifier un droit' : 'Nouveau droit' }}</h2>
+          </div>
+          <form [formGroup]="droitForm" (ngSubmit)="saveDroit()">
+            <label>
+              <span>Libelle du droit</span>
+              <input type="text" formControlName="libelleDroit" placeholder="ex: Creation bail" />
+            </label>
+            @if (droitForm.get('libelleDroit')?.invalid && droitForm.get('libelleDroit')?.touched) {
+              <small class="rd-field-error">Le libelle du droit est obligatoire.</small>
+            }
+            <div class="rd-form-actions">
+              <button type="submit" class="rd-btn rd-btn--primary" [disabled]="isSavingDroit">
+                {{ editingDroit ? 'Modifier' : 'Creer' }}
+              </button>
+              @if (editingDroit) {
+                <button type="button" class="rd-btn rd-btn--outline" (click)="cancelDroitEdit()">
+                  Annuler
+                </button>
+              }
+            </div>
+          </form>
+        </section>
+
+        <section class="rd-list-panel">
+          <div class="rd-section-header">
+            <h2>Droits declares</h2>
+            <span class="rd-count-pill">{{ filteredDroits.length }} ligne(s)</span>
+          </div>
+          <div class="rd-table-shell">
+            <table class="rd-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Code</th>
+                  <th>Libelle</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (filteredDroits.length === 0) {
+                  <tr>
+                    <td colspan="4" class="rd-no-result">Aucun droit declare.</td>
+                  </tr>
+                }
+                @for (droit of filteredDroits; track trackByDroit($index, droit)) {
+                  <tr>
+                    <td><span class="rd-id-badge">#{{ droit.id }}</span></td>
+                    <td>{{ droit.codeDroit || '-' }}</td>
+                    <td><strong>{{ droit.libelleDroit }}</strong></td>
+                    <td>
+                      <div class="rd-row-actions">
+                        <button type="button" class="rd-btn rd-btn--sm rd-btn--outline" (click)="editDroit(droit)">Modifier</button>
+                        <button type="button" class="rd-btn rd-btn--sm rd-btn--danger" (click)="deleteDroit(droit)">Supprimer</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    } @else {
+      <div class="rd-grid rd-grid--form">
+        <section class="rd-form-panel">
+          <div class="rd-section-header">
+            <h2>{{ editingGroupe ? 'Modifier un groupe' : 'Nouveau groupe' }}</h2>
+          </div>
+          <form [formGroup]="groupeForm" (ngSubmit)="saveGroupe()">
+            <label>
+              <span>Nom du groupe</span>
+              <input type="text" formControlName="groupeDroit" placeholder="ex: Gestion comptable" />
+            </label>
+            @if (groupeForm.get('groupeDroit')?.invalid && groupeForm.get('groupeDroit')?.touched) {
+              <small class="rd-field-error">Le nom du groupe est obligatoire.</small>
+            }
+            <div class="rd-form-actions">
+              <button type="submit" class="rd-btn rd-btn--primary" [disabled]="isSavingGroupe">
+                {{ editingGroupe ? 'Modifier' : 'Creer' }}
+              </button>
+              @if (editingGroupe) {
+                <button type="button" class="rd-btn rd-btn--outline" (click)="cancelGroupeEdit()">
+                  Annuler
+                </button>
+              }
+            </div>
+          </form>
+        </section>
+
+        <section class="rd-list-panel">
+          <div class="rd-section-header">
+            <h2>Groupes de droits</h2>
+            <span class="rd-count-pill">{{ filteredGroupes.length }} ligne(s)</span>
+          </div>
+          <div class="rd-table-shell">
+            <table class="rd-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Groupe</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (filteredGroupes.length === 0) {
+                  <tr>
+                    <td colspan="3" class="rd-no-result">Aucun groupe declare.</td>
+                  </tr>
+                }
+                @for (groupe of filteredGroupes; track trackByGroupe($index, groupe)) {
+                  <tr>
+                    <td><span class="rd-id-badge">#{{ groupe.id }}</span></td>
+                    <td><strong>{{ groupe.groupeDroit }}</strong></td>
+                    <td>
+                      <div class="rd-row-actions">
+                        <button type="button" class="rd-btn rd-btn--sm rd-btn--outline" (click)="editGroupe(groupe)">Modifier</button>
+                        <button type="button" class="rd-btn rd-btn--sm rd-btn--danger" (click)="deleteGroupe(groupe)">Supprimer</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    }
+  </div>
 </div>

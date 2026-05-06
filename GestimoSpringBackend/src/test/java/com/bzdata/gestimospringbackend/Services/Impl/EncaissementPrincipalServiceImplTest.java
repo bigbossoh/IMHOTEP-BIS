@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.EncaissementPayloadDto;
 import com.bzdata.gestimospringbackend.DTOs.EncaissementPrincipalDTO;
+import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.Models.AppelLoyer;
 import com.bzdata.gestimospringbackend.Models.BailLocation;
 import com.bzdata.gestimospringbackend.Models.EncaissementPrincipal;
@@ -177,6 +178,76 @@ class EncaissementPrincipalServiceImplTest {
         .map(encaissement -> encaissement.getAppelLoyerEncaissement().getPeriodeAppelLoyer())
         .toList()
     );
+  }
+
+  @Test
+  void groupedPaymentShouldSettleOldestUnpaidPeriodBeforeSelectedPeriod() {
+    Villa bien = new Villa();
+    bien.setId(501L);
+
+    Utilisateur locataire = new Utilisateur();
+    locataire.setId(21L);
+    locataire.setUsername("0707070707");
+
+    BailLocation bailLocation = new BailLocation();
+    bailLocation.setId(301L);
+    bailLocation.setIdAgence(1L);
+    bailLocation.setDesignationBail("BAIL TEST");
+    bailLocation.setBienImmobilierOperation(bien);
+    bailLocation.setUtilisateurOperation(locataire);
+
+    AppelLoyer mars2025 = buildAppel(
+      1L,
+      "2025-03",
+      LocalDate.of(2025, 3, 1),
+      bailLocation
+    );
+    AppelLoyer juin2026 = buildAppel(
+      2L,
+      "2026-06",
+      LocalDate.of(2026, 6, 1),
+      bailLocation
+    );
+    List<AppelLoyer> appels = List.of(mars2025, juin2026);
+
+    when(appelLoyerRepository.findById(2L)).thenReturn(Optional.of(juin2026));
+    when(appelLoyerRepository.findAllByBailLocationAppelLoyer(bailLocation))
+      .thenReturn(appels);
+    when(appelLoyerRepository.findAll()).thenReturn(appels);
+    when(bailMapperImpl.fromOperationAppelLoyer(juin2026)).thenAnswer(invocation -> {
+      LocataireEncaisDTO dto = new LocataireEncaisDTO();
+      dto.setIdAppel(juin2026.getId());
+      dto.setSoldeAppelLoyer(juin2026.getSoldeAppelLoyer());
+      return dto;
+    });
+
+    EncaissementPayloadDto payload = new EncaissementPayloadDto();
+    payload.setIdAgence(1L);
+    payload.setIdCreateur(99L);
+    payload.setIdAppelLoyer(2L);
+    payload.setModePaiement(ModePaiement.ESPESE_MAGISER);
+    payload.setOperationType(OperationType.CREDIT);
+    payload.setEntiteOperation(EntiteOperation.MAGISER);
+    payload.setMontantEncaissement(200_000d);
+    payload.setTypePaiement("ENCAISSEMENT_GROUPE");
+
+    List<LocataireEncaisDTO> result = service.saveEncaissementGrouperAvecRetourDeList(
+      payload
+    );
+
+    assertEquals(1, savedEncaissements.size());
+    assertEquals(
+      "2025-03",
+      savedEncaissements
+        .get(0)
+        .getAppelLoyerEncaissement()
+        .getPeriodeAppelLoyer()
+    );
+    assertTrue(mars2025.isSolderAppelLoyer());
+    assertEquals(0d, mars2025.getSoldeAppelLoyer());
+    assertEquals(200_000d, juin2026.getSoldeAppelLoyer());
+    assertEquals(1, result.size());
+    assertEquals(2L, result.get(0).getIdAppel());
   }
 
   private AppelLoyer buildAppel(

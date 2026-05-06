@@ -1,25 +1,13 @@
 import {
-  GetAllAppelLoyerByBailActions,
-  GetAllSmsByLocataireActions,
   SaveSupprimerActions as SaveSupprimerLoyerActions,
 } from './../../../ngrx/appelloyer/appelloyer.actions';
-import {
-  AppelLoyerState,
-  AppelLoyerStateEnum,
-} from 'src/app/ngrx/appelloyer/appelloyer.reducer';
-import {
-  GetEncaissementBienActions,
-} from './../../../ngrx/reglement/reglement.actions';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user/user.service';
 import { LocataireEncaisDTO, UtilisateurRequestDto } from 'src/gs-api/src/models';
-import {
-  EncaissementState,
-  EncaissementStateEnum,
-} from 'src/app/ngrx/reglement/reglement.reducer';
+import { ApiService } from 'src/gs-api/src/services';
 import { saveAs } from 'file-saver';
 import { PrintServiceService } from 'src/app/services/Print/print-service.service';
 import * as XLSX from 'xlsx';
@@ -32,13 +20,15 @@ export type ActiveTab = 'appels' | 'encaissements' | 'sms';
   templateUrl: './page-compte-client.component.html',
   styleUrls: ['./page-compte-client.component.css'],
 })
-export class PageCompteClientComponent implements OnInit {
+export class PageCompteClientComponent implements OnInit, OnDestroy {
   public user?: UtilisateurRequestDto;
   locataire: LocataireEncaisDTO | null = null;
   locataires: LocataireEncaisDTO[] = [];
   locatairesLoading = false;
   locatairesError = '';
+  dataError = '';
   private locatairesSubscription?: Subscription;
+  private dataSubscriptions: Subscription[] = [];
 
   // Onglet actif
   activeTab: ActiveTab = 'appels';
@@ -47,6 +37,10 @@ export class PageCompteClientComponent implements OnInit {
   allAppelLoyers: any[] = [];
   filteredAppelLoyers: any[] = [];
   searchAppel = '';
+  printingAppelId: number | null = null;
+  appelPage = 1;
+  appelPageSize = 10;
+  readonly appelPageSizeOptions = [5, 10, 20, 50];
 
   // Encaissements
   allEncaissements: any[] = [];
@@ -58,21 +52,21 @@ export class PageCompteClientComponent implements OnInit {
   filteredSms: any[] = [];
   searchSms = '';
 
-  appelLoyerState$: Observable<AppelLoyerState> | null = null;
-  readonly AppelLoyerStateEnum = AppelLoyerStateEnum;
-
-  listeEncaissementBien$: Observable<EncaissementState> | null = null;
-  readonly EncaissementStateEnum = EncaissementStateEnum;
-
   constructor(
     private store: Store<any>,
     private userService: UserService,
+    private apiService: ApiService,
     private printService: PrintServiceService
   ) {}
 
   ngOnInit(): void {
-    this.user = this.userService.getUserFromLocalCache();
+    this.user = this.getCurrentUser();
     this.loadLocatairesCompteClient();
+  }
+
+  ngOnDestroy(): void {
+    this.locatairesSubscription?.unsubscribe();
+    this.dataSubscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   // ─── Navigation ────────────────────────────────────────────────────────────
@@ -92,6 +86,7 @@ export class PageCompteClientComponent implements OnInit {
 
   private selectLocataire(selected: LocataireEncaisDTO): void {
     this.locataire = selected;
+    this.dataError = '';
     this.allAppelLoyers = [];
     this.filteredAppelLoyers = [];
     this.allEncaissements = [];
@@ -102,6 +97,8 @@ export class PageCompteClientComponent implements OnInit {
   }
 
   public loadAllForLocataire(loc: LocataireEncaisDTO): void {
+    this.dataSubscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.dataSubscriptions = [];
     this.getAllAppelLoyerByBail(loc);
     this.getAllEncaissementByBienImmobilier(loc);
     this.getAllSmsByLocataire(loc);
@@ -110,38 +107,88 @@ export class PageCompteClientComponent implements OnInit {
   // ─── Chargement données ────────────────────────────────────────────────────
 
   public getAllEncaissementByBienImmobilier(p: any): void {
-    this.store.dispatch(new GetEncaissementBienActions(p.idBien));
-    this.store.pipe(map((state) => state.encaissementState)).subscribe((donnee) => {
-      this.allEncaissements = donnee.encaissements ?? [];
+    const idBien = this.toPositiveNumber(p?.idBien);
+    if (idBien === null) {
+      this.allEncaissements = [];
       this.applyEncaissementFilter();
-    });
+      return;
+    }
+
+    const subscription = this.apiService
+      .findAllEncaissementByIdBienImmobilier(idBien)
+      .subscribe({
+        next: (encaissements) => {
+          this.allEncaissements = encaissements ?? [];
+          this.applyEncaissementFilter();
+        },
+        error: () => {
+          this.allEncaissements = [];
+          this.applyEncaissementFilter();
+          this.dataError = "Impossible de charger les encaissements du compte locataire.";
+        },
+      });
+    this.dataSubscriptions.push(subscription);
   }
 
   public getAllAppelLoyerByBail(bien: any): void {
-    this.store.dispatch(new GetAllAppelLoyerByBailActions(bien.idBail));
-    this.appelLoyerState$ = this.store.pipe(map((state) => state.appelLoyerState));
-    this.store.pipe(map((state) => state.appelLoyerState)).subscribe((data) => {
-      this.allAppelLoyers = data.appelloyers ?? [];
+    const idBail = this.toPositiveNumber(bien?.idBail);
+    if (idBail === null) {
+      this.allAppelLoyers = [];
       this.applyAppelFilter();
+      return;
+    }
+
+    const subscription = this.apiService.listDesLoyersParBail(idBail).subscribe({
+      next: (appels) => {
+        this.allAppelLoyers = appels ?? [];
+        this.applyAppelFilter();
+      },
+      error: () => {
+        this.allAppelLoyers = [];
+        this.applyAppelFilter();
+        this.dataError = "Impossible de charger les appels de loyer du compte locataire.";
+      },
     });
+    this.dataSubscriptions.push(subscription);
   }
 
   public getAllSmsByLocataire(loc: any): void {
-    this.store.dispatch(new GetAllSmsByLocataireActions(loc.username));
-    this.store.pipe(map((state) => state.appelLoyerState)).subscribe((data) => {
-      this.allSms = data.smss ?? [];
+    const username = String(loc?.username ?? '').trim();
+    if (!username) {
+      this.allSms = [];
       this.applySmsFilter();
-    });
+      return;
+    }
+
+    const subscription = this.apiService
+      .listMessageEnvoyerAUnLocataire(username)
+      .subscribe({
+        next: (sms) => {
+          this.allSms = sms ?? [];
+          this.applySmsFilter();
+        },
+        error: () => {
+          this.allSms = [];
+          this.applySmsFilter();
+          this.dataError = "Impossible de charger les messages du compte locataire.";
+        },
+      });
+    this.dataSubscriptions.push(subscription);
   }
 
   // ─── KPIs ──────────────────────────────────────────────────────────────────
 
   get totalLoyersAppeles(): number {
-    return this.allAppelLoyers.reduce((s, r) => s + Number(r.montantBailLPeriode ?? 0), 0);
+    return this.allAppelLoyers.reduce((s, r) => s + this.getMontantAppel(r), 0);
   }
 
   get totalEncaisse(): number {
-    return this.allEncaissements.reduce((s, r) => s + Number(r.montantEncaissement ?? 0), 0);
+    return this.allAppelLoyers.reduce((total, appel) => {
+      const montantAppel = this.getMontantAppel(appel);
+      const solde = Math.max(Number(appel.soldeAppelLoyer ?? 0), 0);
+      const montantPaye = Math.max(montantAppel - solde, 0);
+      return total + Math.min(montantPaye, montantAppel);
+    }, 0);
   }
 
   get soldeEnAttente(): number {
@@ -162,7 +209,44 @@ export class PageCompteClientComponent implements OnInit {
 
   get tauxRecouvrement(): number {
     if (!this.totalLoyersAppeles) return 0;
-    return Math.round((this.totalEncaisse / this.totalLoyersAppeles) * 100);
+    return Math.min(
+      Math.round((this.totalEncaisse / this.totalLoyersAppeles) * 100),
+      100
+    );
+  }
+
+  get appelTotalPages(): number {
+    return Math.max(Math.ceil(this.filteredAppelLoyers.length / this.appelPageSize), 1);
+  }
+
+  get pagedAppelLoyers(): any[] {
+    const start = (this.appelPage - 1) * this.appelPageSize;
+    return this.filteredAppelLoyers.slice(start, start + this.appelPageSize);
+  }
+
+  get appelPageStart(): number {
+    if (this.filteredAppelLoyers.length === 0) {
+      return 0;
+    }
+    return (this.appelPage - 1) * this.appelPageSize + 1;
+  }
+
+  get appelPageEnd(): number {
+    return Math.min(this.appelPage * this.appelPageSize, this.filteredAppelLoyers.length);
+  }
+
+  public onAppelPageSizeChange(event: Event): void {
+    const pageSize = Number((event.target as HTMLSelectElement).value);
+    this.appelPageSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : 10;
+    this.appelPage = 1;
+  }
+
+  public previousAppelPage(): void {
+    this.appelPage = Math.max(this.appelPage - 1, 1);
+  }
+
+  public nextAppelPage(): void {
+    this.appelPage = Math.min(this.appelPage + 1, this.appelTotalPages);
   }
 
   // ─── Actions ───────────────────────────────────────────────────────────────
@@ -171,16 +255,36 @@ export class PageCompteClientComponent implements OnInit {
     if (!this.locataire?.idBail) return;
     if (!confirm('Vous allez annuler ce paiement de façon irréversible. Confirmer ?')) return;
     this.store.dispatch(new SaveSupprimerLoyerActions({ idPeriode: idAppel, idBail: this.locataire.idBail }));
-    this.store.pipe(map((state) => state.appelLoyerState)).subscribe((data) => {
-      this.allAppelLoyers = data.appelloyers ?? [];
-      this.applyAppelFilter();
-    });
+    window.setTimeout(() => this.getAllAppelLoyerByBail(this.locataire), 500);
   }
 
   public printRecu(p: any): void {
     this.printService.printRecuEncaissement(p).subscribe((blob) => {
       saveAs(blob, 'appel_quittance_du_' + p + '.pdf');
     });
+  }
+
+  public printQuittanceLoyer(row: any): void {
+    const appelId = this.toPositiveNumber(row?.id);
+    if (appelId === null) {
+      alert("Impossible d'imprimer cette quittance : appel de loyer introuvable.");
+      return;
+    }
+
+    this.printingAppelId = appelId;
+    this.printService
+      .printQuittanceById(appelId)
+      .pipe(finalize(() => (this.printingAppelId = null)))
+      .subscribe({
+        next: (blob) => this.printBlob(blob),
+        error: () => {
+          alert("Impossible d'imprimer la quittance de ce loyer.");
+        },
+      });
+  }
+
+  public isPrintingQuittance(row: any): boolean {
+    return this.printingAppelId === this.toPositiveNumber(row?.id);
   }
 
   public printPage(): void {
@@ -238,6 +342,7 @@ export class PageCompteClientComponent implements OnInit {
 
   public onSearchAppel(event: Event): void {
     this.searchAppel = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.appelPage = 1;
     this.applyAppelFilter();
   }
 
@@ -298,10 +403,24 @@ export class PageCompteClientComponent implements OnInit {
   // ─── Filtres internes ──────────────────────────────────────────────────────
 
   private applyAppelFilter(): void {
-    if (!this.searchAppel) { this.filteredAppelLoyers = [...this.allAppelLoyers]; return; }
-    this.filteredAppelLoyers = this.allAppelLoyers.filter((r) =>
-      [`${r.id}`, r.periodeAppelLoyer, r.statusAppelLoyer, `${r.montantBailLPeriode}`, `${r.soldeAppelLoyer}`]
-        .join(' ').toLowerCase().includes(this.searchAppel)
+    if (!this.searchAppel) {
+      this.filteredAppelLoyers = [...this.allAppelLoyers];
+    } else {
+      this.filteredAppelLoyers = this.allAppelLoyers.filter((r) =>
+        [`${r.id}`, r.periodeAppelLoyer, r.statusAppelLoyer, `${r.montantBailLPeriode}`, `${r.soldeAppelLoyer}`]
+          .join(' ').toLowerCase().includes(this.searchAppel)
+      );
+    }
+
+    this.appelPage = Math.min(this.appelPage, this.appelTotalPages);
+  }
+
+  private getMontantAppel(appel: any): number {
+    return Number(
+      appel?.montantBailLPeriode ??
+      appel?.montantLoyerBailLPeriode ??
+      appel?.nouveauMontantLoyer ??
+      0
     );
   }
 
@@ -340,34 +459,54 @@ export class PageCompteClientComponent implements OnInit {
       .getLocatairesCompteClient(this.user.idAgence)
       .subscribe({
         next: (locataires) => {
-          this.locataires = this.sortLocataires(locataires ?? []);
-          this.locatairesLoading = false;
-
-          if (!this.locataires.length) {
-            this.locataire = null;
+          const primaryLocataires = this.sortLocataires(locataires ?? []);
+          if (primaryLocataires.length > 0) {
+            this.applyLoadedLocataires(primaryLocataires);
             return;
           }
 
-          if (!this.locataire) {
-            this.selectLocataire(this.locataires[0]);
-            return;
-          }
-
-          const selectedLocataire = this.locataires.find(
-            (locataire) => locataire.idBail === this.locataire?.idBail
-          );
-          if (selectedLocataire) {
-            this.selectLocataire(selectedLocataire);
-          }
+          this.loadLocatairesAvecBailFallback(this.user!.idAgence!);
         },
         error: () => {
-          this.locataires = [];
-          this.locataire = null;
-          this.locatairesLoading = false;
-          this.locatairesError =
-            "Impossible de charger les comptes locataires.";
+          this.loadLocatairesAvecBailFallback(this.user!.idAgence!);
         },
       });
+  }
+
+  private loadLocatairesAvecBailFallback(idAgence: number): void {
+    this.userService.getLocatairesAvecBail(idAgence).subscribe({
+      next: (locataires) => {
+        const fallbackLocataires = this.sortLocataires(locataires ?? []);
+        this.applyLoadedLocataires(fallbackLocataires);
+      },
+      error: () => {
+        this.locataires = [];
+        this.locataire = null;
+        this.locatairesLoading = false;
+        this.locatairesError = "Impossible de charger les comptes locataires.";
+      },
+    });
+  }
+
+  private applyLoadedLocataires(locataires: LocataireEncaisDTO[]): void {
+    this.locataires = locataires;
+    this.locatairesLoading = false;
+    this.locatairesError = '';
+
+    if (!this.locataires.length) {
+      this.locataire = null;
+      return;
+    }
+
+    if (!this.locataire) {
+      this.selectLocataire(this.locataires[0]);
+      return;
+    }
+
+    const selectedLocataire = this.locataires.find(
+      (locataire) => locataire.idBail === this.locataire?.idBail
+    );
+    this.selectLocataire(selectedLocataire ?? this.locataires[0]);
   }
 
   private sortLocataires(locataires: LocataireEncaisDTO[]): LocataireEncaisDTO[] {
@@ -381,5 +520,52 @@ export class PageCompteClientComponent implements OnInit {
         sensitivity: 'base',
       });
     });
+  }
+
+  private getCurrentUser(): UtilisateurRequestDto | undefined {
+    try {
+      const user = this.userService.getUserFromLocalCache();
+      return user ?? undefined;
+    } catch (error) {
+      this.locatairesError =
+        "Impossible de charger le compte client : utilisateur connecte introuvable.";
+      return undefined;
+    }
+  }
+
+  private printBlob(blob: Blob): void {
+    const blobUrl = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.src = blobUrl;
+
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        iframe.remove();
+      }, 1000);
+    };
+
+    document.body.appendChild(iframe);
+  }
+
+  private toPositiveNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const normalized =
+      typeof value === 'number' ? value : Number.parseInt(String(value), 10);
+
+    return Number.isFinite(normalized) && normalized > 0 ? normalized : null;
   }
 }
