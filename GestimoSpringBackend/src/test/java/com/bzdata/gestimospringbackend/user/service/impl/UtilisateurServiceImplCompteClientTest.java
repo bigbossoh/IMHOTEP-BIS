@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.Models.AppelLoyer;
+import com.bzdata.gestimospringbackend.Models.Appartement;
 import com.bzdata.gestimospringbackend.Models.BailLocation;
 import com.bzdata.gestimospringbackend.Models.Role;
 import com.bzdata.gestimospringbackend.Services.Impl.MailContentBuilder;
@@ -108,16 +109,22 @@ class UtilisateurServiceImplCompteClientTest {
     Utilisateur activeTenant = buildTenant(1L, true);
     Utilisateur inactiveTenant = buildTenant(2L, false);
 
+    Appartement bien = new Appartement();
+    bien.setId(201L);
+    bien.setCodeAbrvBienImmobilier("VILLA-01");
+
     BailLocation activeBail = new BailLocation();
     activeBail.setId(101L);
     activeBail.setIdAgence(7L);
     activeBail.setUtilisateurOperation(activeTenant);
+    activeBail.setBienImmobilierOperation(bien);
     activeBail.setEnCoursBail(true);
 
     BailLocation closedBail = new BailLocation();
     closedBail.setId(102L);
     closedBail.setIdAgence(7L);
     closedBail.setUtilisateurOperation(activeTenant);
+    closedBail.setBienImmobilierOperation(bien);
     closedBail.setEnCoursBail(false);
     closedBail.setDateCloture(LocalDate.of(2026, 4, 2));
     closedBail.setListAppelsLoyers(List.of(buildAppel(801L, "2026-03", "Mars 2026", 85000d, 0d)));
