@@ -142,6 +142,23 @@ class UtilisateurServiceImplTest {
     verify(utilisateurRepository).saveAll(anyList());
   }
 
+  @Test
+  void desactiverUtilisateursInactifsIgnoreUtilisateurJamaisConnecte() {
+    Utilisateur neverLoggedIn = buildUser(
+      "nouveau@gestimo.local",
+      "LOCATAIRE",
+      null
+    );
+    neverLoggedIn.setJoinDate(Date.from(Instant.now().minus(60, ChronoUnit.DAYS)));
+
+    when(utilisateurRepository.findAll()).thenReturn(List.of(neverLoggedIn));
+
+    int disabledCount = service.desactiverUtilisateursInactifs();
+
+    assertEquals(0, disabledCount);
+    assertTrue(neverLoggedIn.isActive());
+  }
+
   private Utilisateur buildUser(String email, String roleName, Date lastLoginDate) {
     Role role = new Role();
     role.setRoleName(roleName);
@@ -151,7 +168,7 @@ class UtilisateurServiceImplTest {
     utilisateur.setRoleUsed(roleName);
     utilisateur.setUrole(role);
     utilisateur.setLastLoginDate(lastLoginDate);
-    utilisateur.setJoinDate(lastLoginDate);
+    utilisateur.setJoinDate(Date.from(Instant.now().minus(60, ChronoUnit.DAYS)));
     utilisateur.setActive(true);
     utilisateur.setActivated(true);
     utilisateur.setNonLocked(true);

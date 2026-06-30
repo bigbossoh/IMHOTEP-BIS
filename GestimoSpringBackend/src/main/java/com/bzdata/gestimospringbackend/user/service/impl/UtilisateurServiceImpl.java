@@ -1589,12 +1589,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     Date lastLoginDate = utilisateur.getLastLoginDate();
-    if (lastLoginDate != null) {
-      return lastLoginDate.toInstant();
-    }
-
-    Date joinDate = utilisateur.getJoinDate();
-    return joinDate != null ? joinDate.toInstant() : null;
+    return lastLoginDate != null ? lastLoginDate.toInstant() : null;
   }
 
   private boolean isProtectedFromInactivityDeactivation(Utilisateur utilisateur) {

@@ -8,7 +8,7 @@ spring:
   application:
     name: gestimo_backend_springboot
   profiles:
-    default: dev
+    default: prod
   main:
     allow-circular-references: true
 
@@ -63,7 +63,7 @@ app:
   user-security:
     inactivity-disable-days: 0
     inactivity-check-cron: "0 0 2 * * *"
-    protected-roles: SUPER_SUPERVISEUR
+    protected-roles: SUPER_SUPERVISEUR,SUPERVISEUR,GERANT
 
 management:
   endpoints:
