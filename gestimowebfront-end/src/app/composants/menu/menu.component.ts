@@ -190,6 +190,12 @@ export class MenuComponent implements OnInit {
           icon: 'fas fa-file-invoice',
           url: 'factures-reservation',
         },
+        {
+          id: '79',
+          titre: 'Certifications FNE',
+          icon: 'fas fa-file-invoice-dollar',
+          url: 'certifications-fne',
+        },
       ],
     },
     {

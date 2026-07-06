@@ -42,6 +42,7 @@ import { EspeceEncaissementDto } from '../models/espece-encaissement-dto';
 import { EtablissementUtilisateurDto } from '../models/etablissement-utilisateur-dto';
 import { EtageDto } from '../models/etage-dto';
 import { EtageAfficheDto } from '../models/etage-affiche-dto';
+import { FneFactureCertificationDto } from '../models/fne-facture-certification-dto';
 import { GroupeDroitDto } from '../models/groupe-droit-dto';
 import { ImageDataDto } from '../models/image-data-dto';
 import { ImmeubleEtageDto } from '../models/immeuble-etage-dto';
@@ -993,6 +994,42 @@ class ApiService extends __BaseService {
   findAllPeriode(idAgence: number): __Observable<Array<PeriodeDto>> {
     return this.findAllPeriodeResponse(idAgence).pipe(
       __map(_r => _r.body as Array<PeriodeDto>)
+    );
+  }
+
+  /**
+   * @param idAgence undefined
+   * @return successful operation
+   */
+  listeFacturesCertifieesFneResponse(idAgence: number): __Observable<__StrictHttpResponse<Array<FneFactureCertificationDto>>> {
+    let __params = this.newParams();
+    let __headers = new HttpHeaders();
+    let __body: any = null;
+
+    let req = new HttpRequest<any>(
+      'GET',
+      this.rootUrl + `api/v1/fne/factures/${idAgence}`,
+      __body,
+      {
+        headers: __headers,
+        params: __params,
+        responseType: 'json'
+      });
+
+    return this.http.request<any>(req).pipe(
+      __filter(_r => _r instanceof HttpResponse),
+      __map((_r) => {
+        return _r as __StrictHttpResponse<Array<FneFactureCertificationDto>>;
+      })
+    );
+  }
+  /**
+   * @param idAgence undefined
+   * @return successful operation
+   */
+  listeFacturesCertifieesFne(idAgence: number): __Observable<Array<FneFactureCertificationDto>> {
+    return this.listeFacturesCertifieesFneResponse(idAgence).pipe(
+      __map(_r => _r.body as Array<FneFactureCertificationDto>)
     );
   }
 

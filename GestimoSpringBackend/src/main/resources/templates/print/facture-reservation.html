@@ -259,6 +259,9 @@
             <div class="facture-meta">
               <span><strong th:text="${view.factureNumero}">FACT-00</strong></span>
               <span>Date : <strong th:text="${view.factureDate}">—</strong></span>
+              <span th:if="${view.fneCertifiee}">
+                N° FNE : <strong th:text="${view.fneReference}">—</strong>
+              </span>
             </div>
           </td>
         </tr>
@@ -406,6 +409,11 @@
         <br />
         Document généré automatiquement par Gestimo —
         <span th:text="${view.factureDate}">Date</span>
+        <br th:if="${view.fneCertifiee}" />
+        <span th:if="${view.fneCertifiee}">
+          Facture certifiée FNE — vérification :
+          <span th:text="${view.fneVerificationUrl}">lien de vérification</span>
+        </span>
       </div>
 
     </div>

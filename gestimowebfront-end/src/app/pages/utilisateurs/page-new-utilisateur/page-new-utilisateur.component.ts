@@ -114,6 +114,11 @@ export class PageNewUtilisateurComponent implements OnInit {
       //   validator: PasswordValidation.MatchPassword
       // }
     );
+    this.newUserForm.controls['roleUsed'].valueChanges.subscribe((role) => {
+      this.updateEmailValidators(role);
+    });
+    this.updateEmailValidators(this.newUserForm.controls['roleUsed'].value);
+
     if (this.editDataUser) {
       this.idCompare = this.editDataUser.id;
       this.actionBtn = 'Modifier';
@@ -210,6 +215,16 @@ export class PageNewUtilisateurComponent implements OnInit {
   // private clickButton(buttonId: string): void {
   //   document.getElementById(buttonId)!.click();
   // }
+  private updateEmailValidators(role: string): void {
+    const emailControl = this.newUserForm.controls['email'];
+    const validators = role === 'CLIENT HOTEL'
+      ? [Validators.required, Validators.email]
+      : [Validators.email];
+
+    emailControl.setValidators(validators);
+    emailControl.updateValueAndValidity();
+  }
+
   onAddNewUser(): void {}
   saveNewUser(): void {
     this.newUserForm.patchValue({

@@ -59,4 +59,9 @@ public class FactureReservationView {
     List<FacturePrestationLine> prestations;
     String totalPrestations;
     boolean hasPrestations;
+
+    // Certification FNE (DGI)
+    boolean fneCertifiee;
+    String fneReference;
+    String fneVerificationUrl;
 }

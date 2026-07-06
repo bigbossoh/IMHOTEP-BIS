@@ -57,6 +57,7 @@ import { PageParametreResidenceComponent } from './pages/residence/page-parametr
 import { PageCreationResidenceComponent } from './pages/residence/page-creation-residence/page-creation-residence/page-creation-residence.component';
 import { PagePrestationsResidenceComponent } from './pages/residence/page-prestations/page-prestations-residence/page-prestations-residence.component';
 import { PageFacturesReservationComponent } from './pages/residence/page-factures-reservation/page-factures-reservation.component';
+import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/page-fne-factures.component';
 
 
 const routes: Routes = [
@@ -272,6 +273,11 @@ const routes: Routes = [
       {
         path: 'factures-reservation',
         component: PageFacturesReservationComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'certifications-fne',
+        component: PageFneFacturesComponent,
         canActivate: [ApplicationGuardService],
       },
       {

@@ -35,6 +35,7 @@ export { EspeceEncaissementDto } from './models/espece-encaissement-dto';
 export { EtablissementUtilisateurDto } from './models/etablissement-utilisateur-dto';
 export { EtageAfficheDto } from './models/etage-affiche-dto';
 export { EtageDto } from './models/etage-dto';
+export { FneFactureCertificationDto } from './models/fne-facture-certification-dto';
 export { GroupeDroitDto } from './models/groupe-droit-dto';
 export { ImageData } from './models/image-data';
 export { ImageDataDto } from './models/image-data-dto';

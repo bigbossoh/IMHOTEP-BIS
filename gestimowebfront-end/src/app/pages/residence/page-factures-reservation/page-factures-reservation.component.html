@@ -128,22 +128,24 @@
                     </td>
 
                     <td class="actions-col">
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-primary me-2"
-                        [disabled]="isGenerating(r)"
-                        (click)="genererFacture(r)"
-                      >
-                        @if (isGenerating(r)) { Génération… } @else { Télécharger PDF }
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-success"
-                        [disabled]="isCertifying(r)"
-                        (click)="certifierReservation(r)"
-                      >
-                        @if (isCertifying(r)) { Certification… } @else { Certifier }
-                      </button>
+                      <div class="actions-buttons">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-primary"
+                          [disabled]="isGenerating(r)"
+                          (click)="genererFacture(r)"
+                        >
+                          @if (isGenerating(r)) { Génération… } @else { Télécharger PDF }
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-success"
+                          [disabled]="isCertifying(r)"
+                          (click)="certifierReservation(r)"
+                        >
+                          @if (isCertifying(r)) { Certification… } @else { {{ certifierButtonLabel(r) }} }
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 }

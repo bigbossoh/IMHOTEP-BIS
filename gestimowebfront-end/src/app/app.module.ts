@@ -193,6 +193,7 @@ import { PageNouvelleDepenseComponent } from './pages/depense/page-nouvelle-depe
 import { PageParametreDepenseComponent } from './pages/depense/page-parametre-depense/page-parametre-depense.component';
 import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-depense/page-categories-depense.component';
 import { PageFacturesReservationComponent } from './pages/residence/page-factures-reservation/page-factures-reservation.component';
+import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/page-fne-factures.component';
 
 @NgModule({
   declarations: [
@@ -284,6 +285,7 @@ import { PageFacturesReservationComponent } from './pages/residence/page-facture
     PageAuditComponent,
     PageAideComponent,
     PageFacturesReservationComponent,
+    PageFneFacturesComponent,
   ],
   imports: [
     CanvasJSAngularChartsModule,
