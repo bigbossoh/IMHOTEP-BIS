@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  serverUrl: '/actuator',
+  serverUrl: 'http://localhost:8287/actuator',
   openAiApiKey: '',
 };

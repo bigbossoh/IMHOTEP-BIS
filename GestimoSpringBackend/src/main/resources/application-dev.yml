@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3305/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: gestimoweb
   jpa:

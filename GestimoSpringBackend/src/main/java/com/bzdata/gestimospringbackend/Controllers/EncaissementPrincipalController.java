@@ -75,6 +75,19 @@ public class EncaissementPrincipalController {
     );
   }
 
+  @PostMapping("/saveencaissementmasseavecretourbatch")
+  @Operation(
+    summary = "Creation et encaissement en masse en un seul appel (lot complet)",
+    security = @SecurityRequirement(name = "bearerAuth")
+  )
+  public ResponseEntity<List<LocataireEncaisDTO>> saveEncaissementMasseAvecretourDeListeBatch(
+    @RequestBody List<EncaissementPayloadDto> dtos
+  ) {
+    return ResponseEntity.ok(
+      encaissementPrincipalService.saveEncaissementGrouperBatchAvecRetourDeList(dtos)
+    );
+  }
+
   @PostMapping("/saveencaissementmasse")
   @Operation(
     summary = "Creation d'un encaissement e masse",

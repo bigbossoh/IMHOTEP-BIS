@@ -94,26 +94,19 @@ export class PageReglementGroupeComponent implements OnInit {
 
     this.isSubmitting = true;
     this.errorMessage = '';
-    let completed = 0;
 
     try {
-      let remainingRows = this.locatairesImpayer;
-
-      for (const row of selectedRows) {
-        remainingRows = await firstValueFrom(
-          this.apiService.saveEncaissementMasseAvecretourDeListe(
-            this.buildEncaissementPayload(row)
-          )
-        );
-        completed += 1;
-      }
+      const payloads = selectedRows.map((row) => this.buildEncaissementPayload(row));
+      const remainingRows = await firstValueFrom(
+        this.apiService.saveEncaissementMasseAvecretourDeListeBatch(payloads)
+      );
 
       this.locatairesImpayer = this.sortLocataires(remainingRows ?? []);
       this.selection.clear();
       this.lastRefreshAt = new Date();
       this.notificationService.notify(
         NotificationType.SUCCESS,
-        `${completed} reglement(s) groupe(s) enregistre(s) avec succes.`
+        `${payloads.length} reglement(s) groupe(s) enregistre(s) avec succes.`
       );
     } catch (error) {
       this.errorMessage = this.extractErrorMessage(
@@ -143,11 +136,6 @@ export class PageReglementGroupeComponent implements OnInit {
     this.periode = periode;
     this.selection.clear();
     this.loadLocatairesImpayer(periode);
-  }
-
-  public onPeriodChangeFromSelect(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.onPeriodChange(value);
   }
 
   public onModePaiementChange(event: Event): void {
@@ -312,6 +300,16 @@ export class PageReglementGroupeComponent implements OnInit {
     })} FCFA`;
   }
 
+  public getOldestUnpaidLabel(row: LocataireEncaisDTO): string {
+    return (
+      row.periodeImpayeMoinsRecenteLettre ||
+      row.periodeImpayeMoinsRecente ||
+      row.moisEnLettre ||
+      row.mois ||
+      '-'
+    );
+  }
+
   public getStatusLabel(row: LocataireEncaisDTO): string {
     if (this.isRowSelectable(row)) {
       return this.unlockSelectionEnforced ? 'Pret a encaisser' : 'Disponible';
@@ -336,32 +334,19 @@ export class PageReglementGroupeComponent implements OnInit {
 
     this.apiService.findAllPeriode(this.user.idAgence).subscribe({
       next: (periodes) => {
-        this.periodes = this.sortPeriodes(periodes ?? []);
         const currentPeriod = this.buildCurrentPeriod();
-        const periodExists = this.periodes.some(
+        const loadedPeriodes = periodes ?? [];
+        const periodExists = loadedPeriodes.some(
           (period) => period.periodeAppelLoyer === currentPeriod
         );
 
-        if (periodExists) {
-          this.periode = currentPeriod;
-        } else {
-          // Choisir la période disponible la plus proche et <= au mois actuel
-          const pastPeriods = this.periodes
-            .filter((p) => p.periodeAppelLoyer && p.periodeAppelLoyer <= currentPeriod)
-            .sort((a, b) =>
-              String(b.periodeAppelLoyer).localeCompare(String(a.periodeAppelLoyer))
-            );
-
-          if (pastPeriods.length > 0) {
-            this.periode = pastPeriods[0].periodeAppelLoyer!;
-          } else if (this.periodes.length > 0) {
-            // Toutes les périodes sont futures : prendre la plus ancienne
-            const asc = [...this.periodes].sort((a, b) =>
-              String(a.periodeAppelLoyer).localeCompare(String(b.periodeAppelLoyer))
-            );
-            this.periode = asc[0].periodeAppelLoyer!;
-          }
-        }
+        this.periodes = this.sortPeriodes(
+          periodExists
+            ? loadedPeriodes
+            : [...loadedPeriodes, this.buildCurrentPeriodOption(currentPeriod)]
+        );
+        // Le combo doit toujours proposer et sélectionner le mois/année en cours par défaut.
+        this.periode = currentPeriod;
 
         this.isLoadingPeriodes = false;
         this.loadLocatairesImpayer(this.periode);
@@ -482,6 +467,13 @@ export class PageReglementGroupeComponent implements OnInit {
 
   private buildCurrentPeriod(): string {
     return formatDate(new Date(), 'yyyy-MM', 'en');
+  }
+
+  private buildCurrentPeriodOption(currentPeriod: string): PeriodeDto {
+    return {
+      periodeAppelLoyer: currentPeriod,
+      periodeLettre: formatDate(new Date(), 'MMMM y', 'fr-FR'),
+    };
   }
 
   private extractErrorMessage(

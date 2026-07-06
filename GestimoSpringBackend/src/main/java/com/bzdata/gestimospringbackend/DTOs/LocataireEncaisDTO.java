@@ -29,5 +29,7 @@ public class LocataireEncaisDTO {
     boolean bailEnCours;
     String statutBail;
     LocalDate dateClotureBail;
+    String periodeImpayeMoinsRecente;
+    String periodeImpayeMoinsRecenteLettre;
 
 }

@@ -31,6 +31,9 @@ public interface EncaissementPrincipalService {
   List<LocataireEncaisDTO> saveEncaissementGrouperAvecRetourDeList(
     EncaissementPayloadDto dto
   );
+  List<LocataireEncaisDTO> saveEncaissementGrouperBatchAvecRetourDeList(
+    List<EncaissementPayloadDto> dtos
+  );
   double sommeEncaisserParJour(String jour, Long idAgence, Long chapitre);
 
   boolean delete(Long id);

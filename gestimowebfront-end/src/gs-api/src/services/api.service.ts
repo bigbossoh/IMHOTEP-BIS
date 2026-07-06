@@ -181,6 +181,7 @@ class ApiService extends __BaseService {
   static readonly saveEncaissementAvecretourDeListePath = 'api/v1/encaissement/saveencaissementavecretour';
   static readonly saveEncaissementMassePath = 'api/v1/encaissement/saveencaissementmasse';
   static readonly saveEncaissementMasseAvecretourDeListePath = 'api/v1/encaissement/saveencaissementmasseavecretour';
+  static readonly saveEncaissementMasseAvecretourDeListeBatchPath = 'api/v1/encaissement/saveencaissementmasseavecretourbatch';
   static readonly sommeEncaissementParAgenceEtParPeriodePath = 'api/v1/encaissement/sommeEncaissementParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
   static readonly sommeLoyerParAgenceEtParPeriodePath = 'api/v1/encaissement/sommeLoyerParAgenceEtParPeriode/{idAgence}/{datedebut}/{datefin}';
   static readonly totalencaissementParIdAppelLoyerPath = 'api/v1/encaissement/totalencaissement/{id}';
@@ -4610,6 +4611,42 @@ class ApiService extends __BaseService {
    */
   saveEncaissementMasseAvecretourDeListe(body?: EncaissementPayloadDto): __Observable<Array<LocataireEncaisDTO>> {
     return this.saveEncaissementMasseAvecretourDeListeResponse(body).pipe(
+      __map(_r => _r.body as Array<LocataireEncaisDTO>)
+    );
+  }
+
+  /**
+   * @param body undefined
+   * @return successful operation
+   */
+  saveEncaissementMasseAvecretourDeListeBatchResponse(body?: Array<EncaissementPayloadDto>): __Observable<__StrictHttpResponse<Array<LocataireEncaisDTO>>> {
+    let __params = this.newParams();
+    let __headers = new HttpHeaders();
+    let __body: any = null;
+    __body = body;
+    let req = new HttpRequest<any>(
+      'POST',
+      this.rootUrl + `api/v1/encaissement/saveencaissementmasseavecretourbatch`,
+      __body,
+      {
+        headers: __headers,
+        params: __params,
+        responseType: 'json'
+      });
+
+    return this.http.request<any>(req).pipe(
+      __filter(_r => _r instanceof HttpResponse),
+      __map((_r) => {
+        return _r as __StrictHttpResponse<Array<LocataireEncaisDTO>>;
+      })
+    );
+  }
+  /**
+   * @param body undefined
+   * @return successful operation
+   */
+  saveEncaissementMasseAvecretourDeListeBatch(body?: Array<EncaissementPayloadDto>): __Observable<Array<LocataireEncaisDTO>> {
+    return this.saveEncaissementMasseAvecretourDeListeBatchResponse(body).pipe(
       __map(_r => _r.body as Array<LocataireEncaisDTO>)
     );
   }

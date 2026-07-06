@@ -50,7 +50,7 @@ public class AuthenticationController {
     private final AuditLogService auditLogService;
 
     @PostMapping("/login")
-    public ResponseEntity<Utilisateur> login(@RequestBody AuthRequestDto request) {
+    public ResponseEntity<UtilisateurRequestDto> login(@RequestBody AuthRequestDto request) {
         long startTime = System.currentTimeMillis();
         log.info("Tentative de connexion pour l'email: {}", request.getEmail());
         authenticate(request.getEmail(), request.getPassword());
@@ -65,8 +65,9 @@ public class AuthenticationController {
         log.info("Connexion réussie pour: {}", loginUser.getEmail());
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
         saveLoginAudit(loginUser, System.currentTimeMillis() - startTime);
+        utilisateurByEmail.setPassword(null);
 
-        return new ResponseEntity<>(loginUser, jwtHeader, OK);
+        return new ResponseEntity<>(utilisateurByEmail, jwtHeader, OK);
     }
 
     private void authenticate(String email, String password) {

@@ -53,8 +53,9 @@
           <div class="select-wrap">
             <select
               id="periodeSelect"
-              [value]="periode"
-              (change)="onPeriodChangeFromSelect($event)"
+              name="periodeSelect"
+              [ngModel]="periode"
+              (ngModelChange)="onPeriodChange($event)"
               [disabled]="isLoadingPeriodes || isSubmitting"
             >
               @for (period of periodes; track period.periodeAppelLoyer) {
@@ -170,6 +171,7 @@
                   <th>Période</th>
                   <th>Loyer</th>
                   <th>Solde</th>
+                  <th>Dernier loyer impayé</th>
                   <th>Statut</th>
                 </tr>
               </thead>
@@ -199,6 +201,7 @@
                     <td>{{ row.moisEnLettre || row.mois || '-' }}</td>
                     <td>{{ formatCurrency(row.montantloyer) }}</td>
                     <td>{{ formatCurrency(row.soldeAppelLoyer) }}</td>
+                    <td>{{ getOldestUnpaidLabel(row) }}</td>
                     <td>
                       <span [class]="getStatusClass(row)">
                         {{ getStatusLabel(row) }}

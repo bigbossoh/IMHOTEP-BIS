@@ -16,4 +16,6 @@ export interface LocataireEncaisDTO {
   bailEnCours?: boolean;
   statutBail?: string;
   dateClotureBail?: string;
+  periodeImpayeMoinsRecente?: string;
+  periodeImpayeMoinsRecenteLettre?: string;
 }

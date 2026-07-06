@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,11 +77,13 @@ public class EncaissementPrincipalServiceImpl
     );
     BailLocation bailLocation = appelLoyer.getBailLocationAppelLoyer();
     applySequentialPayment(dto, bailLocation);
+    appelLoyerService.miseAjourDesUnlockDesBaux(dto.getIdAgence());
     return true;
   }
 
   @Override
   public boolean saveEncaissementMasse(List<EncaissementPayloadDto> dtos) {
+    Long idAgence = null;
     for (EncaissementPayloadDto dto : dtos) {
       List<String> errors = EncaissementPayloadDtoValidator.validate(dto);
       if (!errors.isEmpty()) {
@@ -99,7 +102,13 @@ public class EncaissementPrincipalServiceImpl
       );
       BailLocation bailLocation = appelLoyer.getBailLocationAppelLoyer();
       applySequentialPayment(dto, bailLocation);
+      idAgence = dto.getIdAgence() != null ? dto.getIdAgence() : appelLoyer.getIdAgence();
     }
+
+    if (idAgence != null) {
+      appelLoyerService.miseAjourDesUnlockDesBaux(idAgence);
+    }
+
     return true;
   }
 
@@ -229,32 +238,8 @@ public class EncaissementPrincipalServiceImpl
     Comparator<EncaissementPrincipal> compareBydatecreation = Comparator.comparing(
       EncaissementPrincipal::getId
     );
-    String nomString = resolveAgenceSmsName(bailLocation.getIdAgence());
-    try {
-      String leTok = envoiSmsOrange.getTokenSmsOrange();
-
-      String message =
-        "L'Agence " +
-        nomString +
-        " accuse bonne reception de la somme de " +
-        dto.getMontantEncaissement() +
-        " F CFA pour le reglement de votre loyer du bail : " +
-        bailLocation.getDesignationBail().toUpperCase() +
-        ".";
-      envoiSmsOrange.sendSms(
-        leTok,
-        message,
-        "+2250000",
-        bailLocation.getUtilisateurOperation().getUsername(),
-        nomString
-      );
-      // System.out.println("********************* Le toke toke est : " + leTok);
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
-    boolean sauve = appelLoyerService.miseAjourDesUnlockDesBaux(
-      dto.getIdAgence()
-    );
+    sendGroupedPaymentSms(dto, bailLocation);
+    appelLoyerService.miseAjourDesUnlockDesBaux(dto.getIdAgence());
     // enregistrement cloture;
 
     return encaissementPrincipalRepository
@@ -347,16 +332,42 @@ public class EncaissementPrincipalServiceImpl
     Long agence,
     String periode
   ) {
-    List<LocataireEncaisDTO> appelLocataire = appelLoyerRepository
-      .findAll()
+    List<AppelLoyer> tousLesAppels = appelLoyerRepository.findAll();
+
+    List<AppelLoyer> appelsImpayesAgence = tousLesAppels
       .stream()
       .filter(app ->
         app.getSoldeAppelLoyer() > 0 &&
         app.getIdAgence() == agence &&
-        app.getPeriodeAppelLoyer().equals(periode) &&
         app.isCloturer() == false
       )
+      .collect(Collectors.toList());
+
+    Map<Long, AppelLoyer> plusAncienImpayeParBail = appelsImpayesAgence
+      .stream()
+      .filter(app -> app.getBailLocationAppelLoyer() != null)
+      .collect(
+        Collectors.toMap(
+          app -> app.getBailLocationAppelLoyer().getId(),
+          app -> app,
+          (premier, second) ->
+            second.getPeriodeAppelLoyer().compareTo(premier.getPeriodeAppelLoyer()) < 0
+              ? second
+              : premier
+        )
+      );
+
+    List<LocataireEncaisDTO> appelLocataire = appelsImpayesAgence
+      .stream()
+      .filter(app -> app.getPeriodeAppelLoyer().equals(periode))
       .map(bailMapperImpl::fromOperationAppelLoyer)
+      .peek(dto -> {
+        AppelLoyer plusAncien = plusAncienImpayeParBail.get(dto.getIdBail());
+        if (plusAncien != null) {
+          dto.setPeriodeImpayeMoinsRecente(plusAncien.getPeriodeAppelLoyer());
+          dto.setPeriodeImpayeMoinsRecenteLettre(plusAncien.getPeriodeLettre());
+        }
+      })
       .collect(Collectors.toList());
     return appelLocataire;
   }
@@ -562,7 +573,59 @@ public class EncaissementPrincipalServiceImpl
     BailLocation bailLocation = appelLoyer.getBailLocationAppelLoyer();
 
     applySequentialPayment(dto, bailLocation);
+    appelLoyerService.miseAjourDesUnlockDesBaux(idAgence);
     sendGroupedPaymentSms(dto, bailLocation);
+
+    return listeLocataireImpayerParAgenceEtPeriode(idAgence, periodeDemandee);
+  }
+
+  @Override
+  public List<LocataireEncaisDTO> saveEncaissementGrouperBatchAvecRetourDeList(
+    List<EncaissementPayloadDto> dtos
+  ) {
+    if (dtos == null || dtos.isEmpty()) {
+      return List.of();
+    }
+
+    Long idAgence = null;
+    String periodeDemandee = null;
+
+    for (EncaissementPayloadDto dto : dtos) {
+      List<String> errors = EncaissementPayloadDtoValidator.validate(dto);
+      if (!errors.isEmpty()) {
+        throw new InvalidEntityException(
+          "Certains attributs de l'objet site sont null.",
+          ErrorCodes.ENCAISSEMENT_NOT_VALID,
+          errors
+        );
+      }
+
+      if (dto.getMontantEncaissement() <= 0) {
+        continue;
+      }
+
+      AppelLoyer appelLoyer = appelLoyerRepository
+        .findById(dto.getIdAppelLoyer())
+        .orElseThrow(() ->
+          new EntityNotFoundException(
+            "AppelLoyer from GestimoMapper not found",
+            ErrorCodes.APPELLOYER_NOT_FOUND
+          )
+        );
+      BailLocation bailLocation = appelLoyer.getBailLocationAppelLoyer();
+
+      idAgence = dto.getIdAgence() != null ? dto.getIdAgence() : appelLoyer.getIdAgence();
+      periodeDemandee = appelLoyer.getPeriodeAppelLoyer();
+
+      applySequentialPayment(dto, bailLocation);
+      sendGroupedPaymentSms(dto, bailLocation);
+    }
+
+    if (idAgence == null) {
+      return List.of();
+    }
+
+    appelLoyerService.miseAjourDesUnlockDesBaux(idAgence);
 
     return listeLocataireImpayerParAgenceEtPeriode(idAgence, periodeDemandee);
   }
@@ -769,7 +832,6 @@ public class EncaissementPrincipalServiceImpl
       montantRestant -= montantImpute;
     }
 
-    appelLoyerService.miseAjourDesUnlockDesBaux(dto.getIdAgence());
     return encaissements;
   }
 
@@ -815,28 +877,31 @@ public class EncaissementPrincipalServiceImpl
     EncaissementPayloadDto dto,
     BailLocation bailLocation
   ) {
+    // On résout les champs nécessaires avant de passer la main au thread
+    // asynchrone : les entités JPA (proxies lazy) ne doivent pas être
+    // accédées en dehors de la transaction/session appelante.
     String nomString = resolveAgenceSmsName(dto.getIdAgence());
-    try {
-      String leTok = envoiSmsOrange.getTokenSmsOrange();
+    double montant = dto.getMontantEncaissement();
+    String designationBail = bailLocation.getDesignationBail();
+    String username = bailLocation.getUtilisateurOperation().getUsername();
 
-      String message =
-        "L'Agence " +
-        nomString +
-        " accuse bonne reception de la somme de " +
-        dto.getMontantEncaissement() +
-        " F CFA pour le reglement de votre loyer du bail : " +
-        bailLocation.getDesignationBail().toUpperCase() +
-        ".";
-      envoiSmsOrange.sendSms(
-        leTok,
-        message,
-        "+2250000",
-        bailLocation.getUtilisateurOperation().getUsername(),
-        nomString
-      );
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    CompletableFuture.runAsync(() -> {
+      try {
+        String leTok = envoiSmsOrange.getTokenSmsOrange();
+
+        String message =
+          "L'Agence " +
+          nomString +
+          " accuse bonne reception de la somme de " +
+          montant +
+          " F CFA pour le reglement de votre loyer du bail : " +
+          designationBail.toUpperCase() +
+          ".";
+        envoiSmsOrange.sendSms(leTok, message, "+2250000", username, nomString);
+      } catch (Exception e) {
+        log.warn("Echec envoi SMS encaissement groupe: {}", e.getMessage());
+      }
+    });
   }
 
   private String resolveAgenceSmsName(Long idAgence) {
