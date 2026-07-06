@@ -512,7 +512,7 @@ public class PrintServiceImpl implements PrintService {
         .agenceTelephone(fallback(agence != null ? agence.getMobileAgence() : null, agence != null ? agence.getTelAgence() : null))
         .agenceEmail(fallback(agence != null ? agence.getEmailAgence() : null))
         .agenceLogoDataUrl(resolveAgenceLogoDataUrl(agence))
-        .factureNumero("FACT-" + reservation.getId())
+        .factureNumero(buildFactureReservationNumero(reservation, agence))
         .factureDate(formatDate(LocalDate.now()))
         .clientNom(formatFullName(client))
         .clientContact(client != null ? fallback(client.getMobile(), client.getEmail()) : "Non renseigne")
@@ -1236,6 +1236,43 @@ public class PrintServiceImpl implements PrintService {
       return null;
     }
     return agenceImmobiliereRepository.findById(idAgence).orElse(null);
+  }
+
+  private boolean isEtablissementMagiser(AgenceImmobiliere agence) {
+    if (agence == null) {
+      return false;
+    }
+    String sigle = agence.getSigleAgence() != null ? agence.getSigleAgence().trim() : null;
+    String nom = agence.getNomAgence() != null ? agence.getNomAgence().trim() : null;
+    return
+      "MAGISER".equalsIgnoreCase(sigle) ||
+      "MAGISER".equalsIgnoreCase(nom) ||
+      "AGENCE MAGISER".equalsIgnoreCase(nom);
+  }
+
+  private String buildFactureReservationNumero(
+    Reservation reservation,
+    AgenceImmobiliere agence
+  ) {
+    Instant creation = reservation.getCreationDate() != null
+      ? reservation.getCreationDate()
+      : Instant.now();
+    int annee = LocalDate.ofInstant(creation, ZoneId.systemDefault()).getYear();
+    boolean estMagiser = isEtablissementMagiser(agence);
+    String suffixe = estMagiser ? "MO" : "rs";
+
+    long rang = reservationRepository
+      .findAll()
+      .stream()
+      .filter(r -> r.getId() != null && r.getId() <= reservation.getId())
+      .filter(r -> {
+        Instant date = r.getCreationDate() != null ? r.getCreationDate() : Instant.now();
+        return LocalDate.ofInstant(date, ZoneId.systemDefault()).getYear() == annee;
+      })
+      .filter(r -> isEtablissementMagiser(resolveAgenceById(r.getIdAgence())) == estMagiser)
+      .count();
+
+    return "FAC" + annee + suffixe + String.format("%05d", rang);
   }
 
   private AgenceImmobiliere resolveAgenceForLocataireAndPeriode(
