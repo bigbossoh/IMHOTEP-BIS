@@ -14,6 +14,15 @@ app:
   cors:
     allowed-origin-patterns: "http://localhost:[*],http://127.0.0.1:[*]"
 
+fne:
+  base-url: http://54.247.95.108/ws
+  bearer-token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
+
+invoice:
+  api:
+    base-url: http://54.247.95.108/ws
+    token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
+
 logging:
   level:
     root: INFO

@@ -8,12 +8,12 @@
   --res-shadow-soft: 0 4px 20px rgba(25, 41, 72, 0.07);
   --res-text: #16233f;
   --res-muted: #64748b;
-  --res-accent: #0f766e;
-  --res-accent-strong: #115e59;
-  --res-accent-soft: rgba(15, 118, 110, 0.1);
+  --res-accent: #c2410c;
+  --res-accent-strong: #9a3412;
+  --res-accent-soft: rgba(194, 65, 12, 0.1);
   --res-info: #1d4ed8;
   --res-warning: #b45309;
-  --res-danger: #b42318;
+  --res-danger: #b91c1c;
   --res-radius-sm: 10px;
   --res-radius-md: 14px;
   --res-radius-lg: 18px;
@@ -61,7 +61,7 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--res-info);
+  color: var(--res-accent);
 }
 
 .reservation-dialog__subtitle {
@@ -101,8 +101,8 @@
   flex-wrap: wrap;
   padding: 20px 22px;
   border-radius: var(--res-radius-xl);
-  background: linear-gradient(135deg, rgba(15,118,110,0.1), rgba(29,78,216,0.06)), #fff;
-  border: 1px solid rgba(15, 118, 110, 0.12);
+  background: linear-gradient(135deg, rgba(194,65,12,0.1), rgba(29,78,216,0.06)), #fff;
+  border: 1px solid rgba(194, 65, 12, 0.12);
   box-shadow: var(--res-shadow-soft);
 }
 
@@ -267,7 +267,7 @@ mat-form-field .mat-mdc-text-field-wrapper {
 
 .mode-switch__item:has(.mat-mdc-radio-button .mdc-radio--checked) {
   border-color: var(--res-accent);
-  background: rgba(15, 118, 110, 0.05);
+  background: rgba(194, 65, 12, 0.05);
 }
 
 .mode-switch__title,
@@ -403,8 +403,8 @@ mat-form-field .mat-mdc-text-field-wrapper {
   padding: 14px 16px;
   margin-top: 12px;
   border-radius: var(--res-radius-lg);
-  background: linear-gradient(135deg, rgba(15,118,110,0.07), rgba(15,118,110,0.02));
-  border: 1px solid rgba(15, 118, 110, 0.1);
+  background: linear-gradient(135deg, rgba(194,65,12,0.07), rgba(194,65,12,0.02));
+  border: 1px solid rgba(194, 65, 12, 0.1);
 }
 
 .room-preview strong { font-size: 0.97rem; font-weight: 700; }
@@ -532,8 +532,8 @@ mat-form-field .mat-mdc-text-field-wrapper {
 }
 
 .amount-panel__badge--ok {
-  background: rgba(15,118,110,0.1);
-  border-color: rgba(15,118,110,0.18);
+  background: rgba(194,65,12,0.1);
+  border-color: rgba(194,65,12,0.18);
   color: var(--res-accent-strong);
 }
 
@@ -568,8 +568,8 @@ mat-form-field .mat-mdc-text-field-wrapper {
 .amount-line--discount > strong { color: var(--res-warning); }
 
 .amount-line--total {
-  background: linear-gradient(135deg, rgba(15,118,110,0.1), rgba(255,255,255,0.98));
-  border-color: rgba(15,118,110,0.18);
+  background: linear-gradient(135deg, rgba(194,65,12,0.1), rgba(255,255,255,0.98));
+  border-color: rgba(194,65,12,0.18);
 }
 
 .amount-line--total > span,
@@ -701,8 +701,8 @@ mat-form-field .mat-mdc-text-field-wrapper {
   gap: 10px;
   padding: 16px;
   border-radius: var(--res-radius-lg);
-  background: rgba(15, 118, 110, 0.05);
-  border: 1px solid rgba(15, 118, 110, 0.1);
+  background: rgba(194, 65, 12, 0.05);
+  border: 1px solid rgba(194, 65, 12, 0.1);
 }
 
 .prestations-selected__title {

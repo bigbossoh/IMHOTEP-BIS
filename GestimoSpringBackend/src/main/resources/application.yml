@@ -79,23 +79,19 @@ info:
     name: gestimoweb
     description: This is an application to manage employees
     version: "1.0"
-fne:
-  base-url: http://54.247.95.108/ws
-  sign-path: /external/invoices/sign
-  bearer-token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
 
+# Les URLs et le jeton de la plateforme FNE (DGI) sont définis par profil
+# (voir application-dev.yml / application-prod.yml) car l'environnement de
+# test et l'environnement de production n'utilisent ni la même URL, ni la
+# même clé API.
+fne:
+  sign-path: /external/invoices/sign
+  connect-timeout-ms: 10000
+  read-timeout-ms: 15000
+  default-taxe: TVA
+
+# Client alternatif de certification FNE (package newCertificationWay),
+# meme principe : base-url/token definis par profil.
 invoice:
   api:
-    base-url: http://54.247.95.108/ws
     sign-path: /external/invoices/sign
-    token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
-# fne:
-#   base-url:  https://www.services.fne.dgi.gouv.ci/ws
-#   sign-path: /external/invoices/sign
-#   bearer-token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr
-
-# invoice:
-#   api:
-#     base-url: https://www.services.fne.dgi.gouv.ci/ws
-#     sign-path: /external/invoices/sign
-#     token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr

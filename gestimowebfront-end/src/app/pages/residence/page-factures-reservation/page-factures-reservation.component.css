@@ -163,6 +163,12 @@
 }
 .row-helper { margin-top: 0.3rem; font-size: 0.87rem; color: var(--muted); }
 .actions-col { white-space: nowrap; text-align: center; }
+.actions-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
 .text-success { color: var(--success) !important; font-weight: 600; }
 .text-warning { color: var(--warning) !important; font-weight: 600; }
 

@@ -13,6 +13,7 @@ import { PrintServiceService } from 'src/app/services/Print/print-service.servic
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { ReservationAfficheDto, UtilisateurRequestDto } from 'src/gs-api/src/models';
+import { ApiService } from 'src/gs-api/src/services';
 
 @Component({
   standalone: false,
@@ -32,12 +33,14 @@ export class PageFacturesReservationComponent implements OnInit, OnDestroy {
   public certifyingId: number | null = null;
 
   allReservations: ReservationAfficheDto[] = [];
+  private certifieeParReservation = new Map<number, boolean>();
   private sub?: Subscription;
 
   constructor(
     private store: Store<any>,
     private userService: UserService,
     private printService: PrintServiceService,
+    private apiService: ApiService,
     private notificationService: NotificationService
   ) {}
 
@@ -45,6 +48,7 @@ export class PageFacturesReservationComponent implements OnInit, OnDestroy {
     this.user = this.userService.getUserFromLocalCache();
     this.bindState();
     this.load();
+    this.loadCertifications();
   }
 
   ngOnDestroy(): void {
@@ -178,16 +182,77 @@ export class PageFacturesReservationComponent implements OnInit, OnDestroy {
     return this.certifyingId === r.id;
   }
 
+  public isCertifiee(r: ReservationAfficheDto): boolean {
+    return !!r.id && this.certifieeParReservation.get(r.id) === true;
+  }
+
+  public certifierButtonLabel(r: ReservationAfficheDto): string {
+    return this.isCertifiee(r) ? 'Certifier' : 'À certifier';
+  }
+
   public certifierReservation(r: ReservationAfficheDto): void {
     const id = Number(r?.id);
     if (!Number.isFinite(id) || id <= 0 || this.certifyingId !== null) return;
 
     this.certifyingId = id;
-    // TODO: appeler l'endpoint de certification
-    setTimeout(() => {
-      this.certifyingId = null;
-      this.notificationService.notify(NotificationType.SUCCESS, `Réservation ${this.factureNumero(r)} certifiée.`);
-    }, 800);
+    this.printService
+      .factureReservation(id)
+      .pipe(finalize(() => (this.certifyingId = null)))
+      .subscribe({
+        next: () => {
+          this.loadCertifications(id, r);
+        },
+        error: () => {
+          this.notificationService.notify(
+            NotificationType.ERROR,
+            `La certification de ${this.factureNumero(r)} a échoué.`
+          );
+        },
+      });
+  }
+
+  private loadCertifications(idAJustCertifier?: number, rJustCertifie?: ReservationAfficheDto): void {
+    if (!this.user?.idAgence) return;
+
+    this.apiService.listeFacturesCertifieesFne(this.user.idAgence).subscribe({
+      next: (factures) => {
+        const certMap = new Map<number, boolean>();
+        for (const f of factures ?? []) {
+          if (f.idReservation) {
+            certMap.set(f.idReservation, certMap.get(f.idReservation) || !!f.certifiee);
+          }
+        }
+        this.certifieeParReservation = certMap;
+
+        if (idAJustCertifier && rJustCertifie) {
+          const certifiee = certMap.get(idAJustCertifier) === true;
+          if (certifiee) {
+            this.notificationService.notify(
+              NotificationType.SUCCESS,
+              `${this.factureNumero(rJustCertifie)} certifiée avec succès auprès de la FNE.`
+            );
+          } else {
+            const derniere = (factures ?? [])
+              .filter((f) => f.idReservation === idAJustCertifier)
+              .pop();
+            this.notificationService.notify(
+              NotificationType.ERROR,
+              `Certification FNE échouée pour ${this.factureNumero(rJustCertifie)}${
+                derniere?.messageErreur ? ' : ' + derniere.messageErreur : '.'
+              }`
+            );
+          }
+        }
+      },
+      error: () => {
+        if (idAJustCertifier && rJustCertifie) {
+          this.notificationService.notify(
+            NotificationType.WARNING,
+            `Facture générée mais impossible de vérifier le statut de certification.`
+          );
+        }
+      },
+    });
   }
 
   public applySearch(event: Event): void {
