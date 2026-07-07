@@ -124,6 +124,20 @@ export class PageFneFacturesComponent implements OnInit {
     return f.certifiee ? 'Certifiée FNE' : 'Non certifiée';
   }
 
+  private static readonly PAYMENT_MODE_LABELS: Record<string, string> = {
+    cash: 'Espèces',
+    card: 'Carte bancaire',
+    check: 'Chèque',
+    'mobile-money': 'Mobile Money',
+    transfer: 'Virement',
+    deferred: 'À terme',
+  };
+
+  public modePaiementLabel(f: FneFactureCertificationDto): string {
+    const mode = (f.modePaiement || '').trim().toLowerCase();
+    return PageFneFacturesComponent.PAYMENT_MODE_LABELS[mode] || f.modePaiement || '—';
+  }
+
   public statusClass(f: FneFactureCertificationDto): string {
     return f.certifiee ? 'badge badge--success' : 'badge badge--danger';
   }

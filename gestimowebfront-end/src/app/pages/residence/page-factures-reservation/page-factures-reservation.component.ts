@@ -103,10 +103,15 @@ export class PageFacturesReservationComponent implements OnInit, OnDestroy {
   }
 
   public factureNumero(r: ReservationAfficheDto): string {
-    return r.id ? `FACT-${r.id}` : '—';
+    return r.numeroFacture || '—';
   }
 
   public guestName(r: ReservationAfficheDto): string {
+    const clientReservation = (r.clientReservation || '').trim();
+    if (clientReservation) {
+      return clientReservation;
+    }
+
     const name = (r.utilisateurOperation || '').trim().toUpperCase();
     return !name || name === 'XXX XXXXX' ? 'Client à renseigner' : r.utilisateurOperation ?? '—';
   }
@@ -191,6 +196,7 @@ export class PageFacturesReservationComponent implements OnInit, OnDestroy {
   }
 
   public certifierReservation(r: ReservationAfficheDto): void {
+    debugger;
     const id = Number(r?.id);
     if (!Number.isFinite(id) || id <= 0 || this.certifyingId !== null) return;
 

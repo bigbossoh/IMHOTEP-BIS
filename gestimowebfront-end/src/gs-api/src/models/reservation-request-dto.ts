@@ -20,4 +20,9 @@ export interface ReservationRequestDto {
   montantDeReservation?: number;
   nmbreAdulte?: number;
   nmbrEnfant?: number;
+  vatType?: string;
+  email?: string;
+  paymentMode?: string;
+  clientReservation?: string;
+  taxes?: string;
 }

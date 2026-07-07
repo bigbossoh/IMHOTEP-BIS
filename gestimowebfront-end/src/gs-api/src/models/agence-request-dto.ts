@@ -18,6 +18,8 @@ export interface AgenceRequestDto {
   nomPrenomGerant?: string;
   adresseAgence?: string;
   boitePostaleAgence?: string;
+  pointOfSale?: string;
+  establishment?: string;
   idImage?: number;
   nameImage?: string;
   typeImage?: string;

@@ -59,6 +59,7 @@ public class ReservationServiceImpl implements ReservationService {
   final EncaissementReservationRepository encaissementReservationRepository;
   final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
   final SaveEncaissementReservationAvecRetourDeListService saveEncaissementReservationAvecRetourDeListService;
+  final FactureNumeroReservationService factureNumeroReservationService;
 
   @Override
   public Long save(ReservationSaveOrUpdateDto dto) {
@@ -198,9 +199,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     Reservation reservation;
+    boolean estNouvelleReservation = dto.getId() == 0;
 
-    if (dto.getId() == 0) {
+    if (estNouvelleReservation) {
       reservation = new Reservation();
+      reservation.setNumeroFacture(
+        factureNumeroReservationService.genererPourNouvelleReservation(dto.getIdAgence())
+      );
     } else {
       reservation = reservationRepository.getById(dto.getId());
     }
@@ -225,6 +230,11 @@ public class ReservationServiceImpl implements ReservationService {
     reservation.setPourcentageReduction(dto.getPourcentageReduction());
     // reservation.setst
     reservation.setSoldReservation(dto.getSoldReservation());
+    reservation.setVatType(dto.getVatType());
+    reservation.setEmail(dto.getEmail());
+    reservation.setPaymentMode(dto.getPaymentMode());
+    reservation.setClientReservation(dto.getClientReservation());
+    reservation.setTaxes(dto.getTaxes());
     reservation.setBienImmobilierOperation(
       gestimoWebMapperImpl.fromAppartementDto(appartementDto)
     );
@@ -248,6 +258,20 @@ public class ReservationServiceImpl implements ReservationService {
   public ReservationAfficheDto saveOrUpdateReservation(ReservationRequestDto dto) {
     Objects.requireNonNull(dto, "Le paramètre dto ne doit pas être nul");
 
+    log.info(
+      "Payload recu pour saveOrUpdateReservation : id={}, idAgence={}, idCreateur={}, idAppartementdDto={}, "
+        + "dateDebut={}, dateFin={}, idClient={}, idBien={}, idUtilisateur={}, nom={}, prenom={}, username={}, "
+        + "clientReservation={}, email={}, paymentMode={}, vatType={}, taxes={}, pourcentageReduction={}, "
+        + "montantReduction={}, soldReservation={}, montantPaye={}, montantReservation={}, montantDeReservation={}, "
+        + "nmbreAdulte={}, nmbrEnfant={}",
+      dto.getId(), dto.getIdAgence(), dto.getIdCreateur(), dto.getIdAppartementdDto(),
+      dto.getDateDebut(), dto.getDateFin(), dto.getIdClient(), dto.getIdBien(), dto.getIdUtilisateur(),
+      dto.getNom(), dto.getPrenom(), dto.getUsername(),
+      dto.getClientReservation(), dto.getEmail(), dto.getPaymentMode(), dto.getVatType(), dto.getTaxes(),
+      dto.getPourcentageReduction(), dto.getMontantReduction(), dto.getSoldReservation(), dto.getMontantPaye(),
+      dto.getMontantReservation(), dto.getMontantDeReservation(), dto.getNmbreAdulte(), dto.getNmbrEnfant()
+    );
+
     AppartementDto appartementDto = appartementService.findById(
       dto.getIdAppartementdDto()
     );
@@ -264,8 +288,12 @@ public class ReservationServiceImpl implements ReservationService {
       dto.setId(0L);
     }
 
-    if (dto.getId() == 0 || dto.getId() == null) {
+    boolean estNouvelleReservation = dto.getId() == 0;
+    if (estNouvelleReservation) {
       reservation = new Reservation();
+      reservation.setNumeroFacture(
+        factureNumeroReservationService.genererPourNouvelleReservation(dto.getIdAgence())
+      );
     } else {
       reservation = reservationRepository.getById(dto.getId());
     }
@@ -291,6 +319,11 @@ public class ReservationServiceImpl implements ReservationService {
     reservation.setMontantReduction(dto.getMontantReduction());
     reservation.setPourcentageReduction(dto.getPourcentageReduction());
     reservation.setSoldReservation(dto.getSoldReservation());
+    reservation.setVatType(dto.getVatType());
+    reservation.setEmail(dto.getEmail());
+    reservation.setPaymentMode(dto.getPaymentMode());
+    reservation.setClientReservation(dto.getClientReservation());
+    reservation.setTaxes(dto.getTaxes());
     if (dto.getSoldReservation() == 0) {
       if (saveApp != null) {
         saveApp.setOccupied(false);

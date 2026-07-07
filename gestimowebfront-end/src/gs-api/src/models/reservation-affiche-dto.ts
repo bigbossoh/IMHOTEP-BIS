@@ -37,4 +37,9 @@ export interface ReservationAfficheDto {
   priceCategori?: number;
   nbrDiffJourCategori?: number;
   pourcentReducCategori?: number;
+  vatType?: string;
+  paymentMode?: string;
+  numeroFacture?: string;
+  clientReservation?: string;
+  taxes?: string;
 }

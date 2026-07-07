@@ -99,7 +99,28 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   prestationSearch = '';
   prestationsLoading = false;
   prestationsError = '';
+  prestationsOpen = false;
   selectedPrestationIds = new Set<number>();
+
+  emailManuel = '';
+  paymentMode = '';
+  vatType = '';
+
+  readonly vatTypes: Array<{ value: string; label: string; rate: number }> = [
+    { value: 'TVA',  label: 'TVA — TVA normal de 18%', rate: 18 },
+    { value: 'TVAB', label: 'TVAB — TVA réduit de 9%', rate: 9 },
+    { value: 'TVAC', label: 'TVAC — TVA exec conv de 0%', rate: 0 },
+    { value: 'TVAD', label: 'TVAD — TVA exec leg de 0%', rate: 0 },
+  ];
+
+  readonly paymentModes: Array<{ value: string; label: string; icon: string }> = [
+    { value: 'cash',         label: 'Espèces',         icon: 'fa-money-bill-wave' },
+    { value: 'card',         label: 'Carte bancaire',  icon: 'fa-credit-card' },
+    { value: 'check',        label: 'Chèque',          icon: 'fa-money-check' },
+    { value: 'mobile-money', label: 'Mobile Money',    icon: 'fa-mobile-screen' },
+    { value: 'transfer',     label: 'Virement',        icon: 'fa-building-columns' },
+    { value: 'deferred',     label: 'À terme',         icon: 'fa-clock-rotate-left' },
+  ];
 
   constructor(
     public dialogRef: MatDialogRef<PageAjoutReservationComponent>,
@@ -246,13 +267,38 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       : 'Enregistrer la pré-réservation';
   }
 
+  get resolvedEmail(): string {
+    return (this.selectedClient?.email?.trim() || this.emailManuel?.trim()) ?? '';
+  }
+
+  get selectedPaymentModeLabel(): string {
+    return this.paymentModes.find(p => p.value === this.paymentMode)?.label ?? '';
+  }
+
+  get selectedPaymentModeIcon(): string {
+    return this.paymentModes.find(p => p.value === this.paymentMode)?.icon ?? '';
+  }
+
+  isEmailValid(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  onClientChange(client: UtilisateurRequestDto | null): void {
+    this.selectedClient = client;
+    if (client?.email) {
+      this.emailManuel = '';
+    }
+  }
+
   get canSubmit(): boolean {
     const hasDates = !!this.dateDebutSejour && !!this.dateFinSejour && this.stayNights > 0;
     const hasRoom = !!this.residenceModel;
     const hasPrice = this.nightlyPrice > 0 || this.totalAmountPreview > 0;
-    const hasGuest = !this.isCheckInMode || !!this.resolveGuestUsername();
+    const hasGuest = !!this.resolveGuestUsername();
+    const hasEmail = !!this.resolvedEmail && this.isEmailValid(this.resolvedEmail);
+    const hasPayment = !!this.paymentMode;
 
-    return hasDates && hasRoom && hasPrice && hasGuest;
+    return hasDates && hasRoom && hasPrice && hasGuest && hasEmail && hasPayment;
   }
 
   get selectedPrestationsCount(): number {
@@ -430,6 +476,11 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       nom,
       prenom,
       username,
+      clientReservation: this.resolveClientReservationName(),
+      email: this.resolvedEmail,
+      paymentMode: this.paymentMode,
+      vatType: this.vatType,
+      taxes: this.vatType,
       pourcentageReduction: this.reductionPercent,
       montantReduction: this.reductionAmount,
       soldReservation: this.balanceAmountPreview,
@@ -466,6 +517,19 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     return ['XXX', 'XXXXX'];
   }
 
+  private resolveClientReservationName(): string {
+    if (this.selectedClient) {
+      const fullName = `${this.selectedClient.nom ?? ''} ${this.selectedClient.prenom ?? ''}`.trim();
+      return fullName || this.selectedClient.username || '';
+    }
+
+    if (this.isCheckInMode && this.hasExistingGuest()) {
+      return this.reservationToEdit?.utilisateurOperation ?? '';
+    }
+
+    return '';
+  }
+
   private hydrateReservationIfNeeded(): void {
     const currentData = this.data?.idReservation;
     if (!currentData || typeof currentData !== 'object') {
@@ -483,6 +547,9 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.totalApayer = this.toNumber(this.reservationToEdit.montantReservation);
     this.resteApayer = this.toNumber(this.reservationToEdit.soldReservation);
     this.montantPayer = this.toNumber(this.reservationToEdit.montantPaye);
+    this.vatType = this.reservationToEdit.vatType ?? '';
+    this.paymentMode = this.reservationToEdit.paymentMode ?? '';
+    this.emailManuel = this.reservationToEdit.email ?? '';
 
     if (this.dateDebutSejour && this.dateFinSejour) {
       this.getDiffDays(this.dateDebutSejour, this.dateFinSejour);
@@ -560,6 +627,9 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.prestationsLoading = false;
     this.prestationsError = '';
     this.selectedPrestationIds.clear();
+    this.emailManuel = '';
+    this.paymentMode = '';
+    this.vatType = '';
   }
 
   private toApiDate(value: Date | null): string {
@@ -578,6 +648,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   private hasExistingGuest(): boolean {
     const guestName = (this.reservationToEdit?.utilisateurOperation ?? '').trim().toUpperCase();
     return !!guestName && guestName !== 'XXX XXXXX';
+  }
+
+  toDatePublic(value: string): Date {
+    return new Date(value);
   }
 
   private toNumber(value: unknown): number {

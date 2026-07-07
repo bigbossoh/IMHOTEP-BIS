@@ -37,6 +37,7 @@ import org.jfree.util.Log;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -785,9 +786,11 @@ public class GestimoWebMapperImpl {
       " " +
       reservation.getUtilisateurOperation().getPrenom()
     );
-    reservationSaveOrUpdateDto.setEmail(
-      reservation.getUtilisateurOperation().getEmail()
-    );
+    if (StringUtils.hasText(reservation.getUtilisateurOperation().getEmail())) {
+      reservationSaveOrUpdateDto.setEmail(
+        reservation.getUtilisateurOperation().getEmail()
+      );
+    }
     reservationSaveOrUpdateDto.setUsername(
       reservation.getUtilisateurOperation().getUsername()
     );

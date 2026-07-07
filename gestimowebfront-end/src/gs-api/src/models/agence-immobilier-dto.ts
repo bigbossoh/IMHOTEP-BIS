@@ -16,6 +16,8 @@ export interface AgenceImmobilierDTO {
   profileAgenceUrl?: string;
   adresseAgence?: string;
   boitePostaleAgence?: string;
+  pointOfSale?: string;
+  establishment?: string;
   idImage?: number;
   nameImage?: string;
   typeImage?: string;

@@ -40,4 +40,9 @@ public class ReservationRequestDto {
 
   int nmbreAdulte;
   int nmbrEnfant;
+  String vatType;
+  String email;
+  String paymentMode;
+  String clientReservation;
+  String taxes;
 }

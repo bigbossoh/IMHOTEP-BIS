@@ -32,6 +32,8 @@ public class AgenceImmobiliere extends AbstractEntity {
     String sigleAgence;
     String adresseAgence;
     String boitePostaleAgence;
+    String pointOfSale;
+    String establishment;
 
     @OneToMany(mappedBy = "logoAgence")
     List<ImageModel> imageModels;
