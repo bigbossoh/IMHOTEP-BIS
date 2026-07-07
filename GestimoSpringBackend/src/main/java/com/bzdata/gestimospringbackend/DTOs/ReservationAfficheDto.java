@@ -57,4 +57,9 @@ public class ReservationAfficheDto {
   double priceCategori;
   int nbrDiffJourCategori;
   double pourcentReducCategori;
+  String vatType;
+  String paymentMode;
+  String numeroFacture;
+  String clientReservation;
+  String taxes;
 }

@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -33,36 +34,34 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
     private final VerificationResponseRepository verificationRefundResponseRepo;
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public JsonNode certifyInvoice(InvoiceSignRequest request) {
         try {
-            log.info("Calling FNE sign API with payload: {}", objectMapper.writeValueAsString(request));
+            String payload = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
+            log.info("\n========== FNE CERTIFICATION REQUEST ==========\nURL : {}{}\n{}\n===============================================",
+                    props.getBaseUrl(), props.getSignPath(), payload);
         } catch (Exception e) {
             log.warn("Unable to serialize InvoiceSignRequest for logging", e);
         }
-log.info("**********************************FNE API URL: {}********", props.getBaseUrl()       );
-       return invoiceWebClient.post()
-        .uri(props.getSignPath())
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + props.getToken())
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-        .bodyValue(request)
-        .retrieve()
-        .onStatus(
-                HttpStatusCode::isError,
-                response -> response.bodyToMono(JsonNode.class)
-                        .flatMap(errorJson -> {
-                            String message = errorJson.has("message")
-                                    ? errorJson.get("message").asText()
-                                    : errorJson.toString();
 
-                            log.error("Erreur API : {}", message);
-
-                            return Mono.error(new RuntimeException(message));
-                        })
-        )
-        .bodyToMono(JsonNode.class)
-        .block();
-
+        return invoiceWebClient.post()
+                .uri(props.getSignPath())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + props.getToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(rawBody -> {
+                                    log.error("\n========== FNE CERTIFICATION ERROR ==========\nHTTP Status : {}\nBody brut   : {}\n=============================================",
+                                            response.statusCode(), rawBody);
+                                    return Mono.error(new RuntimeException(rawBody));
+                                })
+                )
+                .bodyToMono(JsonNode.class)
+                .block();
     }
 
     @Override
@@ -84,7 +83,7 @@ log.info("**********************************FNE API URL: {}********", props.getB
     }
 
     @Override
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFromJsonToDataba(JsonNode json) {
 
         // ===== 1) MAIN RESPONSE =====
@@ -232,7 +231,20 @@ log.info("**********************************FNE API URL: {}********", props.getB
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFromJsonToDatabaWithNumFacture(JsonNode json, String numFacture, String utiliseur) {
+        log.info(
+                "Payload recu pour saveFromJsonToDatabaWithNumFacture : numFacture={}, utilisateur={}, "
+                        + "reference={}, ncc={}, invoice.id={}, invoice.reference={}, invoice.type={}, "
+                        + "invoice.paymentMethod={}, invoice.amount={}, invoice.totalDue={}, invoice.clientCompanyName={}",
+                numFacture, utiliseur,
+                text(json, "reference"), text(json, "ncc"),
+                text(json.path("invoice"), "id"), text(json.path("invoice"), "reference"),
+                textOrNull(json.path("invoice"), "type"), textOrNull(json.path("invoice"), "paymentMethod"),
+                longVal(json.path("invoice"), "amount"), longVal(json.path("invoice"), "totalDue"),
+                textOrNull(json.path("invoice"), "clientCompanyName")
+        );
+
         if (invoiceRepo.existsByNumeroFacture(numFacture)) {
             throw new InvalidOperationException(
                     "La facture " + numFacture + " est déjà certifiée et ne peut plus être traitée.");

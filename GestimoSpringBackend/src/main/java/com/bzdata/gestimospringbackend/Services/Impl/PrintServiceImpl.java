@@ -33,12 +33,12 @@ import com.bzdata.gestimospringbackend.company.entity.AgenceImmobiliere;
 import com.bzdata.gestimospringbackend.company.repository.AgenceImmobiliereRepository;
 import com.bzdata.gestimospringbackend.Utils.BailDisplayUtils;
 import com.bzdata.gestimospringbackend.fne.FneFactureCertificationService;
-import com.bzdata.gestimospringbackend.fne.FneService;
 import com.bzdata.gestimospringbackend.fne.config.FneProperties;
-import com.bzdata.gestimospringbackend.fne.dto.FneInvoiceItemRequest;
-import com.bzdata.gestimospringbackend.fne.dto.FneSignInvoiceRequest;
 import com.bzdata.gestimospringbackend.fne.dto.FneSignInvoiceResponse;
-import com.bzdata.gestimospringbackend.fne.exception.FneApiException;
+import com.bzdata.gestimospringbackend.newCertificationWay.InvoiceCertificationService;
+import com.bzdata.gestimospringbackend.newCertificationWay.InvoiceItem;
+import com.bzdata.gestimospringbackend.newCertificationWay.InvoiceSignRequest;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -143,9 +143,10 @@ public class PrintServiceImpl implements PrintService {
   final TemplateEngine templateEngine;
   final ReservationRepository reservationRepository;
   final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
-  final FneService fneService;
   final FneProperties fneProperties;
   final FneFactureCertificationService fneFactureCertificationService;
+  final FactureNumeroReservationService factureNumeroReservationService;
+  final InvoiceCertificationService invoiceCertificationService;
 
   @Override
   public byte[] printBailProfessionnel(Long idBail) {
@@ -457,16 +458,60 @@ public class PrintServiceImpl implements PrintService {
     }
   }
 
+  private record ContexteFactureReservation(
+    Reservation reservation,
+    AgenceImmobiliere agence,
+    Utilisateur client,
+    String chambreNomLabel,
+    int nombreNuits,
+    double prixParNuit,
+    double montantTotal,
+    String factureNumero
+  ) {}
+
+  private ContexteFactureReservation resolveContexteFactureReservation(Long idReservation) {
+    Reservation reservation = reservationRepository
+      .findById(idReservation)
+      .orElseThrow(() -> new IllegalArgumentException("Reservation introuvable : " + idReservation));
+
+    AgenceImmobiliere agence = resolveAgenceById(reservation.getIdAgence());
+    Bienimmobilier bien = reservation.getBienImmobilierOperation();
+    Utilisateur client = reservation.getUtilisateurOperation();
+
+    int nombreNuits = 0;
+    if (reservation.getDateDebut() != null && reservation.getDateFin() != null) {
+      nombreNuits = (int) java.time.temporal.ChronoUnit.DAYS.between(
+        reservation.getDateDebut(), reservation.getDateFin()
+      );
+      nombreNuits = Math.max(nombreNuits, 1);
+    }
+
+    double montantTotal = reservation.getMontantDeReservation();
+    if (montantTotal <= 0) {
+      montantTotal = reservation.getMontantPaye() + reservation.getSoldReservation();
+    }
+    double prixParNuit = nombreNuits > 0 ? (montantTotal + reservation.getMontantReduction()) / nombreNuits : 0;
+
+    String chambreNomLabel = fallback(
+      bien != null ? bien.getNomCompletBienImmobilier() : null,
+      bien != null ? bien.getCodeAbrvBienImmobilier() : null
+    );
+
+    String factureNumero = resolveFactureReservationNumero(reservation);
+
+    return new ContexteFactureReservation(
+      reservation, agence, client, chambreNomLabel, nombreNuits, prixParNuit, montantTotal, factureNumero
+    );
+  }
+
   @Override
   public byte[] factureReservation(Long idReservation) {
     try {
-      Reservation reservation = reservationRepository
-        .findById(idReservation)
-        .orElseThrow(() -> new IllegalArgumentException("Reservation introuvable : " + idReservation));
-
-      AgenceImmobiliere agence = resolveAgenceById(reservation.getIdAgence());
+      ContexteFactureReservation ctx = resolveContexteFactureReservation(idReservation);
+      Reservation reservation = ctx.reservation();
+      AgenceImmobiliere agence = ctx.agence();
       Bienimmobilier bien = reservation.getBienImmobilierOperation();
-      Utilisateur client = reservation.getUtilisateurOperation();
+      Utilisateur client = ctx.client();
 
       List<PrestationAdditionnelReservation> prestationLinks =
         prestationAdditionnelReservationRepository.findAllByReservation_Id(idReservation);
@@ -484,19 +529,9 @@ public class PrintServiceImpl implements PrintService {
         .mapToDouble(link -> link.getServiceAdditionnelle().getAmount())
         .sum();
 
-      int nombreNuits = 0;
-      if (reservation.getDateDebut() != null && reservation.getDateFin() != null) {
-        nombreNuits = (int) java.time.temporal.ChronoUnit.DAYS.between(
-          reservation.getDateDebut(), reservation.getDateFin()
-        );
-        nombreNuits = Math.max(nombreNuits, 1);
-      }
-
-      double montantTotal = reservation.getMontantDeReservation();
-      if (montantTotal <= 0) {
-        montantTotal = reservation.getMontantPaye() + reservation.getSoldReservation();
-      }
-      double prixParNuit = nombreNuits > 0 ? (montantTotal + reservation.getMontantReduction()) / nombreNuits : 0;
+      int nombreNuits = ctx.nombreNuits();
+      double montantTotal = ctx.montantTotal();
+      double prixParNuit = ctx.prixParNuit();
       double sousTotal = montantTotal + reservation.getMontantReduction();
 
       String statut;
@@ -515,12 +550,9 @@ public class PrintServiceImpl implements PrintService {
         chambreCategorie = appartement.getCategorieChambreAppartement().getName();
       }
 
-      String chambreNomLabel = fallback(
-        bien != null ? bien.getNomCompletBienImmobilier() : null,
-        bien != null ? bien.getCodeAbrvBienImmobilier() : null
-      );
+      String chambreNomLabel = ctx.chambreNomLabel();
 
-      String factureNumero = buildFactureReservationNumero(reservation, agence);
+      String factureNumero = ctx.factureNumero();
 
       FneSignInvoiceResponse fneResponse = certifierFactureReservationAupresDeFne(
         reservation,
@@ -1269,41 +1301,21 @@ public class PrintServiceImpl implements PrintService {
     return agenceImmobiliereRepository.findById(idAgence).orElse(null);
   }
 
-  private boolean isEtablissementMagiser(AgenceImmobiliere agence) {
-    if (agence == null) {
-      return false;
+  /**
+   * Le numero de facture est genere et fige a la creation de la reservation
+   * (voir FactureNumeroReservationService). Pour les reservations creees avant
+   * la mise en place de cette regle, on l'attribue ici, une seule fois, de
+   * maniere retroactive.
+   */
+  private String resolveFactureReservationNumero(Reservation reservation) {
+    if (StringUtils.hasText(reservation.getNumeroFacture())) {
+      return reservation.getNumeroFacture();
     }
-    String sigle = agence.getSigleAgence() != null ? agence.getSigleAgence().trim() : null;
-    String nom = agence.getNomAgence() != null ? agence.getNomAgence().trim() : null;
-    return
-      "MAGISER".equalsIgnoreCase(sigle) ||
-      "MAGISER".equalsIgnoreCase(nom) ||
-      "AGENCE MAGISER".equalsIgnoreCase(nom);
-  }
 
-  private String buildFactureReservationNumero(
-    Reservation reservation,
-    AgenceImmobiliere agence
-  ) {
-    Instant creation = reservation.getCreationDate() != null
-      ? reservation.getCreationDate()
-      : Instant.now();
-    int annee = LocalDate.ofInstant(creation, ZoneId.systemDefault()).getYear();
-    boolean estMagiser = isEtablissementMagiser(agence);
-    String suffixe = estMagiser ? "MO" : "rs";
-
-    long rang = reservationRepository
-      .findAll()
-      .stream()
-      .filter(r -> r.getId() != null && r.getId() <= reservation.getId())
-      .filter(r -> {
-        Instant date = r.getCreationDate() != null ? r.getCreationDate() : Instant.now();
-        return LocalDate.ofInstant(date, ZoneId.systemDefault()).getYear() == annee;
-      })
-      .filter(r -> isEtablissementMagiser(resolveAgenceById(r.getIdAgence())) == estMagiser)
-      .count();
-
-    return "FAC" + annee + suffixe + String.format("%05d", rang);
+    String factureNumero = factureNumeroReservationService.genererPourReservationExistante(reservation);
+    reservation.setNumeroFacture(factureNumero);
+    reservationRepository.save(reservation);
+    return factureNumero;
   }
 
   /**
@@ -1323,14 +1335,44 @@ public class PrintServiceImpl implements PrintService {
     String factureNumero,
     double montantTotal
   ) {
-    String etablissement = fallback(agence != null ? agence.getNomAgence() : null, "GESTIMO");
-    String pointOfSale = fallback(agence != null ? agence.getSigleAgence() : null, "GESTIMO");
+    String etablissement = fallback(agence != null ? agence.getSigleAgence() : null, "GESTIMO");
+    String pointOfSale = fallback(agence != null ? agence.getPointOfSale() : null, "GESTIMO");
     String clientNom = fallback(formatFullName(client));
     String modePaiement = resolveFnePaymentMethod(reservation.getId());
+    String taxe = StringUtils.hasText(reservation.getTaxes())
+      ? reservation.getTaxes()
+      : fneProperties.getDefaultTaxe();
+    String clientEmail = client != null && StringUtils.hasText(client.getEmail())
+      ? client.getEmail()
+      : fallback(reservation.getEmail(), "");
+
+    if (!fneProperties.isEnabled()) {
+      log.info(
+        "Certification FNE non effectuee pour la reservation {} (facture {}) : integration desactivee (fne.enabled=false).",
+        reservation.getId(),
+        factureNumero
+      );
+      fneFactureCertificationService.enregistrer(
+        FneFactureCertificationService.Enregistrement.builder()
+          .idAgence(reservation.getIdAgence())
+          .typeDocument("RESERVATION")
+          .idReservation(reservation.getId())
+          .factureNumero(factureNumero)
+          .clientNom(clientNom)
+          .etablissement(etablissement)
+          .pointOfSale(pointOfSale)
+          .modePaiement(modePaiement)
+          .montant(montantTotal)
+          .certifiee(false)
+          .messageErreur("Certification FNE desactivee")
+          .build()
+      );
+      return null;
+    }
 
     try {
-      FneInvoiceItemRequest item = FneInvoiceItemRequest.builder()
-        .taxes(List.of(fneProperties.getDefaultTaxe()))
+      InvoiceItem item = InvoiceItem.builder()
+        .taxes(List.of(taxe))
         .reference("RESA-" + reservation.getId())
         .description("Sejour - " + chambreNomLabel)
         .quantity(Math.max(nombreNuits, 1))
@@ -1338,40 +1380,35 @@ public class PrintServiceImpl implements PrintService {
         .measurementUnit("nuitee")
         .build();
 
-      FneSignInvoiceRequest request = FneSignInvoiceRequest.builder()
+      InvoiceSignRequest request = InvoiceSignRequest.builder()
         .invoiceType("sale")
         .paymentMethod(modePaiement)
         .template("B2C")
-        .linkedToRne(false)
+        .numeroFacture(factureNumero)
         .clientCompanyName(clientNom)
         .clientPhone(client != null ? fallback(client.getMobile(), client.getEmail()) : "")
-        .clientEmail(client != null ? fallback(client.getEmail()) : "")
+        .clientEmail(clientEmail)
         .pointOfSale(pointOfSale)
         .establishment(etablissement)
         .items(List.of(item))
         .discount(reservation.getMontantReduction())
         .build();
 
-      FneSignInvoiceResponse response = fneService.signInvoice(request);
+      JsonNode json = invoiceCertificationService.certifyInvoice(request);
+      invoiceCertificationService.saveFromJsonToDataba(json);
 
-      if (response != null) {
-        log.info(
-          "Certification FNE reussie pour la reservation {} (facture {}) : reference={}, ncc={}, verification={}, balanceSticker={}, warning={}",
-          reservation.getId(),
-          factureNumero,
-          response.getReference(),
-          response.getNcc(),
-          response.getToken(),
-          response.getBalanceSticker(),
-          response.isWarning()
-        );
-      } else {
-        log.info(
-          "Certification FNE non effectuee pour la reservation {} (facture {}) : integration desactivee (fne.enabled=false).",
-          reservation.getId(),
-          factureNumero
-        );
-      }
+      FneSignInvoiceResponse response = toFneSignInvoiceResponse(json);
+
+      log.info(
+        "Certification FNE reussie pour la reservation {} (facture {}) : reference={}, ncc={}, verification={}, balanceSticker={}, warning={}",
+        reservation.getId(),
+        factureNumero,
+        response.getReference(),
+        response.getNcc(),
+        response.getToken(),
+        response.getBalanceSticker(),
+        response.isWarning()
+      );
 
       fneFactureCertificationService.enregistrer(
         FneFactureCertificationService.Enregistrement.builder()
@@ -1384,37 +1421,16 @@ public class PrintServiceImpl implements PrintService {
           .pointOfSale(pointOfSale)
           .modePaiement(modePaiement)
           .montant(montantTotal)
-          .certifiee(response != null)
-          .fneReference(response != null ? response.getReference() : null)
-          .fneNcc(response != null ? response.getNcc() : null)
-          .fneVerificationUrl(response != null ? response.getToken() : null)
-          .fneBalanceSticker(response != null ? response.getBalanceSticker() : null)
-          .fneWarning(response != null && response.isWarning())
-          .messageErreur(response == null ? "Certification FNE desactivee" : null)
+          .certifiee(true)
+          .fneReference(response.getReference())
+          .fneNcc(response.getNcc())
+          .fneVerificationUrl(response.getToken())
+          .fneBalanceSticker(response.getBalanceSticker())
+          .fneWarning(response.isWarning())
           .build()
       );
 
       return response;
-    } catch (FneApiException e) {
-      log.warn(
-        "Certification FNE echouee pour la reservation {} (facture {}, statut={}, erreur={}) : {}",
-        reservation.getId(),
-        factureNumero,
-        e.getStatusCode(),
-        e.getErrorCode(),
-        e.getMessage()
-      );
-      enregistrerEchecCertification(
-        reservation,
-        factureNumero,
-        clientNom,
-        etablissement,
-        pointOfSale,
-        modePaiement,
-        montantTotal,
-        e.getMessage()
-      );
-      return null;
     } catch (Exception e) {
       log.warn(
         "Certification FNE impossible pour la reservation {} (facture {})",
@@ -1469,6 +1485,33 @@ public class PrintServiceImpl implements PrintService {
         persistError
       );
     }
+  }
+
+  /**
+   * Adapte la reponse brute de InvoiceCertificationService.certifyInvoice (JsonNode)
+   * vers le DTO de traçabilite historiquement utilise par cette methode et par
+   * FactureReservationView, pour ne pas avoir a modifier tous les appelants.
+   */
+  private FneSignInvoiceResponse toFneSignInvoiceResponse(JsonNode json) {
+    FneSignInvoiceResponse response = new FneSignInvoiceResponse();
+    if (json == null) {
+      return response;
+    }
+
+    response.setReference(jsonText(json, "reference"));
+    response.setNcc(jsonText(json, "ncc"));
+    response.setToken(jsonText(json, "token"));
+    response.setWarning(!json.path("warning").isMissingNode() && json.path("warning").asBoolean(false));
+
+    JsonNode balanceFunds = json.path("balance_funds");
+    response.setBalanceSticker(balanceFunds.isMissingNode() || balanceFunds.isNull() ? null : balanceFunds.asInt());
+
+    return response;
+  }
+
+  private String jsonText(JsonNode node, String field) {
+    JsonNode value = node.path(field);
+    return (value.isMissingNode() || value.isNull()) ? null : value.asText();
   }
 
   private String resolveFnePaymentMethod(Long idReservation) {

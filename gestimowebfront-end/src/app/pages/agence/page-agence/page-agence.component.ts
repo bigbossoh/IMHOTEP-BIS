@@ -120,6 +120,8 @@ export class PageAgenceComponent implements OnInit {
       faxAgence: agence.faxAgence ?? '',
       adresseAgence: agence.adresseAgence ?? '',
       boitePostaleAgence: agence.boitePostaleAgence ?? '',
+      pointOfSale: agence.pointOfSale ?? '',
+      establishment: agence.establishment ?? '',
       nomPrenomGerant: '',
       motdepasse: '',
     });
@@ -321,6 +323,8 @@ export class PageAgenceComponent implements OnInit {
       faxAgence: [''],
       adresseAgence: [''],
       boitePostaleAgence: [''],
+      pointOfSale: [''],
+      establishment: [''],
       nomPrenomGerant: ['', Validators.required],
       motdepasse: ['', [Validators.required, Validators.minLength(4)]],
       active: [true],
@@ -401,6 +405,8 @@ export class PageAgenceComponent implements OnInit {
       faxAgence: formValue.faxAgence?.trim(),
       adresseAgence: formValue.adresseAgence?.trim(),
       boitePostaleAgence: formValue.boitePostaleAgence?.trim(),
+      pointOfSale: formValue.pointOfSale?.trim(),
+      establishment: formValue.establishment?.trim(),
       nomPrenomGerant: this.isEditionMode
         ? undefined
         : formValue.nomPrenomGerant?.trim(),
@@ -428,6 +434,8 @@ export class PageAgenceComponent implements OnInit {
       faxAgence: '',
       adresseAgence: '',
       boitePostaleAgence: '',
+      pointOfSale: '',
+      establishment: '',
       nomPrenomGerant: '',
       motdepasse: '',
       active: true,

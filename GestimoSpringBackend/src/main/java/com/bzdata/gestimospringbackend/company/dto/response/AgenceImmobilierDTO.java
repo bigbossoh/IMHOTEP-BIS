@@ -32,4 +32,6 @@ public class AgenceImmobilierDTO {
     String nameImage;
     String typeImage;
     MultipartFile logoAgence;
+    String pointOfSale;
+    String establishment;
 }

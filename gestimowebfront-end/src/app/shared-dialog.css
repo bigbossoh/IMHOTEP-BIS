@@ -1,0 +1,285 @@
+/*
+ * shared-dialog.css
+ * Styles communs à tous les dialogs du projet.
+ * À importer dans le styleUrls de chaque composant dialog.
+ */
+
+/* ── Variables ── */
+.dlg {
+  --accent:        #c2410c;
+  --accent-strong: #9a3412;
+  --accent-soft:   rgba(194, 65, 12, 0.1);
+  --info:          #1d4ed8;
+  --warning:       #b45309;
+  --danger:        #b91c1c;
+  --success:       #047857;
+  --text:          #16233f;
+  --muted:         #64748b;
+  --border:        rgba(20, 38, 74, 0.1);
+  --border-soft:   rgba(20, 38, 74, 0.06);
+  --surface:       #ffffff;
+  --surface-soft:  #f8fafc;
+  --shadow:        0 20px 60px rgba(15, 23, 42, 0.12);
+  --shadow-soft:   0 4px 16px rgba(15, 23, 42, 0.06);
+  --radius:        16px;
+  --radius-sm:     10px;
+
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-soft);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: 0.94rem;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Header ── */
+.dlg__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.dlg__header-text { flex: 1 1 auto; min-width: 0; }
+
+.dlg__eyebrow {
+  display: block;
+  margin: 0 0 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dlg__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dlg__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.dlg__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dlg__close:hover { background: var(--accent-soft); color: var(--accent); }
+
+/* ── Body (mat-dialog-content) ── */
+.dlg__body {
+  flex: 1 1 auto;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(20, 38, 74, 0.1) transparent;
+}
+
+/* ── Contenu interne scrollable ── */
+.dlg__content {
+  padding: 16px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Sections ── */
+.dlg-section {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.dlg-section:last-child { border-bottom: none; }
+
+.dlg-section__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── Champs Bootstrap ── */
+.dlg .form-control,
+.dlg .form-select {
+  border-radius: var(--radius) !important;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: none !important;
+  color: var(--text);
+  min-height: 38px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.dlg .form-control:focus,
+.dlg .form-select:focus {
+  border-color: rgba(194, 65, 12, 0.4);
+  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.1) !important;
+}
+
+.dlg .form-control.is-invalid,
+.dlg .form-select.is-invalid {
+  border-color: rgba(185, 28, 28, 0.45);
+}
+
+.dlg .form-control[readonly] {
+  background: var(--surface-soft);
+  cursor: default;
+}
+
+.dlg .input-group-text {
+  border-radius: 0 var(--radius) var(--radius) 0 !important;
+  border-color: rgba(148, 163, 184, 0.35);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.dlg .input-group .form-control {
+  border-radius: var(--radius) 0 0 var(--radius) !important;
+}
+
+.dlg .form-label {
+  margin-bottom: 3px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.dlg .form-text {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.dlg .invalid-feedback { font-size: 0.78rem; }
+
+/* ── Boutons ── */
+.dlg .btn-pill { border-radius: 999px !important; }
+
+.dlg .btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.dlg .btn-primary:hover:not(:disabled) {
+  background-color: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.dlg .btn-outline-primary {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.dlg .btn-outline-primary:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Footer (mat-dialog-actions) ── */
+.dlg__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  margin: 0 !important;
+}
+
+.dlg__footer .btn {
+  min-height: 40px;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  border-radius: var(--radius) !important;
+}
+
+.dlg__footer .btn-primary { min-width: 160px; }
+
+/* ── États inline ── */
+.dlg-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.dlg-state--loading { background: rgba(29,78,216,0.07); color: var(--info); }
+.dlg-state--error   { background: rgba(185,28,28,0.07);  color: var(--danger); }
+.dlg-state--success { background: rgba(4,120,87,0.07);   color: var(--success); }
+
+/* ── Info panel ── */
+.dlg-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(29, 78, 216, 0.07);
+  color: #1e40af;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ── Alerte ── */
+.dlg-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(180, 83, 9, 0.08);
+  border: 1px solid rgba(180, 83, 9, 0.2);
+  color: var(--warning);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .dlg { border-radius: 0; min-height: 100vh; }
+  .dlg__header, .dlg__content, .dlg__footer { padding-left: 16px; padding-right: 16px; }
+  .dlg__footer { flex-direction: column-reverse; align-items: stretch; }
+  .dlg__footer .btn { width: 100%; min-width: unset; }
+}

@@ -31,6 +31,12 @@ public class Reservation extends Operation {
   int nmbreAdulte;
   int nmbrEnfant;
   String statutReservation;
+  String vatType;
+  String email;
+  String paymentMode;
+  String numeroFacture;
+  String clientReservation;
+  String taxes;
   @OneToMany(mappedBy = "reservation")
   List<PrestationAdditionnelReservation> serviceAdditionnelreservations;
 
