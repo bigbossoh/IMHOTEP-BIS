@@ -15,13 +15,16 @@ app:
     allowed-origin-patterns: "http://localhost:[*],http://127.0.0.1:[*]"
 
 fne:
+  enabled: true
   base-url: http://54.247.95.108/ws
-  bearer-token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
+  bearer-token: WCRHegK8Jk5HyNabnYSq1nmozBSj3BCC
 
 invoice:
   api:
+    enabled: true
     base-url: http://54.247.95.108/ws
-    token: Ql16HNhOhdXxn52RvS4qNy2JOyyyuBxv
+    token: WCRHegK8Jk5HyNabnYSq1nmozBSj3BCC
+    sign-path: /external/invoices/sign
 
 logging:
   level:

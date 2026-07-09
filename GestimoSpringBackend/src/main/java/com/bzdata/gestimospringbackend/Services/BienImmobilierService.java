@@ -10,7 +10,9 @@ public interface BienImmobilierService {
 
     List<BienImmobilierAffiheDto> findAllBienOccuper(Long idAgence, Long chapitre);
 
-    Bienimmobilier findBienByBailEnCours(Long idBail);
-
     BienImmobilierAffiheDto rattacherUnBienAUnChapitre(Long idBail, Long chapitre);
+
+    List<BienImmobilierAffiheDto> findAllAppartementMeuble(Long idAgence);
+
+    Bienimmobilier findBienByBailEnCours(Long idBail);
 }

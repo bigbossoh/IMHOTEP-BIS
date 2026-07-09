@@ -24,6 +24,6 @@ public class FneProperties {
   private String bearerToken;
   private int connectTimeoutMs = 10000;
   private int readTimeoutMs = 15000;
-  private String defaultTaxe = "TVA";
+private String defaultTaxe = "TVAC";
   private boolean enabled = true;
 }

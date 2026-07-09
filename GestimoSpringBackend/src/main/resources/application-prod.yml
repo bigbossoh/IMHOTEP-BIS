@@ -14,13 +14,16 @@ app:
   password-reset-url: https://gestimoweb.com/reset-password
 
 fne:
+  enabled: true
   base-url: https://www.services.fne.dgi.gouv.ci/ws
   bearer-token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr
 
 invoice:
   api:
+    enabled: true
     base-url: https://www.services.fne.dgi.gouv.ci/ws
     token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr
+    sign-path: /external/invoices/sign
 
 logging:
   level:

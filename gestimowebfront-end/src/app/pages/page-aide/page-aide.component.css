@@ -1,22 +1,18 @@
-/* ══════════════════════════════════════════════════════════
-   AIDE PAGE — Manuel d'utilisation
-   ══════════════════════════════════════════════════════════ */
 :host {
-  --aide-primary:      #4f46e5;
-  --aide-primary-dark: #3730a3;
-  --aide-primary-light:#ede9fe;
-  --aide-surface:      #ffffff;
-  --aide-bg:           #f8fafc;
-  --aide-border:       #e2e8f0;
-  --aide-text:         #1e293b;
-  --aide-muted:        #64748b;
-  --aide-green:        #10b981;
-  --aide-radius:       12px;
-  --aide-shadow:       0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --aide-shadow-md:    0 4px 12px rgba(0,0,0,.10);
+  --aide-primary:      var(--primary-600);
+  --aide-primary-dark: var(--primary-700);
+  --aide-primary-light:var(--primary-50);
+  --aide-surface:      var(--surface);
+  --aide-bg:           var(--surface-soft);
+  --aide-border:       var(--border);
+  --aide-text:         var(--text);
+  --aide-muted:        var(--neutral-500);
+  --aide-green:        var(--success);
+  --aide-radius:       var(--radius-md);
+  --aide-shadow:       var(--shadow-sm);
+  --aide-shadow-md:    var(--shadow-md);
 }
 
-/* ─── Page wrapper ──────────────────────────────────────── */
 .aide-page {
   background: var(--aide-bg);
   min-height: 100vh;
@@ -27,7 +23,6 @@
   margin: 0 auto;
 }
 
-/* ─── En-tête ───────────────────────────────────────────── */
 .aide-header {
   display: flex;
   align-items: flex-start;
@@ -48,10 +43,11 @@
 }
 
 .aide-header h1 {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--aide-text);
   margin: 0 0 6px;
+  letter-spacing: -0.02em;
 }
 
 .aide-header p {
@@ -67,13 +63,12 @@
   align-items: center;
 }
 
-/* ─── Boutons ───────────────────────────────────────────── */
 .aide-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -86,20 +81,25 @@
   border-color: var(--aide-border);
   color: var(--aide-text);
 }
-.aide-btn--ghost:hover { background: #f1f5f9; }
+.aide-btn--ghost:hover { background: var(--neutral-50); }
 
-/* ─── Barre de recherche ────────────────────────────────── */
 .aide-search-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   background: var(--aide-surface);
-  border: 1px solid var(--aide-border);
-  border-radius: 10px;
+  border: 1.5px solid var(--aide-border);
+  border-radius: var(--radius-sm);
   padding: 10px 16px;
   margin-bottom: 24px;
   box-shadow: var(--aide-shadow);
   color: var(--aide-muted);
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.aide-search-bar:focus-within {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
 }
 
 .aide-search-input {
@@ -123,9 +123,8 @@
   border-radius: 4px;
   transition: color .15s;
 }
-.aide-search-clear:hover { color: #ef4444; }
+.aide-search-clear:hover { color: var(--danger); }
 
-/* ─── Sommaire (TOC) ────────────────────────────────────── */
 .aide-toc {
   background: var(--aide-surface);
   border: 1px solid var(--aide-border);
@@ -170,7 +169,6 @@
   color: var(--aide-primary);
 }
 
-/* ─── Section ───────────────────────────────────────────── */
 .aide-section {
   background: var(--aide-surface);
   border: 1px solid var(--aide-border);
@@ -181,7 +179,6 @@
   scroll-margin-top: 24px;
 }
 
-/* En-tête de section (accordion trigger) */
 .aide-section__header {
   display: flex;
   align-items: center;
@@ -192,7 +189,7 @@
   user-select: none;
   transition: background .15s;
 }
-.aide-section__header:hover { background: #f8faff; }
+.aide-section__header:hover { background: var(--primary-50); }
 .aide-section__header.open { background: var(--aide-primary-light); }
 
 .aide-section__header-left {
@@ -204,7 +201,7 @@
 .aide-section__icon-wrap {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--aide-primary-light);
   display: flex;
   align-items: center;
@@ -241,17 +238,15 @@
   transform: rotate(180deg);
 }
 
-/* Corps de section (collapsible) */
 .aide-section__body {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .3s ease;
+  transition: max-height .3s var(--ease-out);
 }
 .aide-section__body.open {
   max-height: 9999px;
 }
 
-/* ─── Grille de cartes ──────────────────────────────────── */
 .aide-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -259,11 +254,10 @@
   padding: 20px;
 }
 
-/* ─── Carte de fonctionnalité ───────────────────────────── */
 .aide-card {
   background: var(--aide-bg);
   border: 1px solid var(--aide-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 16px 18px;
 }
 
@@ -288,11 +282,10 @@
   margin: 0 0 12px;
 }
 
-/* ─── Étapes ────────────────────────────────────────────── */
 .aide-steps {
   background: var(--aide-surface);
   border: 1px solid var(--aide-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 12px 14px;
 }
 
@@ -317,7 +310,6 @@
 }
 .aide-steps__list li + li { margin-top: 4px; }
 
-/* ─── État vide ─────────────────────────────────────────── */
 .aide-empty {
   text-align: center;
   padding: 64px 24px;
@@ -337,7 +329,6 @@
   text-decoration: underline;
 }
 
-/* ─── Pied de page manuel ───────────────────────────────── */
 .aide-footer {
   margin-top: 40px;
   padding: 24px;
@@ -375,7 +366,6 @@
   max-width: 480px;
 }
 
-/* ─── Impression ────────────────────────────────────────── */
 @media print {
   .no-print { display: none !important; }
 
@@ -405,7 +395,6 @@
   }
 }
 
-/* ─── Responsive ────────────────────────────────────────── */
 @media (max-width: 640px) {
   .aide-cards-grid {
     grid-template-columns: 1fr;

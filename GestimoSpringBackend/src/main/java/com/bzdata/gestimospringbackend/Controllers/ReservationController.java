@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,13 +92,21 @@ final SaveEncaissementReservationAvecRetourDeListService encaissementReservation
   ) {
     return ResponseEntity.ok(reservationService.findReservationById(id));
   }
-   @GetMapping("/findPeriodeReservationByIdBien/{idBien}")
+  @GetMapping("/findPeriodeReservationByIdBien/{idBien}")
   public ResponseEntity<ReservationAfficheDto> findPeriodeReservationByIdBien(
     @PathVariable("idBien") Long idBien
   ) {
     return ResponseEntity.ok(reservationService.findPeriodeReservationByIdBien(idBien));
   }
-  
+
+  @PutMapping("/annuler/{idReservation}")
+  @Operation(summary = "Annuler une réservation et libérer le bien immobilier")
+  public ResponseEntity<ReservationAfficheDto> annulerReservation(
+    @PathVariable("idReservation") Long idReservation
+  ) {
+    return ResponseEntity.ok(reservationService.annulerReservation(idReservation));
+  }
+
   // TOUTES LES RESERVATION
   @Operation(
     summary = "Liste de toutes les Reservations"

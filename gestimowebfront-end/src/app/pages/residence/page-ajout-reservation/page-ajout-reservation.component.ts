@@ -1,11 +1,12 @@
 import { formatDate } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { GetAllAppartementMeubleActions } from './../../../ngrx/appartement/appartement.actions';
+import { GetAllAppartementMeubleActions, GetAllAppartementLibreActions } from './../../../ngrx/appartement/appartement.actions';
 import {
   AppartementState,
   AppartementStateEnum,
@@ -29,6 +30,7 @@ import {
   UtilisateurRequestDto,
 } from 'src/gs-api/src/models';
 import { ApiService } from 'src/gs-api/src/services';
+import { ApiConfiguration } from 'src/gs-api/src/api-configuration';
 import { SaveReservationAction } from 'src/app/ngrx/reservation/reservation.actions';
 import { DialogData } from '../../baux/page-baux/page-baux.component';
 import { PageNewUtilisateurComponent } from '../../utilisateurs/page-new-utilisateur/page-new-utilisateur.component';
@@ -88,6 +90,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   public user?: UtilisateurRequestDto;
   public minDate: Date = new Date();
 
+  /** Disponibilités : toutes les chambres libres pour les dates sélectionnées */
+  availableRooms: AppartementDto[] = [];
+  roomsLoading = false;
+
   private reservationToEdit: ReservationAfficheDto | null = null;
   private appartementSubscription?: Subscription;
   private clientSubscription?: Subscription;
@@ -128,6 +134,8 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     private userService: UserService,
     private apiService: ApiService,
+    private http: HttpClient,
+    private apiConfig: ApiConfiguration,
     private fb: FormBuilder,
     public dialog: MatDialog
   ) {}
@@ -146,6 +154,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     return Number(this.client) === 2;
   }
 
+  get isEditMode(): boolean {
+    return !!this.idReservation;
+  }
+
   get selectedModeDescription(): string {
     return this.reservationModes.find((mode) => mode.value === Number(this.client))
       ?.description ?? '';
@@ -162,10 +174,14 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   get selectedRoomCategory(): string {
     return (
       this.residenceModel?.idCategorieChambre?.name ||
-      this.residenceModel?.nameCategorie ||
+      this.reservationModelName() ||
       this.reservationToEdit?.descriptionCategori ||
       'Catégorie à définir'
     );
+  }
+
+  private reservationModelName(): string {
+    return this.residenceModel?.nameCategorie ?? '';
   }
 
   get selectedRoomDescription(): string {
@@ -279,6 +295,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     return this.paymentModes.find(p => p.value === this.paymentMode)?.icon ?? '';
   }
 
+  get datesSelected(): boolean {
+    return !!this.dateDebutSejour && !!this.dateFinSejour && this.stayNights > 0;
+  }
+
   isEmailValid(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
@@ -329,7 +349,8 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
     if (this.user?.idAgence) {
       this.store.dispatch(new GetAllClientHotelActions(this.user.idAgence));
-      this.store.dispatch(new GetAllAppartementMeubleActions(this.user.idAgence));
+      // On ne charge plus toutes les chambres au démarrage.
+      // Elles seront chargées après la sélection des dates.
     }
 
     this.bindAppartements();
@@ -376,9 +397,15 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.laNuiteMontant = this.toNumber(room?.priceCategorie);
   }
 
+  /**
+   * Lorsque les dates de séjour changent :
+   * 1. On recharge la liste des chambres disponibles depuis le backend
+   * 2. On réinitialise la chambre sélectionnée si elle n'est plus disponible
+   */
   onStayChange(): void {
     if (!this.dateDebutSejour || !this.dateFinSejour) {
       this.dateDiff = 0;
+      this.availableRooms = [];
       if (!this.laNuiteMontant) {
         this.laNuiteMontant = this.toNumber(this.residenceModel?.priceCategorie);
       }
@@ -386,7 +413,81 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     }
 
     this.getDiffDays(this.dateDebutSejour, this.dateFinSejour);
-    this.getMontantNuite(this.stayNights, this.listMontant);
+
+    if (this.stayNights > 0 && this.user?.idAgence) {
+      this.loadAvailableRooms();
+    }
+
+    // Recalculate price if a room is already selected
+    if (this.residenceModel) {
+      this.getMontantNuite(this.stayNights, this.listMontant);
+    }
+  }
+
+  /**
+   * Charge les chambres disponibles pour la période sélectionnée depuis le backend.
+   * Utilise le nouvel endpoint qui filtre les réservations existantes sur la période.
+   */
+  private loadAvailableRooms(): void {
+    if (!this.user?.idAgence || !this.dateDebutSejour || !this.dateFinSejour) return;
+
+    const idAgence = this.user.idAgence;
+    const dateDebut = this.toApiDate(this.dateDebutSejour);
+    const dateFin = this.toApiDate(this.dateFinSejour);
+    const baseUrl = this.apiConfig.rootUrl || this.apiService.rootUrl;
+    const url = `${baseUrl}api/v1/appartement/libre-par-periode/${idAgence}/${dateDebut}/${dateFin}`;
+
+    this.roomsLoading = true;
+    this.http
+      .get<AppartementDto[]>(url)
+      .pipe(finalize(() => (this.roomsLoading = false)))
+      .subscribe({
+        next: (rooms) => {
+          this.availableRooms = Array.isArray(rooms) ? rooms : [];
+
+          // Si la chambre actuellement sélectionnée n'est plus disponible, on la réinitialise
+          if (this.residenceModel) {
+            const stillAvailable = this.availableRooms.some(
+              (r) => r.id === this.residenceModel?.id
+            );
+            if (!stillAvailable) {
+              this.residenceModel = null;
+              this.laNuiteMontant = 0;
+              this.listMontant = [];
+            }
+          }
+        },
+        error: () => {
+          this.availableRooms = [];
+        },
+      });
+  }
+
+  /**
+   * Annule la réservation en cours et libère la chambre (la rend disponible).
+   */
+  cancelReservation(): void {
+    if (!this.idReservation) {
+      return;
+    }
+
+    const baseUrl = this.apiConfig.rootUrl || this.apiService.rootUrl;
+    const url = `${baseUrl}api/v1/reservation/annuler/${this.idReservation}`;
+
+    this.http
+      .put<ReservationAfficheDto>(url, {})
+      .pipe(finalize(() => this.dialogRef.close(true)))
+      .subscribe({
+        next: () => {
+          // Rafraîchir la liste des chambres libres dans le store
+          if (this.user?.idAgence) {
+            this.store.dispatch(new GetAllAppartementLibreActions(this.user.idAgence));
+          }
+        },
+        error: () => {
+          // On ferme quand même pour ne pas bloquer l'utilisateur
+        },
+      });
   }
 
   closeDialog(): void {
@@ -553,6 +654,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
     if (this.dateDebutSejour && this.dateFinSejour) {
       this.getDiffDays(this.dateDebutSejour, this.dateFinSejour);
+      // Charger les chambres disponibles après hydratation
+      if (this.stayNights > 0 && this.user?.idAgence) {
+        this.loadAvailableRooms();
+      }
     }
   }
 
@@ -630,6 +735,7 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.emailManuel = '';
     this.paymentMode = '';
     this.vatType = '';
+    this.availableRooms = [];
   }
 
   private toApiDate(value: Date | null): string {

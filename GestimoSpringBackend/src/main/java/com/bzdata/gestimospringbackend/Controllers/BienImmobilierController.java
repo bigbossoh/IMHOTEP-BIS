@@ -33,6 +33,12 @@ public class BienImmobilierController {
         return ResponseEntity.ok(bienImmobilierService.findAll(idAgence,chapitre));
     }
 
+    @GetMapping("/allappartementmeuble/{idAgence}")
+    @Operation(summary = "Liste des biens immobilier de type Appartement ou bienMeublerResidence = true pour une agence donnee")
+    public ResponseEntity<List<BienImmobilierAffiheDto>> findAllAppartementMeuble(@PathVariable("idAgence") Long idAgence) {
+        return ResponseEntity.ok(bienImmobilierService.findAllAppartementMeuble(idAgence));
+    }
+
     @Operation(summary = "Liste de toutes les bien immobiliers oqpq", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/allBienOccuper/{idAgence}/{chapitre}")
     public ResponseEntity<List<BienImmobilierAffiheDto>> findAllBienOqp(@PathVariable("idAgence") Long idAgence,
