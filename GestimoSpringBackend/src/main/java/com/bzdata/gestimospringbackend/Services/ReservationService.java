@@ -36,5 +36,7 @@ public interface ReservationService
     LocalDate dateFin
   );
   ReservationAfficheDto findPeriodeReservationByIdBien(Long idBien);
-  
+
+  ReservationAfficheDto annulerReservation(Long idReservation);
+   
 }

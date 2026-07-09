@@ -479,4 +479,29 @@ public class ReservationServiceImpl implements ReservationService {
       .findFirst()
       .orElse(null);
   }
+
+  @Override
+  public ReservationAfficheDto annulerReservation(Long idReservation) {
+    log.info("Annulation de la réservation {}", idReservation);
+    Reservation reservation = reservationRepository.findById(idReservation).orElse(null);
+    if (reservation == null) {
+      return null;
+    }
+
+    // Libérer le bien immobilier (le rendre disponible)
+    if (reservation.getBienImmobilierOperation() != null) {
+      Appartement appartement = appartementRepository
+        .findById(reservation.getBienImmobilierOperation().getId())
+        .orElse(null);
+      if (appartement != null) {
+        appartement.setOccupied(false);
+        appartementRepository.save(appartement);
+      }
+    }
+
+    // Marquer la réservation comme annulée
+    reservation.setStatutReservation("Annule");
+    Reservation saved = reservationRepository.save(reservation);
+    return gestimoWebMapperImpl.fromReservation(saved);
+  }
 }

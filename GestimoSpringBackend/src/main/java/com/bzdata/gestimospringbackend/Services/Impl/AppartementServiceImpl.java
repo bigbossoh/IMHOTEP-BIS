@@ -6,6 +6,7 @@ import com.bzdata.gestimospringbackend.department.entity.Chapitre;
 import com.bzdata.gestimospringbackend.Models.Etage;
 import com.bzdata.gestimospringbackend.Models.Site;
 import com.bzdata.gestimospringbackend.Models.hotel.CategorieChambre;
+import com.bzdata.gestimospringbackend.Models.hotel.Reservation;
 import com.bzdata.gestimospringbackend.Services.AppartementService;
 import com.bzdata.gestimospringbackend.exceptions.EntityNotFoundException;
 import com.bzdata.gestimospringbackend.exceptions.ErrorCodes;
@@ -15,7 +16,9 @@ import com.bzdata.gestimospringbackend.repository.AppartementRepository;
 import com.bzdata.gestimospringbackend.repository.CategoryChambreRepository;
 import com.bzdata.gestimospringbackend.department.repository.ChapitreRepository;
 import com.bzdata.gestimospringbackend.repository.EtageRepository;
+import com.bzdata.gestimospringbackend.repository.ReservationRepository;
 import com.bzdata.gestimospringbackend.validator.AppartementDtoValidator;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +46,7 @@ public class AppartementServiceImpl implements AppartementService {
   final CategoryChambreRepository categoryChambreRepository;
   final EtageRepository etageRepository;
   final ChapitreRepository chapitreRepository;
+  final ReservationRepository reservationRepository;
 
   @Override
   public boolean delete(Long id) {
@@ -269,6 +273,30 @@ public class AppartementServiceImpl implements AppartementService {
         app.isBienMeublerResidence() == false &&
         app.isOccupied() == false
       )
+      .map(gestimoWebMapperImpl::fromAppartement)
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<AppartementDto> findAllLibreByPeriode(Long idAgence, String dateDebut, String dateFin) {
+    log.info("Disponibilité par période pour agence {} du {} au {}", idAgence, dateDebut, dateFin);
+    LocalDate debut = LocalDate.parse(dateDebut);
+    LocalDate fin = LocalDate.parse(dateFin);
+
+    return appartementRepository
+      .findAll()
+      .stream()
+      .filter(app ->
+        Objects.equals(app.getIdAgence(), idAgence) &&
+        app.isBienMeublerResidence() == true &&
+        app.isOccupied() == false
+      )
+      .filter(app -> {
+        List<Reservation> reservations = reservationRepository.findReservationsOverlap(
+          app.getId(), debut, fin
+        );
+        return reservations.isEmpty();
+      })
       .map(gestimoWebMapperImpl::fromAppartement)
       .collect(Collectors.toList());
   }

@@ -78,6 +78,17 @@ public class AppartementController {
     public ResponseEntity<List<AppartementDto>> findAllAppartementLibre(@PathVariable("idAgence") Long idAgence) {
         return ResponseEntity.ok(appartementService.findAllLibre(idAgence));
     }
+
+    @Operation(summary = "Liste des chambres libres pour une période donnée"
+    // , security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @GetMapping("/libre-par-periode/{idAgence}/{dateDebut}/{dateFin}")
+    public ResponseEntity<List<AppartementDto>> findAllAppartementLibreByPeriode(
+            @PathVariable("idAgence") Long idAgence,
+            @PathVariable("dateDebut") String dateDebut,
+            @PathVariable("dateFin") String dateFin) {
+        return ResponseEntity.ok(appartementService.findAllLibreByPeriode(idAgence, dateDebut, dateFin));
+    }
     @Operation(summary = "Trouver un Appartement par son ID", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/findById/{id}")
     public ResponseEntity<AppartementDto> findByIDAppartement(@PathVariable("id") Long id) {

@@ -19,9 +19,16 @@
         </button>
       }
     </div>
-    <button type="button" class="btn-close-dialog" (click)="closeDialog()" aria-label="Fermer">
-      <i class="fas fa-xmark"></i>
-    </button>
+    <div class="res-header__actions">
+      @if (isEditMode) {
+        <button type="button" class="btn btn-outline-danger btn-pill btn-annuler" (click)="cancelReservation()">
+          <i class="fas fa-ban"></i> Annuler la réservation
+        </button>
+      }
+      <button type="button" class="btn-close-dialog" (click)="closeDialog()" aria-label="Fermer">
+        <i class="fas fa-xmark"></i>
+      </button>
+    </div>
   </div>
 
   <!-- ── Body ── -->
@@ -31,52 +38,7 @@
       <!-- ════ Colonne gauche : formulaire ════ -->
       <div class="res-form">
 
-        <!-- Section 1 : Chambre -->
-        <div class="form-section">
-          <p class="form-section__label"><i class="fas fa-door-open"></i> Chambre</p>
-
-          @if (appartementState$ | async; as state) {
-            @if (state.dataState === AppartementStateEnum.LOADING) {
-              <div class="inline-state inline-state--loading">
-                <span class="spinner-border spinner-border-sm"></span> Chargement…
-              </div>
-            } @else if (state.dataState === AppartementStateEnum.ERROR) {
-              <div class="inline-state inline-state--error">
-                <i class="fas fa-circle-exclamation"></i> {{ state.errorMessage }}
-              </div>
-            } @else {
-              <select
-                class="form-select"
-                [(ngModel)]="residenceModel"
-                (ngModelChange)="onRoomSelection(residenceModel)"
-              >
-                <option [ngValue]="null">Sélectionner une chambre…</option>
-                @for (appart of state.appartements; track appart.id) {
-                  <option [ngValue]="appart">{{ appart.nomBaptiserBienImmobilier }}</option>
-                }
-              </select>
-
-              @if (residenceModel) {
-                <div class="room-badge">
-                  <span class="room-badge__name">{{ selectedRoomName }}</span>
-                  <span class="room-badge__cat">{{ selectedRoomCategory }}</span>
-                  @if (selectedRoomRates.length) {
-                    <div class="room-rates">
-                      @for (prix of selectedRoomRates; track prix.id ?? prix.nombreDeJour) {
-                        <span class="rate-pill">
-                          {{ prix.prix | currency:'XOF':'symbol':'1.0-0' }}
-                          <small>≤ {{ prix.nombreDeJour }}j</small>
-                        </span>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            }
-          }
-        </div>
-
-        <!-- Section 2 : Dates -->
+        <!-- Section 1 : Dates (toujours en premier) -->
         <div class="form-section">
           <p class="form-section__label"><i class="fas fa-calendar-range"></i> Période du séjour</p>
           <div class="row g-1">
@@ -109,6 +71,53 @@
               <span>·</span>
               <span>{{ nightlyPrice | currency:'XOF':'symbol':'1.0-0' }} / nuit</span>
             </div>
+          }
+        </div>
+
+        <!-- Section 2 : Chambre (disponible uniquement après sélection des dates) -->
+        <div class="form-section">
+          <p class="form-section__label"><i class="fas fa-door-open"></i> Chambre disponible</p>
+
+          @if (!datesSelected) {
+            <div class="inline-state inline-state--info">
+              <i class="fas fa-calendar-alt"></i> Veuillez d'abord sélectionner les dates du séjour pour voir les chambres disponibles.
+            </div>
+          } @else if (roomsLoading) {
+            <div class="inline-state inline-state--loading">
+              <span class="spinner-border spinner-border-sm"></span> Recherche des chambres disponibles…
+            </div>
+          } @else if (availableRooms.length === 0) {
+            <div class="inline-state inline-state--error">
+              <i class="fas fa-circle-exclamation"></i> Aucune chambre disponible pour cette période.
+            </div>
+          } @else {
+            <select
+              class="form-select"
+              [(ngModel)]="residenceModel"
+              (ngModelChange)="onRoomSelection(residenceModel)"
+            >
+              <option [ngValue]="null">Sélectionner une chambre…</option>
+              @for (appart of availableRooms; track appart.id) {
+                <option [ngValue]="appart">{{ appart.nomBaptiserBienImmobilier }}</option>
+              }
+            </select>
+
+            @if (residenceModel) {
+              <div class="room-badge">
+                <span class="room-badge__name">{{ selectedRoomName }}</span>
+                <span class="room-badge__cat">{{ selectedRoomCategory }}</span>
+                @if (selectedRoomRates.length) {
+                  <div class="room-rates">
+                    @for (prix of selectedRoomRates; track prix.id ?? prix.nombreDeJour) {
+                      <span class="rate-pill">
+                        {{ prix.prix | currency:'XOF':'symbol':'1.0-0' }}
+                        <small>≤ {{ prix.nombreDeJour }}j</small>
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            }
           }
         </div>
 

@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Reservation extends Operation {
 
+  Long idAppartementdDto;
   double montantDeReservation;
   double pourcentageReduction;
   double montantReduction;

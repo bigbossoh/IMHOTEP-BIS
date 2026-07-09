@@ -72,8 +72,7 @@ public class InvoiceController {
                 "baseUrl", baseUrl));
     }
 
-     @PostMapping("/refund-invoice")
-
+    @PostMapping("/refund-invoice")
     @ResponseStatus(HttpStatus.OK)
     public VerificationRefundResponse refundInvoice(
             @RequestBody RefundInvoiceDTO refundDto
@@ -81,7 +80,7 @@ public class InvoiceController {
         return service.refundInvoice(refundDto);
     }
 
-     @GetMapping("/list-facture-avoir")
+    @GetMapping("/list-facture-avoir")
     public List<VerificationRefundResponse> getAllRefunds() {
         return service.getAllRefunds();
     }

@@ -140,7 +140,7 @@
                         <button
                           type="button"
                           class="btn btn-sm btn-success"
-                          [disabled]="isCertifying(r)"
+                          [disabled]="isCertifying(r) || isCertifiee(r)"
                           (click)="certifierReservation(r)"
                         >
                           @if (isCertifying(r)) { Certification… } @else { {{ certifierButtonLabel(r) }} }

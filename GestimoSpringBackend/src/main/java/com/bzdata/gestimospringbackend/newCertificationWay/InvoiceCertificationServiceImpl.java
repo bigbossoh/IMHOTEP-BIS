@@ -33,9 +33,15 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
     private final InvoiceCertifierCustomTaxRepository invoiceCustomTaxRepo;
     private final VerificationResponseRepository verificationRefundResponseRepo;
 
-    @Override
+  @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public JsonNode certifyInvoice(InvoiceSignRequest request) {
+        // Check if FNE certification is enabled
+        if (!props.isEnabled()) {
+            log.info("Certification FNE desactivee (invoice.api.enabled=false) : facture non certifiee.");
+            return null;
+        }
+
         try {
             String payload = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
             log.info("\n========== FNE CERTIFICATION REQUEST ==========\nURL : {}{}\n{}\n===============================================",
@@ -538,103 +544,103 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
         return (s == null || s.isBlank()) ? null : OffsetDateTime.parse(s);
     }
 
- @Override
-@Transactional
-public VerificationRefundResponse refundInvoice(RefundInvoiceDTO refundDto) {
+    @Override
+    @Transactional
+    public VerificationRefundResponse refundInvoice(RefundInvoiceDTO refundDto) {
 
-    // ===== 1) LOG =====
-    try {
+        // ===== 1) LOG =====
+        try {
+            log.info(
+                    "Calling FNE REFUND API | invoiceId={} | payload={}",
+                    refundDto.getInvoiceId(),
+                    objectMapper.writeValueAsString(refundDto)
+            );
+        } catch (Exception e) {
+            log.warn("Unable to serialize RefundInvoiceDTO for logging", e);
+        }
+
+        // ===== 2) APPEL API FNE =====
+        VerificationRefundResponseDto response;
+        try {
+            String refundPath = "/external/invoices/{id}/refund";
+            log.info("Calling FNE refund API at {}{}", props.getBaseUrl(), refundPath);
+
+            response = invoiceWebClient
+                    .post()
+                    .uri(refundPath, refundDto.getInvoiceId())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + props.getToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+
+                    // ⬅️ BODY = DTO (invoiceId ignoré par Jackson)
+                    .bodyValue(refundDto)
+
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, res ->
+                            res.bodyToMono(String.class)
+                                    .map(body -> {
+                                        log.error("FNE REFUND 4xx error: {}", body);
+                                        return new RuntimeException(body);
+                                    })
+                    )
+                    .onStatus(HttpStatusCode::is5xxServerError, res ->
+                            res.bodyToMono(String.class)
+                                    .map(body -> {
+                                        log.error("FNE REFUND 5xx error: {}", body);
+                                        return new RuntimeException(body);
+                                    })
+                    )
+                    .bodyToMono(VerificationRefundResponseDto.class)
+                    .block();
+
+        } catch (Exception e) {
+            log.error("Exception while calling FNE REFUND API", e);
+            throw new RuntimeException("Impossible de contacter l'API FNE (refund)", e);
+        }
+
+        if (response == null) {
+            throw new RuntimeException("Réponse FNE refund vide");
+        }
+
+        // ===== 3) MAPPING DTO → ENTITY =====
+        VerificationRefundResponse entity = VerificationRefundResponse.builder()
+                .reference(response.getReference())
+                .ncc(response.getNcc())
+                .token(response.getToken())
+                .warning(response.isWarning())
+                .balanceSticker(response.getBalance_funds())
+                .invoiceId(refundDto.getInvoiceId())
+                .createdAt(OffsetDateTime.now())
+                .build();
+
+        // ===== 4) SAUVEGARDE DB =====
+        VerificationRefundResponse saved =
+                verificationRefundResponseRepo.save(entity);
+
         log.info(
-                "Calling FNE REFUND API | invoiceId={} | payload={}",
-                refundDto.getInvoiceId(),
-                objectMapper.writeValueAsString(refundDto)
+                "Refund saved successfully | reference={} | invoiceId={}",
+                saved.getReference(),
+                saved.getInvoiceId()
         );
-    } catch (Exception e) {
-        log.warn("Unable to serialize RefundInvoiceDTO for logging", e);
+
+        return saved;
     }
 
-    // ===== 2) APPEL API FNE =====
-    VerificationRefundResponseDto response;
-    try {
-        String refundPath = "/external/invoices/{id}/refund";
-        log.info("Calling FNE refund API at {}{}", props.getBaseUrl(), refundPath);
-
-        response = invoiceWebClient
-                .post()
-                .uri(refundPath, refundDto.getInvoiceId())
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + props.getToken())
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-
-                // ⬅️ BODY = DTO (invoiceId ignoré par Jackson)
-                .bodyValue(refundDto)
-
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, res ->
-                        res.bodyToMono(String.class)
-                                .map(body -> {
-                                    log.error("FNE REFUND 4xx error: {}", body);
-                                    return new RuntimeException(body);
-                                })
-                )
-                .onStatus(HttpStatusCode::is5xxServerError, res ->
-                        res.bodyToMono(String.class)
-                                .map(body -> {
-                                    log.error("FNE REFUND 5xx error: {}", body);
-                                    return new RuntimeException(body);
-                                })
-                )
-                .bodyToMono(VerificationRefundResponseDto.class)
-                .block();
-
-    } catch (Exception e) {
-        log.error("Exception while calling FNE REFUND API", e);
-        throw new RuntimeException("Impossible de contacter l’API FNE (refund)", e);
+    @Override
+    public List<VerificationRefundResponse> getAllRefundInvoiceList() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllRefundInvoiceList'");
     }
 
-    if (response == null) {
-        throw new RuntimeException("Réponse FNE refund vide");
+    @Override
+    public List<VerificationRefundResponse> getAllRefunds() {
+        return verificationRefundResponseRepo.findAllByOrderByCreatedAtDesc();
     }
 
-    // ===== 3) MAPPING DTO → ENTITY =====
-    VerificationRefundResponse entity = VerificationRefundResponse.builder()
-            .reference(response.getReference())
-            .ncc(response.getNcc())
-            .token(response.getToken())
-            .warning(response.isWarning())
-            .balanceSticker(response.getBalance_funds())
-            .invoiceId(refundDto.getInvoiceId())
-            .createdAt(OffsetDateTime.now())
-            .build();
-
-    // ===== 4) SAUVEGARDE DB =====
-    VerificationRefundResponse saved =
-            verificationRefundResponseRepo.save(entity);
-
-    log.info(
-            "Refund saved successfully | reference={} | invoiceId={}",
-            saved.getReference(),
-            saved.getInvoiceId()
-    );
-
-    return saved;
-}
-
- @Override
- public List<VerificationRefundResponse> getAllRefundInvoiceList() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getAllRefundInvoiceList'");
- }
-
-@Override
-public List<VerificationRefundResponse> getAllRefunds() {
-    return verificationRefundResponseRepo.findAllByOrderByCreatedAtDesc();
-}
-
-@Override
-public List<VerificationRefundResponse> getRefundsByInvoiceId(String invoiceId) {
-    return verificationRefundResponseRepo.findByInvoiceIdOrderByCreatedAtDesc(invoiceId);
-}
+    @Override
+    public List<VerificationRefundResponse> getRefundsByInvoiceId(String invoiceId) {
+        return verificationRefundResponseRepo.findByInvoiceIdOrderByCreatedAtDesc(invoiceId);
+    }
 
 
     

@@ -85,10 +85,11 @@ info:
 # test et l'environnement de production n'utilisent ni la même URL, ni la
 # même clé API.
 fne:
+  enabled: true
   sign-path: /external/invoices/sign
   connect-timeout-ms: 10000
   read-timeout-ms: 15000
-  default-taxe: TVA
+  default-taxe: TVAC
 
 # Client alternatif de certification FNE (package newCertificationWay),
 # meme principe : base-url/token definis par profil.

@@ -1338,7 +1338,7 @@ public class PrintServiceImpl implements PrintService {
     String etablissement = fallback(agence != null ? agence.getSigleAgence() : null, "GESTIMO");
     String pointOfSale = fallback(agence != null ? agence.getPointOfSale() : null, "GESTIMO");
     String clientNom = fallback(formatFullName(client));
-    String modePaiement = resolveFnePaymentMethod(reservation.getId());
+    String modePaiement = resolveFnePaymentMethod(reservation);
     String taxe = StringUtils.hasText(reservation.getTaxes())
       ? reservation.getTaxes()
       : fneProperties.getDefaultTaxe();
@@ -1370,29 +1370,31 @@ public class PrintServiceImpl implements PrintService {
       return null;
     }
 
-    try {
-      InvoiceItem item = InvoiceItem.builder()
-        .taxes(List.of(taxe))
-        .reference("RESA-" + reservation.getId())
-        .description("Sejour - " + chambreNomLabel)
-        .quantity(Math.max(nombreNuits, 1))
-        .amount(prixParNuit)
-        .measurementUnit("nuitee")
-        .build();
+try {
+        InvoiceItem item = InvoiceItem.builder()
+          .taxes(List.of(taxe))
+          .reference("RESA-" + reservation.getId())
+          .description("Sejour - " + chambreNomLabel)
+          .quantity(Math.max(nombreNuits, 1))
+          .amount(prixParNuit)
+          .discount((double) reservation.getPourcentageReduction())
+          .measurementUnit("nuitee")
+          .build();
 
-      InvoiceSignRequest request = InvoiceSignRequest.builder()
-        .invoiceType("sale")
-        .paymentMethod(modePaiement)
-        .template("B2C")
-        .numeroFacture(factureNumero)
-        .clientCompanyName(clientNom)
-        .clientPhone(client != null ? fallback(client.getMobile(), client.getEmail()) : "")
-        .clientEmail(clientEmail)
-        .pointOfSale(pointOfSale)
-        .establishment(etablissement)
-        .items(List.of(item))
-        .discount(reservation.getMontantReduction())
-        .build();
+        InvoiceSignRequest request = InvoiceSignRequest.builder()
+          .invoiceType("sale")
+          .paymentMethod(modePaiement)
+          .template("B2C")
+          .numeroFacture(factureNumero)
+          .clientCompanyName(clientNom)
+          .clientPhone(client != null ? fallback(client.getMobile(), client.getEmail()) : "")
+          .clientEmail(clientEmail)
+          .clientSellerName(agence != null ? agence.getNomAgence() : "GESTIMO")
+          .pointOfSale(pointOfSale)
+          .establishment(etablissement)
+          .items(List.of(item))
+          .discount(reservation.getMontantReduction())
+          .build();
 
       JsonNode json = invoiceCertificationService.certifyInvoice(request);
       invoiceCertificationService.saveFromJsonToDataba(json);
@@ -1514,15 +1516,19 @@ public class PrintServiceImpl implements PrintService {
     return (value.isMissingNode() || value.isNull()) ? null : value.asText();
   }
 
-  private String resolveFnePaymentMethod(Long idReservation) {
-    String modePaiement = encaissementReservationRepository
-      .findAllByReservation_Id(idReservation)
-      .stream()
-      .max(Comparator.comparing(
-        e -> e.getCreationDate() != null ? e.getCreationDate() : Instant.EPOCH
-      ))
-      .map(EncaissementReservation::getModePaiement)
-      .orElse("");
+  private String resolveFnePaymentMethod(Reservation reservation) {
+    // Utilise paymentMode de la réservation en priorité, puis fallback sur les encaissements
+    String modePaiement = reservation.getPaymentMode();
+
+    if (!StringUtils.hasText(modePaiement)) {
+      List<EncaissementReservation> encaissements = encaissementReservationRepository.findAllByReservation_Id(reservation.getId());
+      modePaiement = encaissements.stream()
+        .max(Comparator.comparing(
+          e -> e.getCreationDate() != null ? e.getCreationDate() : Instant.EPOCH
+        ))
+        .map(EncaissementReservation::getModePaiement)
+        .orElse("");
+    }
 
     String normalise = modePaiement != null ? modePaiement.toUpperCase(Locale.ROOT) : "";
 

@@ -82,7 +82,7 @@ public class BienImmobilierServiceImpl implements BienImmobilierService {
   public Bienimmobilier findBienByBailEnCours(Long idBail) {
     BailLocation bailLocation = bailLocationRepository
       .findById(idBail)
-      .filter(bail -> bail.isEnCoursBail() == true&&bail.getBienImmobilierOperation().isBienMeublerResidence()==false)
+      .filter(bail -> bail.isEnCoursBail() == true && bail.getBienImmobilierOperation().isBienMeublerResidence() == false)
       .orElse(null);
     if (bailLocation != null) {
       Bienimmobilier bienimmobilier = bienImmobilierRepository
@@ -91,6 +91,16 @@ public class BienImmobilierServiceImpl implements BienImmobilierService {
       return bienimmobilier;
     }
     return null;
+  }
+
+  @Override
+  public List<BienImmobilierAffiheDto> findAllAppartementMeuble(Long idAgence) {
+    return bienImmobilierRepository
+      .findAll()
+      .stream()
+      .filter(bien -> bien.getIdAgence() == idAgence && bien.isBienMeublerResidence() == true)
+      .map(gestimoWebMapperImpl::fromBienImmobilier)
+      .collect(Collectors.toList());
   }
 
   @Override
