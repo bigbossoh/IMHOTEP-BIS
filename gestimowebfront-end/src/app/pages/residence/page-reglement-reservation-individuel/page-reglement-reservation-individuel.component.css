@@ -1,21 +1,245 @@
-.mat-select{
-  max-width: max-content !important;
-  min-width: 100%;
+:host {
+  --accent: #c2410c;
+  --accent-soft: rgba(194, 65, 12, 0.1);
+  --success: #047857;
+  --danger: #b91c1c;
+  --danger-soft: rgba(185, 28, 28, 0.06);
+  --text: #16233f;
+  --muted: #64748b;
+  --border: rgba(20, 38, 74, 0.1);
+  --border-soft: rgba(20, 38, 74, 0.06);
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --radius: 16px;
+  --radius-sm: 10px;
+  display: block;
+  width: 440px;
+  max-width: 100%;
+  color: var(--text);
+  font-size: 0.94rem;
 }
-.mat-form-field{
-  width: 100%;
+
+/* ── Shell ── */
+.rgl-dialog {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-soft);
 }
-.widthForm{
-  width: 75%;
+
+/* ── Header ── */
+.rgl-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 22px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  margin: 0 !important;
 }
-.example-form {
-  min-width: 150px;
-  max-width: 500px;
-  width: 100%;
+
+.rgl-header__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.1rem;
 }
-.example-full-width {
-  width: 100%;
+
+.rgl-header__text { flex: 1 1 auto; min-width: 0; }
+
+.rgl-eyebrow {
+  display: block;
+  margin: 0 0 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
-.tail-50{
-  width: 50%;
+
+.rgl-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.rgl-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-close-dialog {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-close-dialog:hover { background: var(--accent-soft); color: var(--accent); }
+
+/* ── Body ── */
+.rgl-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px !important;
+  margin: 0 !important;
+  max-height: 70vh;
+}
+
+/* Reste à payer */
+.rgl-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+  border: 1px solid rgba(185, 28, 28, 0.15);
+}
+
+.rgl-balance__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.rgl-balance__value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+/* Formulaire */
+.rgl-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--radius) !important;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: none !important;
+  color: var(--text);
+  min-height: 40px;
+  font-size: 0.92rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(194, 65, 12, 0.4);
+  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.1) !important;
+}
+
+.input-group .form-control {
+  border-radius: var(--radius) 0 0 var(--radius) !important;
+}
+
+.input-group-text {
+  border-radius: 0 var(--radius) var(--radius) 0 !important;
+  border-color: rgba(148, 163, 184, 0.35);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Nouveau solde */
+.rgl-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.rgl-preview__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rgl-preview__value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rgl-preview--solde {
+  background: rgba(4, 120, 87, 0.06);
+  border-color: rgba(4, 120, 87, 0.2);
+}
+
+.rgl-preview--solde .rgl-preview__value { color: var(--success); }
+
+.rgl-preview__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(4, 120, 87, 0.12);
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Footer ── */
+.rgl-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.rgl-footer .btn {
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.5rem 1.1rem;
+}
+
+@media (max-width: 480px) {
+  :host { width: 100%; }
+  .rgl-form-grid { grid-template-columns: 1fr; }
 }

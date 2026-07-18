@@ -3,7 +3,6 @@ package com.bzdata.gestimospringbackend.Services.Impl.EncaissementReservationSer
 import com.bzdata.gestimospringbackend.DTOs.EncaissementReservationDto;
 import com.bzdata.gestimospringbackend.DTOs.EncaissementReservationRequestDto;
 import com.bzdata.gestimospringbackend.Models.Appartement;
-import com.bzdata.gestimospringbackend.Models.EncaissementPrincipal;
 import com.bzdata.gestimospringbackend.Models.hotel.EncaissementReservation;
 import com.bzdata.gestimospringbackend.Models.hotel.Reservation;
 import com.bzdata.gestimospringbackend.Services.EncaissementReservationService.SaveEncaissementReservationAvecRetourDeListService;
@@ -11,11 +10,9 @@ import com.bzdata.gestimospringbackend.mappers.GestimoWebMapperImpl;
 import com.bzdata.gestimospringbackend.repository.AppartementRepository;
 import com.bzdata.gestimospringbackend.repository.EncaissementReservationRepository;
 import com.bzdata.gestimospringbackend.repository.ReservationRepository;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -39,25 +36,34 @@ public class SaveEncaissementReservationAvecRetourDeListImpl
   public List<EncaissementReservationDto> saveEncaissementReservationAvecRetourDeList(
     EncaissementReservationRequestDto dto
   ) {
-    log.info("EncaissementReservationRequestDto {}",dto);
+    log.info("EncaissementReservationRequestDto {}", dto);
+    
+    Reservation reservation = reservationRepository.findById(
+      dto.getIdReservation()
+    ).orElse(null);
+    if (reservation == null) {
+      throw new IllegalArgumentException("Réservation non trouvée avec l'ID : " + dto.getIdReservation());
+    }
+    
     Appartement saveApp = appartementRepository
       .findById(dto.getIdAppartement())
       .orElse(null);
-
-    Reservation reservation = reservationRepository.getById(
-      dto.getIdReservation()
-    );
-    if (reservation != null) {
-      reservation.setSoldReservation(dto.getNvoSoldeReservation());
-      if (dto.getNvoSoldeReservation() == 0) {
-        if (saveApp != null) {
-          saveApp.setOccupied(false);
-          appartementRepository.saveAndFlush(saveApp);
-        }
-        reservation.setStatutReservation("Ferme");
+    
+    // Calcul du nouveau solde : ancien solde - montant encaissé
+    double nouveauSolde = Math.max(0, dto.getEncienSoldReservation() - dto.getMontantEncaissement());
+    
+    // Mise à jour de la réservation avec le nouveau solde
+    reservation.setSoldReservation(nouveauSolde);
+    if (nouveauSolde == 0) {
+      if (saveApp != null) {
+        saveApp.setOccupied(false);
+        appartementRepository.saveAndFlush(saveApp);
       }
-      reservationRepository.saveAndFlush(reservation);
+      reservation.setStatutReservation("Ferme");
     }
+    reservationRepository.saveAndFlush(reservation);
+    
+    // Création de l'encaissement
     EncaissementReservation encaissementReservation = new EncaissementReservation();
     encaissementReservation.setIdAgence(dto.getIdAgence());
     encaissementReservation.setCreationDate(
@@ -69,30 +75,22 @@ public class SaveEncaissementReservationAvecRetourDeListImpl
     encaissementReservation.setEncienSoldReservation(
       dto.getEncienSoldReservation()
     );
-    // encaissementReservation.setEntiteOperation(dto.getEntiteOperation());
-    //encaissementReservation.setModePaiement(dto.getModePaiement());
     encaissementReservation.setMontantEncaissement(
       dto.getMontantEncaissement()
     );
-    encaissementReservation.setNvoSoldeReservation(
-      dto.getNvoSoldeReservation()
-    );
-
+    encaissementReservation.setNvoSoldeReservation(nouveauSolde);
+    encaissementReservation.setSoldeEncaissement(nouveauSolde);
     encaissementReservation.setReservation(reservation);
-    EncaissementReservation encaissementReservationSave = encaissementReservationRepository.save(
-      encaissementReservation
-    );
-    if (reservation == null) {
-      return null;
-    } else {
-      return encaissementReservationRepository
-        .findAll()
-        .stream()
-        .filter(res -> res.getReservation().getId() == reservation.getId())
-        .map(x -> gestimoWebMapperImpl.fromEncaissementReservation(x))
-        .distinct()
-        .collect(Collectors.toList());
-    }
+    
+    encaissementReservationRepository.save(encaissementReservation);
+    
+    // Retourner la liste des encaissements de la réservation (triés par date décroissante)
+    return encaissementReservationRepository
+      .findAllByReservation_Id(reservation.getId())
+      .stream()
+      .sorted(Comparator.comparing(EncaissementReservation::getCreationDate).reversed())
+      .map(x -> gestimoWebMapperImpl.fromEncaissementReservation(x))
+      .collect(Collectors.toList());
   }
 
   @Override

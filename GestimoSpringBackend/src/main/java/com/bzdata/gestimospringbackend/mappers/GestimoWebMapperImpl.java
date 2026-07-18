@@ -923,31 +923,25 @@ public class GestimoWebMapperImpl {
     return chapitreUserDto;
   }
 
-  public EncaissementReservationDto fromEncaissementReservation(
-    EncaissementReservation encaissementReservation
-  ) {
-    EncaissementReservation encaissementReservationFund = encaissementReservationRepository
-      .findAll()
-      .stream()
-      .filter(x ->
-        x.getReservation().getId() ==
-        encaissementReservation.getReservation().getId()
-      )
-      .findFirst().orElse(null);
-    EncaissementReservationDto encaissementReservationDto = new EncaissementReservationDto();
-    BeanUtils.copyProperties(
-      encaissementReservation,
-      encaissementReservationDto
-    );
-    encaissementReservationDto.setIdReservation(
-      encaissementReservation.getId()
-    );
-    encaissementReservationDto.setModePaiement(
-      encaissementReservation.getModePaiement()
-    );
-    if (encaissementReservationFund!=null) {
-      encaissementReservationDto.setIdLastEncaissement(encaissementReservationFund.getId());
-    }
-    return encaissementReservationDto;
-  }
+   public EncaissementReservationDto fromEncaissementReservation(
+     EncaissementReservation encaissementReservation
+   ) {
+     EncaissementReservationDto encaissementReservationDto = new EncaissementReservationDto();
+     BeanUtils.copyProperties(
+       encaissementReservation,
+       encaissementReservationDto
+     );
+     encaissementReservationDto.setIdReservation(
+       encaissementReservation.getReservation().getId()
+     );
+     encaissementReservationDto.setModePaiement(
+       encaissementReservation.getModePaiement()
+     );
+     encaissementReservationDto.setSoldeEncaissement(
+       encaissementReservation.getSoldeEncaissement()
+     );
+     // Le dernier encaissement est l'encaissement lui-même si c'est le plus récent
+     encaissementReservationDto.setIdLastEncaissement(encaissementReservation.getId());
+     return encaissementReservationDto;
+   }
 }

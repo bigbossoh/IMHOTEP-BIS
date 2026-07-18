@@ -314,11 +314,17 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     const hasDates = !!this.dateDebutSejour && !!this.dateFinSejour && this.stayNights > 0;
     const hasRoom = !!this.residenceModel;
     const hasPrice = this.nightlyPrice > 0 || this.totalAmountPreview > 0;
-    const hasGuest = !!this.resolveGuestUsername();
-    const hasEmail = !!this.resolvedEmail && this.isEmailValid(this.resolvedEmail);
-    const hasPayment = !!this.paymentMode;
 
-    return hasDates && hasRoom && hasPrice && hasGuest && hasEmail && hasPayment;
+    if (this.isCheckInMode) {
+      // Mode "Entrée en chambre" : toutes les infos sont obligatoires
+      const hasGuest = this.hasGuestIdentifier() || !!this.resolveGuestUsername();
+      const hasEmail = !!this.resolvedEmail && this.isEmailValid(this.resolvedEmail);
+      const hasPayment = !!this.paymentMode;
+      return hasDates && hasRoom && hasPrice && hasGuest && hasEmail && hasPayment;
+    }
+
+    // Mode "Pré-réservation" : seules les dates, la chambre et le prix sont nécessaires
+    return hasDates && hasRoom && hasPrice;
   }
 
   get selectedPrestationsCount(): number {
@@ -383,6 +389,13 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   onModeChange(mode: ReservationMode): void {
     this.client = Number(mode) as ReservationMode;
+  }
+
+  onReductionChange(): void {
+    // Le total/solde figés au chargement (mode édition) doivent être
+    // recalculés dès que la réduction change, sinon elle n'a aucun effet.
+    this.totalApayer = 0;
+    this.resteApayer = 0;
   }
 
   onRoomSelection(room: AppartementDto | null): void {
@@ -560,7 +573,8 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   private buildReservationPayload(): Record<string, unknown> {
     const guest = this.selectedClient;
-    const guestId = this.isCheckInMode ? this.toNumber(guest?.id) : 0;
+    const existingGuestId = this.toNumber(this.reservationToEdit?.idUtilisateur);
+    const guestId = this.isCheckInMode ? (this.toNumber(guest?.id) || existingGuestId) : 0;
     const username = this.resolveGuestUsername();
     const [nom, prenom] = this.resolveGuestIdentity();
 
@@ -573,7 +587,7 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       dateFin: this.toApiDate(this.dateFinSejour),
       idClient: guestId,
       idBien: this.residenceModel?.id,
-      idUtilisateur: guestId,
+      idUtilisateur: guestId || existingGuestId,
       nom,
       prenom,
       username,
@@ -597,11 +611,11 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       return this.selectedClient.username;
     }
 
-    if (this.isCheckInMode && this.reservationToEdit?.username && this.hasExistingGuest()) {
-      return this.reservationToEdit.username;
+    if (this.isCheckInMode && this.hasExistingGuest()) {
+      return this.reservationToEdit?.username || this.reservationToEdit?.email || '';
     }
 
-    return '1234567890';
+    return '';
   }
 
   private resolveGuestIdentity(): [string, string] {
@@ -629,6 +643,13 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     }
 
     return '';
+  }
+
+  private hasGuestIdentifier(): boolean {
+    return (
+      !!this.toNumber(this.selectedClient?.id) ||
+      !!this.toNumber(this.reservationToEdit?.idUtilisateur)
+    );
   }
 
   private hydrateReservationIfNeeded(): void {
@@ -753,7 +774,16 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   private hasExistingGuest(): boolean {
     const guestName = (this.reservationToEdit?.utilisateurOperation ?? '').trim().toUpperCase();
-    return !!guestName && guestName !== 'XXX XXXXX';
+    const guestIdentifier = (
+      this.reservationToEdit?.username || this.reservationToEdit?.email || ''
+    )
+      .trim()
+      .toUpperCase();
+
+    return (
+      (!!guestName && guestName !== 'XXX XXXXX') ||
+      !!guestIdentifier
+    );
   }
 
   toDatePublic(value: string): Date {

@@ -31,10 +31,12 @@ public class FactureReservationView {
     // Client
     String clientNom;
     String clientContact;
+    String clientCivilite;
 
     // Chambre
     String chambreNom;
     String chambreCategorie;
+    String chambreCode;
 
     // Séjour
     String dateDebut;

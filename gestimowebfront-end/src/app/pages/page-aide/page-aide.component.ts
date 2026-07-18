@@ -189,7 +189,16 @@ export class PageAideComponent {
         {
           titre: 'Tableau de bord résidences',
           description:
-            "Vue synthétique du taux d'occupation des chambres, des réservations en cours et des revenus générés par la résidence.",
+            "Vue synthétique du taux d'occupation des chambres, des réservations en cours, des revenus générés par la résidence et du suivi de la certification FNE.",
+          etapes: [
+            'Accédez à Résidences > Tableau de bord',
+            'Les indicateurs en haut de page couvrent le mois en cours : taux d\'occupation, séjours en cours, montant encaissé, soldes restants',
+            'Filtrez sur une période précise (dates de début/fin) pour recalculer tous les indicateurs sur cette plage plutôt que sur le mois en cours',
+            'Des alertes signalent les départs du jour, les arrivées du jour, les départs dans les 3 prochains jours et les certifications FNE en échec récentes',
+            'Le tableau des séjours en cours indique pour chaque réservation le client (ou « Client à renseigner »), la chambre, les dates, la progression du séjour, le montant, le solde et le statut de certification FNE (Certifiée / Échec / Non certifiée)',
+            'La carte « Certification FNE » résume le taux de certification, le nombre de factures certifiées/en échec, le montant total certifié et le solde de stickers DGI restant',
+            'La colonne de droite affiche la disponibilité des chambres (anneau occupées/libres), la répartition par catégorie et un résumé financier',
+          ],
         },
         {
           titre: 'Clients résidence',
@@ -211,28 +220,48 @@ export class PageAideComponent {
             'Cliquez sur "Nouvelle réservation" ou "Ajout réservation"',
             'Sélectionnez le client, la chambre, les dates d\'arrivée et de départ',
             'Le système calcule automatiquement le montant selon la grille tarifaire',
+            'Une réduction (%) peut être appliquée : elle réduit le montant total et sera reprise sur la facture ainsi que dans la certification FNE',
             'Confirmez pour bloquer la chambre',
+          ],
+        },
+        {
+          titre: 'De la pré-réservation à l\'entrée en chambre',
+          description:
+            "Une réservation peut être créée rapidement (« Pré-réservation ») sans connaître encore le client, puis finalisée plus tard lorsqu'il se présente (« Entrée en chambre »).",
+          etapes: [
+            'Mode « Pré-réservation » : bloque la chambre pour les dates choisies ; le client peut être laissé vide et complété plus tard',
+            'Mode « Entrée en chambre » : le client, son email et le mode de paiement sont obligatoires — c\'est le mode à utiliser quand le client est présent',
+            'Tant qu\'aucun client réel n\'est associé, la réservation affiche « Client à renseigner » dans la liste, le tableau de bord et le planning de disponibilité',
+            'Un bouton « Finaliser » apparaît sur ces réservations incomplètes : cliquez dessus (ou sur « Modifier ») pour rouvrir la réservation en mode Entrée en chambre',
+            'Sélectionnez le client réel (ou créez-le), renseignez l\'email et le mode de paiement, puis validez',
+            'Une fois un client réel enregistré, la réservation n\'est plus considérée comme une pré-réservation — il n\'y a pas de bouton ou de statut séparé à changer, cela se fait automatiquement dès que le client est renseigné',
           ],
         },
         {
           titre: 'Disponibilité',
           description:
-            "Visualisez en temps réel les chambres disponibles et occupées sur un calendrier. Planifiez les arrivées et départs.",
+            "Visualisez l'occupation des chambres sur un planning type Gantt (une ligne par chambre, une colonne par jour) et vérifiez la disponibilité sur une période précise avant de confirmer un séjour.",
           etapes: [
             'Accédez à Résidences > Disponibilité',
-            'Sélectionnez la période souhaitée',
-            'Les chambres disponibles apparaissent en vert, occupées en rouge',
+            'Consultez les compteurs "Total chambres / Disponibles / Occupées" en haut de page',
+            'Filtrez la liste des chambres par recherche, par statut (Toutes, Libres, Occupées) ou par catégorie',
+            'Saisissez une date d\'arrivée et une date de départ puis cliquez sur "Vérifier" pour surligner la période et compter les chambres disponibles ; "Réinitialiser" efface la recherche',
+            'Naviguez dans le planning avec les boutons "← 7 j", "Aujourd\'hui" et "7 j →"',
+            'Repérez le statut de chaque séjour grâce à la couleur des barres : gris = pré-réservation, rouge = non payée, orange = acompte versé, vert = soldée',
+            'Cliquez sur une chambre pour ouvrir son détail : prix/nuit, superficie, séjour en cours (client, dates, solde) et historique des réservations',
           ],
         },
         {
           titre: 'Paiement résidence',
           description:
-            "Enregistrez les paiements liés aux séjours en résidence. Gérez les acomptes, soldes et remboursements.",
+            "Enregistrez les paiements liés aux séjours en résidence. Recherchez une réservation dans la liste, encaissez un acompte ou un solde et suivez l'historique des paiements.",
           etapes: [
-            'Accédez à Résidences > Paiement',
-            'Recherchez la réservation concernée',
-            'Saisissez le montant encaissé et le mode de paiement',
-            'Une quittance est générée automatiquement',
+            'Accédez à Résidences > Paiement (ou cliquez sur "Encaisser" depuis la liste des réservations)',
+            'Utilisez la barre de recherche pour retrouver une réservation par client, chambre ou code, ou parcourez la liste des réservations ouvertes',
+            'La fenêtre de règlement affiche le reste à payer, le mode de règlement (espèces, mobile money, chèque, virement bancaire) et le montant encaissé',
+            'Le nouveau solde se recalcule automatiquement au fur et à mesure de la saisie du montant, et passe en vert avec le badge « Soldé » dès que le règlement couvre le solde restant',
+            'Cliquez sur "Encaisser" pour valider : le solde de la réservation est mis à jour et elle passe au statut "Fermé" une fois entièrement soldée',
+            "Consultez l'historique des encaissements en bas de page et imprimez un reçu pour chaque paiement",
           ],
         },
       ],
@@ -356,6 +385,83 @@ export class PageAideComponent {
           titre: 'Fonctionnalités',
           description:
             "Consultez la liste exhaustive de toutes les fonctionnalités déclarées dans le système et gérez leur activation par profil d'utilisateur.",
+        },
+      ],
+    },
+{
+      id: 'factures',
+      titre: 'Factures',
+      icon: 'fas fa-file-invoice',
+      description: 'Consultez et gérez les factures générées pour les séjours en résidence.',
+      fonctionnalites: [
+        {
+          titre: 'Factures de séjour',
+          description:
+            "Liste des factures générées pour les réservations de résidence. Chaque facture affiche son statut de paiement et son statut de certification FNE.",
+          etapes: [
+            'Accédez à Résidences > Factures via le menu principal',
+            'La liste montre chaque facture avec son numéro, le client, le montant et son statut (soldée, partiellement payée)',
+            'Cliquez sur "Télécharger PDF" pour récupérer le document de la facture',
+            'Le bouton "Certifier" (ou "À certifier") permet de lancer la certification FNE directement depuis cette liste',
+          ],
+        },
+      ],
+    },
+    {
+      id: 'certifications-fne',
+      titre: 'Certifications FNE',
+      icon: 'fas fa-file-invoice-dollar',
+      description: "Certification électronique des factures auprès de la plateforme FNE (Facture Normalisée Électronique) de la DGI et suivi des certifications.",
+      fonctionnalites: [
+        {
+          titre: 'Certification FNE',
+          description:
+            "Certifiez électroniquement une facture soldée auprès de la DGI pour la conformité fiscale.",
+          etapes: [
+            "La facture doit être au statut 'Soldée' (solde = 0) pour pouvoir être certifiée",
+            'Cliquez sur le bouton de certification sur la ligne de la facture concernée (page Factures)',
+            "Le système génère le PDF et transmet automatiquement la facture à la DGI",
+            "Un message confirme la réussite (\"...certifiée avec succès auprès de la FNE\") ou signale un échec avec le motif de rejet renvoyé par la DGI",
+            "Une fois certifiée, la référence FNE, le NCC et un lien de vérification DGI sont associés à la facture",
+          ],
+        },
+        {
+          titre: 'Avoirs sur facture certifiée',
+          description:
+            "Créez un avoir auprès de la DGI pour rembourser tout ou partie d'une facture déjà certifiée (annulation, erreur de facturation, remboursement client).",
+          etapes: [
+            'Accédez à Résidences > Certifications FNE, onglet « Avoirs »',
+            'Le bouton "Avoir" apparaît sur les lignes déjà certifiées FNE (onglet « Ventes »)',
+            "Cochez les articles concernés et indiquez la quantité à rembourser pour chacun (jusqu'à la quantité facturée)",
+            "La fenêtre affiche le sous-total, la réduction éventuellement appliquée sur la facture d'origine puis le montant total de l'avoir, recalculés automatiquement",
+            'Cliquez sur "Confirmer l\'avoir" : la demande est transmise à la DGI et un avoir est enregistré',
+            "L'historique des avoirs déjà émis pour la facture s'affiche dans la même fenêtre",
+            'Dans l\'onglet « Avoirs », filtrez par statut (avec/sans alerte stock sticker) et par période (date de création) en plus de la recherche libre',
+          ],
+        },
+        {
+          titre: 'Historique des certifications FNE',
+          description:
+            "Tableau de suivi de toutes les certifications FNE réalisées : réussites, échecs et statistiques globales.",
+          etapes: [
+            "Accédez à Résidences > Certifications FNE",
+            "Les indicateurs et la carte « Gestion des stickers » en haut de page sont communs aux deux onglets Ventes/Avoirs : tentatives de certification, factures certifiées, échecs, montant total certifié",
+            "Les boutons « Ventes » et « Avoirs » juste en dessous ne changent que le tableau affiché",
+            "Dans l'onglet « Ventes », filtrez par recherche (facture, référence, NCC, client), par statut (Toutes / Certifiées uniquement / Échecs uniquement), par mode de paiement ou par période (date de certification)",
+            "Pour chaque ligne, retrouvez la référence FNE avec un lien \"Vérifier\" vers la plateforme DGI, le motif d'échec le cas échéant, et un bouton pour télécharger le PDF",
+          ],
+        },
+        {
+          titre: 'Gestion des stickers',
+          description:
+            "Chaque certification FNE réussie consomme un sticker auprès de la DGI (1 sticker = 200 FCFA). Cette carte permet de suivre le solde restant et sa valeur.",
+          etapes: [
+            "Accédez à Résidences > Certifications FNE : la carte « Gestion des stickers » se trouve juste sous les indicateurs, avant les onglets Ventes/Avoirs",
+            "« Solde restant » indique le nombre de stickers encore disponibles auprès de la DGI, avec un badge d'alerte (stock suffisant / faible / critique)",
+            "« Stickers consommés » indique le nombre de certifications réussies, converti en FCFA",
+            "« Valeur de sticker restant » convertit le solde restant en FCFA (solde × 200 FCFA) pour estimer le budget de certifications encore disponible",
+            "Quand le stock devient faible ou critique, anticipez le réapprovisionnement de stickers auprès de la DGI pour ne pas bloquer les certifications",
+          ],
         },
       ],
     },
