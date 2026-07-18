@@ -576,8 +576,10 @@ public class PrintServiceImpl implements PrintService {
         .factureDate(formatDate(LocalDate.now()))
         .clientNom(formatFullName(client))
         .clientContact(client != null ? fallback(client.getMobile(), client.getEmail()) : "Non renseigne")
+        .clientCivilite(resolveCivilite(client != null ? client.getGenre() : null))
         .chambreNom(chambreNomLabel)
         .chambreCategorie(fallback(chambreCategorie))
+        .chambreCode(fallback(bien != null ? bien.getCodeAbrvBienImmobilier() : null))
         .dateDebut(formatDate(reservation.getDateDebut()))
         .dateFin(formatDate(reservation.getDateFin()))
         .nombreNuits(nombreNuits)
@@ -602,7 +604,10 @@ public class PrintServiceImpl implements PrintService {
       Context context = new Context(FRENCH_LOCALE);
       context.setVariable("view", view);
 
-      String html = templateEngine.process("print/facture-reservation", context);
+      String templateName = view.isFneCertifiee()
+        ? "print/facture-reservation"
+        : "print/facture-reservation-non-certifiee";
+      String html = templateEngine.process(templateName, context);
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       ConverterProperties properties = new ConverterProperties();
       properties.setCharset(StandardCharsets.UTF_8.name());
@@ -1251,6 +1256,19 @@ public class PrintServiceImpl implements PrintService {
     return fallback(BailDisplayUtils.buildLocataireDisplayName(utilisateur));
   }
 
+  private String resolveCivilite(String genre) {
+    if (genre == null) {
+      return "-";
+    }
+    String normalized = genre.trim().toLowerCase(FRENCH_LOCALE);
+    return switch (normalized) {
+      case "m", "masculin", "homme", "monsieur" -> "Monsieur";
+      case "f", "feminin", "féminin", "femme", "madame" -> "Madame";
+      case "mademoiselle" -> "Mademoiselle";
+      default -> StringUtils.hasText(genre) ? genre.trim() : "-";
+    };
+  }
+
   private String buildDisplayName(String nom, String prenom) {
     String displayName = ((nom == null ? "" : nom.trim()) + " " + (prenom == null ? "" : prenom.trim())).trim();
     return StringUtils.hasText(displayName) ? displayName : "";
@@ -1371,13 +1389,17 @@ public class PrintServiceImpl implements PrintService {
     }
 
 try {
+        // Prix unitaire AVANT réduction = (montantTotal + montantReduction) / nombreNuits
+        // Le discount est envoyé au niveau de la facture (pourcentage)
+        double prixUnitaireAvantReduction = nombreNuits > 0 ? (montantTotal + reservation.getMontantReduction()) / nombreNuits : montantTotal;
+
         InvoiceItem item = InvoiceItem.builder()
           .taxes(List.of(taxe))
           .reference("RESA-" + reservation.getId())
           .description("Sejour - " + chambreNomLabel)
           .quantity(Math.max(nombreNuits, 1))
-          .amount(prixParNuit)
-          .discount((double) reservation.getPourcentageReduction())
+          .amount(prixUnitaireAvantReduction)
+          .discount(0)
           .measurementUnit("nuitee")
           .build();
 
@@ -1393,11 +1415,11 @@ try {
           .pointOfSale(pointOfSale)
           .establishment(etablissement)
           .items(List.of(item))
-          .discount(reservation.getMontantReduction())
+          .discount(reservation.getPourcentageReduction())
           .build();
 
       JsonNode json = invoiceCertificationService.certifyInvoice(request);
-      invoiceCertificationService.saveFromJsonToDataba(json);
+      invoiceCertificationService.saveFromJsonToDataba(json, factureNumero);
 
       FneSignInvoiceResponse response = toFneSignInvoiceResponse(json);
 

@@ -2,7 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
 import { ApiService } from 'src/gs-api/src/services/api.service';
 import { UserService } from 'src/app/services/user/user.service';
-import { AppartementDto, ReservationAfficheDto, UtilisateurRequestDto } from 'src/gs-api/src/models';
+import {
+  AppartementDto,
+  FneFactureCertificationDto,
+  ReservationAfficheDto,
+  UtilisateurRequestDto,
+} from 'src/gs-api/src/models';
+
+export type CertificationStatus = 'certifiee' | 'echec' | 'absente';
 
 export interface SejourVm extends ReservationAfficheDto {
   joursRestants: number;
@@ -11,6 +18,9 @@ export interface SejourVm extends ReservationAfficheDto {
   progressPercent: number;
   guestLabel: string;
   chambreLabel: string;
+  certificationStatus: CertificationStatus;
+  certificationLabel: string;
+  certificationFacture: FneFactureCertificationDto | null;
 }
 
 @Component({
@@ -28,6 +38,8 @@ export class PageDashboardResidenceComponent implements OnInit, OnDestroy {
   public sejoursEnCours: SejourVm[] = [];
   public toutesReservations: ReservationAfficheDto[] = [];
   public totalChambres = 0;
+  public certificationsFne: FneFactureCertificationDto[] = [];
+  private certificationParReservation = new Map<number, FneFactureCertificationDto>();
 
   public periodeDebut = '';
   public periodeFin = '';
@@ -55,10 +67,15 @@ export class PageDashboardResidenceComponent implements OnInit, OnDestroy {
       ouvertes: this.api.listeDesReservationOuvertParAgence(idAgence),
       toutes: this.api.allreservationparagence(idAgence),
       chambres: this.api.findAllAppartementMeuble(idAgence),
+      certifications: this.api.listeFacturesCertifieesFne(idAgence),
     }).subscribe({
-      next: ({ ouvertes, toutes, chambres }) => {
+      next: ({ ouvertes, toutes, chambres, certifications }) => {
         this.toutesReservations = toutes ?? [];
         this.totalChambres = (chambres ?? []).length;
+        this.certificationsFne = [...(certifications ?? [])].sort(
+          (a, b) => this.ts(b.dateCertification) - this.ts(a.dateCertification)
+        );
+        this.certificationParReservation = this.buildCertificationIndex(this.certificationsFne);
         this.sejoursEnCours = (ouvertes ?? [])
           .sort((a, b) => this.ts(a.dateFin) - this.ts(b.dateFin))
           .map((r) => this.buildSejourVm(r));
@@ -69,6 +86,20 @@ export class PageDashboardResidenceComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
     });
+  }
+
+  private buildCertificationIndex(
+    certifications: FneFactureCertificationDto[]
+  ): Map<number, FneFactureCertificationDto> {
+    // La liste est triée du plus récent au plus ancien : on ne garde que la
+    // certification la plus récente par réservation (le dernier essai fait foi).
+    const index = new Map<number, FneFactureCertificationDto>();
+    for (const c of certifications) {
+      if (c.idReservation && !index.has(c.idReservation)) {
+        index.set(c.idReservation, c);
+      }
+    }
+    return index;
   }
 
   private buildSejourVm(r: ReservationAfficheDto): SejourVm {
@@ -82,7 +113,37 @@ export class PageDashboardResidenceComponent implements OnInit, OnDestroy {
     const guest = (r.utilisateurOperation || '').trim().toUpperCase();
     const guestLabel = !guest || guest === 'XXX XXXXX' ? 'Client à renseigner' : r.utilisateurOperation ?? '—';
     const chambreLabel = r.bienImmobilierOperation || r.designationBail || '—';
-    return { ...r, joursRestants, joursEcoules, totalJours, progressPercent, guestLabel, chambreLabel };
+    const certificationFacture = (r.id && this.certificationParReservation.get(r.id)) || null;
+    const certificationStatus = this.resolveCertificationStatus(certificationFacture);
+    const certificationLabel = this.certificationStatusLabel(certificationStatus);
+    return {
+      ...r,
+      joursRestants,
+      joursEcoules,
+      totalJours,
+      progressPercent,
+      guestLabel,
+      chambreLabel,
+      certificationStatus,
+      certificationLabel,
+      certificationFacture,
+    };
+  }
+
+  private resolveCertificationStatus(facture: FneFactureCertificationDto | null): CertificationStatus {
+    if (!facture) return 'absente';
+    return facture.certifiee ? 'certifiee' : 'echec';
+  }
+
+  private certificationStatusLabel(status: CertificationStatus): string {
+    switch (status) {
+      case 'certifiee':
+        return 'Certifiée';
+      case 'echec':
+        return 'Échec';
+      default:
+        return 'Non certifiée';
+    }
   }
 
   /* ── Filtre période ── */
@@ -161,6 +222,79 @@ export class PageDashboardResidenceComponent implements OnInit, OnDestroy {
       const d = new Date(r.dateDebut);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
+  }
+
+  /* ── Certification FNE ── */
+  private matchesPeriodeOuMois(dateStr?: string): boolean {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+
+    if (this.hasPeriodeFilter) {
+      const start = this.periodeDebut ? new Date(this.periodeDebut) : null;
+      const end = this.periodeFin ? new Date(this.periodeFin) : null;
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    }
+
+    const now = this.today;
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }
+
+  get certificationsPeriode(): FneFactureCertificationDto[] {
+    return this.certificationsFne.filter((c) => this.matchesPeriodeOuMois(c.dateCertification));
+  }
+
+  get certificationsCertifieesCount(): number {
+    return this.certificationsPeriode.filter((c) => c.certifiee).length;
+  }
+
+  get certificationsEchecCount(): number {
+    return this.certificationsPeriode.filter((c) => !c.certifiee).length;
+  }
+
+  get tauxCertification(): number {
+    const total = this.certificationsPeriode.length;
+    if (!total) return 0;
+    return Math.round((this.certificationsCertifieesCount / total) * 100);
+  }
+
+  get montantCertifie(): number {
+    return this.certificationsPeriode
+      .filter((c) => c.certifiee)
+      .reduce((s, c) => s + Number(c.montant ?? 0), 0);
+  }
+
+  get dernieresCertificationsEchouees(): FneFactureCertificationDto[] {
+    return this.certificationsFne.filter((c) => !c.certifiee).slice(0, 5);
+  }
+
+  /** 1 sticker DGI = 200 FCFA ; consommé automatiquement à chaque certification FNE réussie. */
+  private static readonly PRIX_STICKER_FCFA = 200;
+
+  get soldeStickers(): number | null {
+    // certificationsFne est trié du plus récent au plus ancien : la première
+    // valeur non nulle est le solde de stickers actuel côté DGI.
+    const derniere = this.certificationsFne.find(
+      (c) => c.fneBalanceSticker !== null && c.fneBalanceSticker !== undefined
+    );
+    return derniere ? Number(derniere.fneBalanceSticker) : null;
+  }
+
+  get soldeStickersMontant(): number {
+    return (this.soldeStickers ?? 0) * PageDashboardResidenceComponent.PRIX_STICKER_FCFA;
+  }
+
+  public certificationBadgeClass(status: CertificationStatus): string {
+    switch (status) {
+      case 'certifiee':
+        return 'cert-badge--ok';
+      case 'echec':
+        return 'cert-badge--echec';
+      default:
+        return 'cert-badge--absente';
+    }
   }
 
   /* ── Alertes ── */

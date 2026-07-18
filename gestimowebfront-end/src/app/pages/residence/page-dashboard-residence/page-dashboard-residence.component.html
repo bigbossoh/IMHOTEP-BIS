@@ -105,8 +105,25 @@
     </div>
 
     <!-- ── Alertes du jour ── -->
-    @if (departsAujourdhui.length > 0 || arrivees.length > 0 || departsBientot.length > 0) {
+    @if (departsAujourdhui.length > 0 || arrivees.length > 0 || departsBientot.length > 0 || dernieresCertificationsEchouees.length > 0) {
       <div class="alertes-row">
+
+        @if (dernieresCertificationsEchouees.length > 0) {
+          <div class="alerte-card alerte-card--cert-echec">
+            <div class="alerte-card__header">
+              <i class="fas fa-triangle-exclamation"></i>
+              <strong>{{ dernieresCertificationsEchouees.length }} certification(s) FNE en échec</strong>
+            </div>
+            <ul class="alerte-list">
+              @for (c of dernieresCertificationsEchouees; track c.id) {
+                <li>
+                  <span class="alerte-guest">{{ c.factureNumero || ('Résa #' + c.idReservation) }}</span>
+                  <span class="alerte-room" [title]="c.messageErreur || ''">{{ c.messageErreur || 'Erreur inconnue' }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
 
         @if (departsAujourdhui.length > 0) {
           <div class="alerte-card alerte-card--depart">
@@ -192,6 +209,7 @@
                       <th>Progression</th>
                       <th>Montant</th>
                       <th>Solde</th>
+                      <th>Certification FNE</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -228,6 +246,16 @@
                         <td>{{ formatCurrency(+(r.montantReservation ?? 0)) }}</td>
                         <td [class.text-warning]="+(r.soldReservation ?? 0) > 0">
                           {{ formatCurrency(+(r.soldReservation ?? 0)) }}
+                        </td>
+                        <td>
+                          <span class="cert-badge" [class]="certificationBadgeClass(r.certificationStatus)">
+                            {{ r.certificationLabel }}
+                          </span>
+                          @if (r.certificationStatus === 'echec' && r.certificationFacture && r.certificationFacture.messageErreur) {
+                            <div class="row-helper" [title]="r.certificationFacture.messageErreur">
+                              {{ r.certificationFacture.messageErreur }}
+                            </div>
+                          }
                         </td>
                       </tr>
                     }
@@ -326,6 +354,46 @@
               <div class="finance-row">
                 <span>Soldes ouverts</span>
                 <strong class="finance-row__value--warning">{{ formatCurrency(soldeTotal) }}</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Certification FNE -->
+        <section class="surface-card">
+          <div class="surface-card__body">
+            <div class="card-heading">
+              <div>
+                <span class="card-heading__eyebrow">{{ hasPeriodeFilter ? 'Certification FNE — période' : 'Certification FNE du mois' }}</span>
+                <div class="kpi-value kpi-value--sm">{{ tauxCertification }}<span class="kpi-unit">%</span></div>
+              </div>
+              <span class="dash-count">{{ certificationsPeriode.length }} facture(s)</span>
+            </div>
+            <div class="kpi-progress">
+              <div class="kpi-progress__track">
+                <div class="kpi-progress__fill" [class.kpi-progress__fill--danger]="certificationsEchecCount > 0" [style.width.%]="tauxCertification"></div>
+              </div>
+            </div>
+            <div class="finance-list">
+              <div class="finance-row">
+                <span>Certifiées</span>
+                <strong class="finance-row__value--success">{{ certificationsCertifieesCount }}</strong>
+              </div>
+              <div class="finance-row">
+                <span>Échecs</span>
+                <strong [class.finance-row__value--danger]="certificationsEchecCount > 0">{{ certificationsEchecCount }}</strong>
+              </div>
+              <div class="finance-row">
+                <span>Montant certifié</span>
+                <strong class="finance-row__value--success">{{ formatCurrency(montantCertifie) }}</strong>
+              </div>
+              <div class="finance-row">
+                <span>Solde stickers DGI</span>
+                @if (soldeStickers !== null) {
+                  <strong>{{ soldeStickers }} ({{ formatCurrency(soldeStickersMontant) }})</strong>
+                } @else {
+                  <strong class="finance-row__value--warning">—</strong>
+                }
               </div>
             </div>
           </div>

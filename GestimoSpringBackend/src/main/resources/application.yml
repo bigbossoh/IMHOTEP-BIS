@@ -8,7 +8,7 @@ spring:
   application:
     name: gestimo_backend_springboot
   profiles:
-    default: dev
+    default: prod
   main:
     allow-circular-references: true
 
@@ -37,7 +37,7 @@ spring:
         show_sql: false
   sql:
     init:
-      mode: always
+      mode: never
 
   datasource:
     hikari:

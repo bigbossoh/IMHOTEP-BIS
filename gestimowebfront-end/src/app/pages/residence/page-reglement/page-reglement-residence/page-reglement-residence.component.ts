@@ -82,6 +82,11 @@ export class PageReglementResidenceComponent implements OnInit {
   encaissementReservationState$: Observable<ReservationState> | null = null;
   modePaiement: string = 'ESPESE';
   montantEnacaisse: any;
+  selectedReservationId: number | null = null;
+
+  public get selectedReservation(): any {
+    return this.leLocataire;
+  }
 
   public get remainingAmount(): number {
     const amount = Number(this.leLocataire?.soldReservation ?? 0);
@@ -153,6 +158,21 @@ export class PageReglementResidenceComponent implements OnInit {
   ngOnInit(): void {
     this.user = this.userService.getUserFromLocalCache();
     this.afficherLesReservationOuverte();
+  }
+
+  public selectReservation(reservation: any | null): void {
+    this.selectedReservationId = reservation?.id ?? null;
+    this.leLocataire = reservation;
+    this.montantEnacaisse = null;
+
+    if (!reservation?.id) {
+      this.totalRecords = 0;
+      this.dataSource.data = [];
+      this.dataSource.paginator = null;
+      return;
+    }
+
+    this.getAllEncaissementByBienImmobilier(reservation);
   }
 
   public onReservationSelected(reservation: any | null): void {

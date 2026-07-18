@@ -279,7 +279,6 @@ import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/pa
     NewCategorieChambreComponent,
     NewPrixCategorieChambreComponent,
     SaveCategorieAppartComponent,
-    PageReglementResidenceComponent,
     PageReglementReservationIndividuelComponent,
     MatTableExporterDirective,
     PageAuditComponent,

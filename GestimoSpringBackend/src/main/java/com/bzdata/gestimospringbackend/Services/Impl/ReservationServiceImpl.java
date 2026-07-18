@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -279,9 +280,17 @@ public class ReservationServiceImpl implements ReservationService {
       .findById(dto.getIdAppartementdDto())
       .orElse(null);
 
-    Utilisateur utilisateurSave = utilisateurRepository.findUtilisateurByMobile(
-      dto.getUsername()
-    );
+    Utilisateur utilisateurSave = null;
+    if (dto.getIdUtilisateur() != null && dto.getIdUtilisateur() > 0) {
+      utilisateurSave = utilisateurRepository.findById(dto.getIdUtilisateur()).orElse(null);
+    }
+
+    if (utilisateurSave == null && StringUtils.hasText(dto.getUsername())) {
+      utilisateurSave = utilisateurRepository.findUtilisateurByMobile(dto.getUsername());
+      if (utilisateurSave == null) {
+        utilisateurSave = utilisateurRepository.findUtilisateurByUsername(dto.getUsername());
+      }
+    }
 
     Reservation reservation;
     if (dto.getId() == null) {
@@ -372,28 +381,8 @@ public class ReservationServiceImpl implements ReservationService {
   public List<EncaissementReservationDto> saveEncaissementReservationAvecREsrourDeList(
     EncaissementReservationRequestDto dto
   ) {
-    EncaissementReservation encaissementReservation = new EncaissementReservation();
-    encaissementReservation.setModePaiement(dto.getModePaiement());
-    // encaissementReservation.setOperationType(dto.getOperationType());
-    encaissementReservation.setIdAgence(dto.getIdAgence());
-    encaissementReservation.setEncienSoldReservation(
-      dto.getEncienSoldReservation()
-    );
-    encaissementReservation.setIdCreateur(dto.getIdCreateur());
-    encaissementReservation.setDateEncaissement(LocalDate.now());
-    encaissementReservation.setMontantEncaissement(
-      dto.getMontantEncaissement()
-    );
-    //encaissementReservation.setIntituleDepense(dto.getIntituleDepense());
-    //  encaissementReservation.setEntiteOperation(dto.getEntiteOperation());
-    // encaissementReservation.set("non cloturer");
-    // encaissementReservation.setEntiteOperation(null);
-    EncaissementReservation saveEncaissement = encaissementReservationRepository.save(
-      encaissementReservation
-    );
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'saveEncaissementReservationAvecREsrourDeList'"
-    );
+    // Utiliser le service dédié au lieu de réimplémenter la logique
+    return saveEncaissementReservationAvecRetourDeListService.saveEncaissementReservationAvecRetourDeList(dto);
   }
 
   @Override
@@ -460,10 +449,17 @@ public class ReservationServiceImpl implements ReservationService {
     LocalDate dateDebut,
     LocalDate dateFin
   ) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-      "Unimplemented method 'sommeEncaissementReservationEntreDeuxPeriode'"
-    );
+    return encaissementReservationRepository
+      .findAll(Sort.by(Sort.Direction.DESC, "id"))
+      .stream()
+      .filter(encaissement ->
+        Objects.equals(encaissement.getIdAgence(), agence) &&
+        encaissement.getDateEncaissement() != null &&
+        !encaissement.getDateEncaissement().isBefore(dateDebut) &&
+        !encaissement.getDateEncaissement().isAfter(dateFin)
+      )
+      .mapToDouble(EncaissementReservation::getMontantEncaissement)
+      .sum();
   }
 
   @Override

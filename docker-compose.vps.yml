@@ -36,11 +36,12 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
+      SPRING_SQL_INIT_MODE: never
       SERVER_FORWARD_HEADERS_STRATEGY: framework
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      MYSQL_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
-      MYSQL_USER: gestimo
-      MYSQL_PASSWORD: gestimoweb
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/dbgestimoweb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: gestimo
+      SPRING_DATASOURCE_PASSWORD: gestimoweb
       APP_CORS_ALLOWED_ORIGIN_PATTERNS: https://gestimoweb.com,https://www.gestimoweb.com
       JWT_SECRET: change_me_in_prod
       APP_PASSWORD_RESET_URL: https://gestimoweb.com/reset-password

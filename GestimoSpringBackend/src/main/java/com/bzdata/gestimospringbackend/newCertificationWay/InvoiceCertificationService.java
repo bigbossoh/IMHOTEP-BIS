@@ -16,6 +16,8 @@ public interface InvoiceCertificationService {
 
     void saveFromJsonToDataba(JsonNode json);
 
+    void saveFromJsonToDataba(JsonNode json, String numeroFacture);
+
     void saveFromJsonToDatabaWithNumFacture(JsonNode json, String numFacture, String utiliseur);
 
     Long countByNumeroFacture(String numeroFacture);

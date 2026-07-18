@@ -30,6 +30,7 @@ public class EncaissementReservation extends AbstractEntity {
   double montantEncaissement;
   double encienSoldReservation;
   double nvoSoldeReservation;
+  double soldeEncaissement;
 
   @ManyToOne
   private Reservation reservation;

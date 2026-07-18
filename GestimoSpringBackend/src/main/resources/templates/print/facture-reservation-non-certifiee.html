@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="'Facture ' + ${view.factureNumero}">Facture de réservation</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 30px 34px 34px 34px;
+      }
+
+      body {
+        font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
+        color: #1a1a1a;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+      }
+
+      .page { width: 100%; }
+
+      /* ── En-tête ── */
+      .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 18px;
+      }
+      .header-table td { vertical-align: top; }
+      .header-logo { width: 110px; }
+      .header-logo img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+      }
+      .header-name {
+        text-align: center;
+        vertical-align: middle;
+      }
+      .header-name span {
+        display: inline-block;
+        font-size: 22px;
+        font-weight: 800;
+        font-style: italic;
+        text-decoration: underline;
+        color: #1a1a1a;
+      }
+      .header-date {
+        width: 110px;
+        text-align: right;
+        font-size: 11px;
+        color: #334155;
+      }
+
+      /* ── N° facture / client ── */
+      .facture-band {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 26px;
+      }
+      .facture-band td { vertical-align: top; }
+      .facture-label {
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: underline;
+      }
+      .facture-numero {
+        font-size: 15px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+      .client-block {
+        text-align: right;
+      }
+      .client-civilite {
+        font-size: 12px;
+        color: #1a1a1a;
+      }
+      .client-nom {
+        font-size: 15px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+
+      /* ── Bien / période ── */
+      .info-line {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 14px;
+      }
+      .info-line td {
+        padding: 3px 0;
+        font-size: 12px;
+      }
+      .info-line .info-key {
+        font-weight: 700;
+        font-family: "DejaVu Serif", serif;
+        width: 90px;
+      }
+
+      /* ── Tableau désignation ── */
+      .lines-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 22px;
+      }
+      .lines-table thead th {
+        background: #ededed;
+        border: 1px solid #080707;
+        padding: 6px 8px;
+        font-size: 12px;
+        font-weight: 800;
+        font-style: italic;
+        text-align: left;
+      }
+      .lines-table thead th.text-right { text-align: right; }
+      .lines-table tbody td {
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+      .lines-table tbody td.text-right { text-align: right; font-weight: 700; }
+
+      /* ── Résumé facture ── */
+      .summary-title {
+        font-size: 13px;
+        font-weight: 800;
+        font-style: italic;
+        margin-bottom: 8px;
+      }
+      .summary-table {
+        border-collapse: collapse;
+        margin-bottom: 30px;
+      }
+      .summary-table td {
+        padding: 3px 0;
+        font-size: 12px;
+      }
+      .summary-table td.summary-key { padding-right: 16px; }
+      .summary-table td.summary-value { font-weight: 700; }
+
+      /* ── Signature ── */
+      .signature-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+      }
+      .signature-table td { vertical-align: top; }
+      .signature-block {
+        text-align: right;
+        font-size: 12px;
+      }
+      .signature-nom {
+        font-size: 12px;
+        text-decoration: underline;
+        margin-top: 18px;
+      }
+
+      /* ── Pied de page ── */
+      .footer {
+        border-top: 1px solid #cbd5e1;
+        padding-top: 10px;
+        text-align: center;
+        font-size: 10px;
+        color: #64748b;
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+
+      <!-- En-tête : logo + nom agence + date -->
+      <table class="header-table">
+        <tr>
+          <td class="header-logo">
+            <img th:if="${view.agenceLogoDataUrl != null and !view.agenceLogoDataUrl.isEmpty()}"
+                 th:src="${view.agenceLogoDataUrl}"
+                 alt="Logo agence" />
+          </td>
+          <td class="header-name">
+            <span th:text="${view.agenceNom}">AGENCE</span>
+          </td>
+          <td class="header-date" th:text="${view.factureDate}">Date</td>
+        </tr>
+      </table>
+
+      <!-- N° facture + client -->
+      <table class="facture-band">
+        <tr>
+          <td>
+            <div class="facture-label">FACTURE :</div>
+            <div class="facture-numero" th:text="'N° ' + ${view.factureNumero}">N° FACT-00</div>
+          </td>
+          <td class="client-block">
+            <div class="client-civilite" th:text="${view.clientCivilite}">Monsieur</div>
+            <div class="client-nom" th:text="${view.clientNom}">Nom client</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Bien loué / période -->
+      <table class="info-line">
+        <tr>
+          <td class="info-key">Bien loué :</td>
+          <td th:text="${view.chambreCode} + ' — ' + ${view.chambreNom}">Bien</td>
+        </tr>
+        <tr>
+          <td class="info-key">Période :</td>
+          <td th:text="'Du ' + ${view.dateDebut} + ' au ' + ${view.dateFin}">Période</td>
+        </tr>
+      </table>
+
+      <!-- Désignation / Montant -->
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th class="text-right">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td th:text="'Séjour — ' + ${view.dateDebut} + ' au ' + ${view.dateFin} + ' (' + ${view.nombreNuits} + ' nuit(s))'">
+              Séjour
+            </td>
+            <td class="text-right" th:text="${view.montantTotal}">0 FCFA</td>
+          </tr>
+          <tr th:each="prestation : ${view.prestations}">
+            <td th:text="${prestation.nom}">Prestation</td>
+            <td class="text-right" th:text="${prestation.montant}">0 FCFA</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Résumé facture -->
+      <div class="summary-title">Résumé facture</div>
+      <table class="summary-table">
+        <tr>
+          <td class="summary-key">Période :</td>
+          <td class="summary-value" th:text="'Du ' + ${view.dateDebut} + ' au ' + ${view.dateFin}">Période</td>
+        </tr>
+        <tr>
+          <td class="summary-key">Montant de la réservation :</td>
+          <td class="summary-value" th:text="${view.montantTotal}">0 FCFA</td>
+        </tr>
+        <tr>
+          <td class="summary-key">Montant encaissé :</td>
+          <td class="summary-value" th:text="${view.montantPaye}">0 FCFA</td>
+        </tr>
+        <tr th:if="${view.soldeRestant != '0 FCFA'}">
+          <td class="summary-key">Solde restant :</td>
+          <td class="summary-value" th:text="${view.soldeRestant}">0 FCFA</td>
+        </tr>
+      </table>
+
+      <!-- Signature -->
+      <table class="signature-table">
+        <tr>
+          <td></td>
+          <td class="signature-block">
+            <div th:text="'Fait à Abidjan, le ' + ${view.factureDate}">Fait à Abidjan, le —</div>
+            <div class="signature-nom" th:text="${#strings.toUpperCase(view.agenceNom)}">AGENCE</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Pied de page -->
+      <div class="footer">
+        <span th:text="${view.agenceAdresse}">Adresse</span>
+        <br />
+        <span>Tél : <span th:text="${view.agenceTelephone}">Téléphone</span></span>
+        <span> | Email : <span th:text="${view.agenceEmail}">Email</span></span>
+      </div>
+
+    </div>
+  </body>
+</html>

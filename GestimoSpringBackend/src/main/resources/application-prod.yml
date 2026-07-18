@@ -13,16 +13,27 @@ spring:
 app:
   password-reset-url: https://gestimoweb.com/reset-password
 
-fne:
+# FNE Production Configuration (DGI)
+# fne:
+#   enabled: true
+#   base-url: https://www.services.fne.dgi.gouv.ci/ws
+#   bearer-token: 01h7neCqBmAqU8lmDy0AcE1ILWAvPhTe
+
+# invoice:
+#   api:
+#     enabled: true
+#     base-url: https://www.services.fne.dgi.gouv.ci/ws
+#     token: 01h7neCqBmAqU8lmDy0AcE1ILWAvPhTe
+#     sign-path: /external/invoices/sign
   enabled: true
-  base-url: https://www.services.fne.dgi.gouv.ci/ws
-  bearer-token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr
+  base-url: http://54.247.95.108/ws
+  bearer-token: WCRHegK8Jk5HyNabnYSq1nmozBSj3BCC
 
 invoice:
   api:
     enabled: true
-    base-url: https://www.services.fne.dgi.gouv.ci/ws
-    token: qroYuiOXtt32EcsPa9Wg6JWjhEyLNOWr
+    base-url: http://54.247.95.108/ws
+    token: WCRHegK8Jk5HyNabnYSq1nmozBSj3BCC
     sign-path: /external/invoices/sign
 
 logging:

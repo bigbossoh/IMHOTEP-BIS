@@ -201,6 +201,9 @@
   background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
   transition: width 600ms var(--ease-out);
 }
+.kpi-progress__fill--danger {
+  background: linear-gradient(90deg, #f87171, #dc2626);
+}
 
 /* ── Alertes ── */
 .alertes-row {
@@ -217,9 +220,10 @@
   border: 1px solid;
 }
 
-.alerte-card--depart  { background: rgba(239, 68, 68, 0.04);  border-color: rgba(239, 68, 68, 0.15); }
-.alerte-card--arrivee { background: rgba(16, 185, 129, 0.04); border-color: rgba(16, 185, 129, 0.15); }
-.alerte-card--bientot { background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.15); }
+.alerte-card--depart     { background: rgba(239, 68, 68, 0.04);  border-color: rgba(239, 68, 68, 0.15); }
+.alerte-card--arrivee    { background: rgba(16, 185, 129, 0.04); border-color: rgba(16, 185, 129, 0.15); }
+.alerte-card--bientot    { background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.15); }
+.alerte-card--cert-echec { background: rgba(239, 68, 68, 0.04);  border-color: rgba(239, 68, 68, 0.15); }
 
 .alerte-card__header {
   display: flex;
@@ -230,9 +234,11 @@
   font-weight: 700;
 }
 
-.alerte-card--depart  .alerte-card__header { color: var(--danger); }
-.alerte-card--arrivee .alerte-card__header { color: var(--success); }
-.alerte-card--bientot .alerte-card__header { color: var(--warning); }
+.alerte-card--depart     .alerte-card__header { color: var(--danger); }
+.alerte-card--arrivee    .alerte-card__header { color: var(--success); }
+.alerte-card--bientot    .alerte-card__header { color: var(--warning); }
+.alerte-card--cert-echec .alerte-card__header { color: var(--danger); }
+.alerte-card--cert-echec .alerte-room { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .alerte-list {
   list-style: none;
@@ -375,6 +381,19 @@
 
 .urgence-label { color: var(--danger) !important; font-weight: 700; }
 
+.cert-badge {
+  display: inline-flex;
+  padding: 0.3rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cert-badge--ok      { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+.cert-badge--echec   { background: rgba(239, 68, 68, 0.12);  color: var(--danger); }
+.cert-badge--absente { background: var(--neutral-100); color: var(--neutral-500); }
+
 /* Progress bar */
 .progress-wrap { display: flex; align-items: center; gap: 0.5rem; }
 .progress-track {
@@ -501,6 +520,7 @@
 .finance-row strong { font-weight: 700; color: var(--text); }
 .finance-row__value--success { color: var(--success); }
 .finance-row__value--warning { color: var(--warning); }
+.finance-row__value--danger  { color: var(--danger); }
 
 /* ── Responsive ── */
 @media (max-width: 1199.98px) {

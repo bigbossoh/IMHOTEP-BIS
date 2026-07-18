@@ -45,4 +45,5 @@ public class ReservationRequestDto {
   String paymentMode;
   String clientReservation;
   String taxes;
+  String statutReservation; // Pré-réservation, À confirmer, Acompte versé, Soldée, Ferme, Annule
 }

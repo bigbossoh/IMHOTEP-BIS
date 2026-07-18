@@ -60,6 +60,15 @@ reservation:any;
 
     this.user = this.userService.getUserFromLocalCache();
   }
+  get nouveauSolde(): number {
+    return (this.leLocataire?.soldReservation ?? 0) - (Number(this.montantEnacaisse) || 0);
+  }
+
+  get montantValide(): boolean {
+    const montant = Number(this.montantEnacaisse);
+    return Number.isFinite(montant) && montant > 0;
+  }
+
   onSaveEncaissement() {
     this.store.dispatch(
       new SaveEncaissementReservationAction({

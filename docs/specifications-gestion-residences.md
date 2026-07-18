@@ -149,23 +149,48 @@ Tableau avec : nom, e-mail, téléphone, nombre de réservations, montant total,
 
 ---
 
-### 3.5 Factures et Reçus
+### 3.5 Factures et Reçus (avec Certification FNE)
 
-**Objectif :** Accéder à la liste de toutes les factures émises et les télécharger ou les certifier.
+**Objectif :** Accéder à la liste de toutes les factures émises, les télécharger, les certifier auprès de la DGI (FNE) et gérer les avoirs.
 
 #### Liste des factures
-Colonnes : Code réservation, Client, Chambre, Période de séjour, Montant, Payé, Solde, Statut, Actions.
+Colonnes : Code réservation, Client, Chambre, Période de séjour, Montant, Payé, Solde, Statut, Token FNE, Actions.
 
 #### Actions disponibles par ligne
 - **Télécharger** : génération et téléchargement du PDF de la facture
-- **Certifier** : action de certification officielle de la facture (avec indicateur de traitement en cours)
+- **Certifier** : action de certification officielle de la facture auprès de la plateforme FNE (DGI)
+  - Environnement TEST (développement) : `http://54.247.95.108/ws`
+  - Environnement PROD (DGI) : `https://www.services.fne.dgi.gouv.ci/ws`
+- **Avoir** : créer un avoir/remboursement pour une facture certifiée
+
+#### Certification FNE - Procédure
+1. La facture doit être au statut **Soldée** (solde = 0) pour pouvoir être certifiée
+2. Cliquez sur le bouton **Certifier** dans la liste des factures
+3. Le système envoie la facture à l'API FNE de la DGI avec les informations :
+   - `invoiceType`: "sale" (facture de vente)
+   - `template`: "B2C" (ou "B2B" selon le type de client)
+   - `paymentMethod`: mode de paiement utilisé
+   - Items avec taxes (TVAC par défaut)
+4. En cas de succès, le **token FNE** et la **référence** sont affichés dans le tableau
+5. En cas d'échec, un message d'erreur indique le problème (erreur serveur DGI ou données manquantes)
+
+#### Création d'un avoir (Remboursement)
+1. Depuis la liste des factures, cliquer sur **Avoir** pour une facture certifiée
+2. Saisir les items à rembourser
+3. Le système crée l'avoir via l'API FNE `/external/invoices/{id}/refund`
+4. L'avoir est enregistré avec une référence unique
 
 #### Filtres
-- Recherche texte (client, code, chambre)
+- Recherche texte (client, code, chambre, référence FNE)
 - Filtre par statut de paiement
+- Filtre par environnement FNE (TEST/PROD)
 
 #### Pagination
 Navigation par pages avec résumé du nombre de factures affichées.
+
+#### Suivi des certifications
+- Endpoint `/api/v1/new-invoices/environment-label` indique l'environnement FNE actif
+- Endpoint `/api/v1/new-invoices/all-certified-invoices` liste toutes les factures certifiées
 
 ---
 
@@ -246,10 +271,12 @@ Rattachement de chaque unité à une résidence et à une catégorie.
 | `/residence/reservations` | `PageReservationResidenceComponent` | Liste des réservations |
 | `/residence/disponibilites` | `PageDisponibiliteResidenceComponent` | Disponibilité des chambres |
 | `/residence/clients` | `PageClientResidenceComponent` | Fichier client |
-| `/residence/factures` | `PageFacturesReservationComponent` | Factures et reçus |
+| `/residence/factures` | `PageFacturesReservationComponent` | Factures et reçus (certification FNE) |
+| `/residence/factures/avoir` | `PageAvoirComponent` | Gestion des avoirs/remboursements |
 | `/residence/prestations` | `PagePrestationsComponent` | Prestations additionnelles |
 | `/residence/reglements` | `PageReglementComponent` | Encaissements groupés |
 | `/residence/parametres` | `PageParametreResidenceComponent` | Paramétrage |
+| `/residence/certified-invoices` | `PageFacturesCertifieesComponent` | Liste des factures FNE certifiées |
 
 ---
 

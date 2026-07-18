@@ -21,7 +21,7 @@
     <div class="alert alert-danger page-alert">{{ errorMessage }}</div>
   }
 
-  <!-- Récapitulatif -->
+  <!-- Récapitulatif (toujours visible, indépendant de l'onglet) -->
   <section class="stats-grid">
     <article class="stat-card stat-card--default">
       <span class="stat-label">Tentatives de certification</span>
@@ -45,146 +45,487 @@
     </article>
   </section>
 
-  <!-- Table -->
-  <section class="surface-card">
+  <!-- Gestion des stickers (toujours visible, indépendant de l'onglet) -->
+  <section class="surface-card sticker-card">
     <div class="surface-card__body">
-
       <div class="card-heading">
         <div>
-          <span class="card-heading__eyebrow">Recapitulatif</span>
-          <h2>Detail des certifications</h2>
-          <p>Recherchez par numero de facture, reference FNE, NCC ou client.</p>
+          <span class="card-heading__eyebrow">DGI · Consommables</span>
+          <h2>Gestion des stickers</h2>
+          <p>1 sticker = {{ formatCurrency(prixSticker) }}, consommé automatiquement à chaque certification réussie.</p>
         </div>
-        <span class="facture-count">{{ filteredFactures.length }} ligne(s)</span>
+        @if (soldeStickersConnu) {
+          <span class="sticker-alert-badge" [class]="'sticker-alert-badge--' + stickerAlertLevel">
+            {{ stickerAlertLabel }}
+          </span>
+        }
       </div>
 
-      <div class="toolbar">
-        <div class="search-box">
-          <label for="fneSearch">Recherche</label>
-          <input
-            id="fneSearch"
-            type="search"
-            class="form-control"
-            [(ngModel)]="searchTerm"
-            placeholder="N° facture, référence FNE, NCC, client..."
-          />
+      <div class="sticker-grid">
+        <div class="sticker-metric sticker-metric--solde" [class]="'sticker-metric--' + stickerAlertLevel">
+          <span class="sticker-metric__label">Solde restant</span>
+          <strong class="sticker-metric__value">
+            @if (soldeStickersConnu) { {{ soldeStickers }} } @else { — }
+          </strong>
+          <span class="sticker-metric__sub">
+            @if (soldeStickersConnu) {
+              soit {{ formatCurrency(soldeStickersMontant) }}
+            } @else {
+              Aucune certification réussie pour le moment
+            }
+          </span>
         </div>
-        <div class="toolbar-field">
-          <label for="fneStatutFiltre">Statut</label>
-          <select
-            id="fneStatutFiltre"
-            class="toolbar-select"
-            [value]="statutFiltre"
-            (change)="onStatutFiltreChange($event)"
-          >
-            <option value="TOUS">Tous</option>
-            <option value="CERTIFIEE">Certifiées uniquement</option>
-            <option value="ECHEC">Échecs uniquement</option>
-          </select>
+
+        <div class="sticker-metric">
+          <span class="sticker-metric__label">Stickers consommés</span>
+          <strong class="sticker-metric__value">{{ stickersConsommes }}</strong>
+          <span class="sticker-metric__sub">soit {{ formatCurrency(stickersConsommesMontant) }}</span>
+        </div>
+
+        <div class="sticker-metric">
+          <span class="sticker-metric__label">Valeur de sticker restant</span>
+          <strong class="sticker-metric__value">
+            @if (soldeStickersConnu) { {{ formatCurrency(soldeStickersMontant) }} } @else { — }
+          </strong>
+          <span class="sticker-metric__sub">{{ soldeStickers ?? 0 }} × {{ formatCurrency(prixSticker) }}</span>
         </div>
       </div>
-
-      @if (isLoading) {
-        <div class="state-card">Chargement des certifications FNE…</div>
-      }
-
-      @if (!isLoading && factures.length === 0 && !errorMessage) {
-        <div class="state-card">Aucune facture n'a encore été soumise à la certification FNE.</div>
-      }
-
-      @if (!isLoading && factures.length > 0 && filteredFactures.length === 0) {
-        <div class="state-card">Aucune certification ne correspond à votre recherche.</div>
-      }
-
-      @if (!isLoading && filteredFactures.length > 0) {
-        <div class="table-shell">
-          <div class="table-responsive">
-            <table class="table align-middle fne-table">
-              <thead>
-                <tr>
-                  <th>Date certification</th>
-                  <th>N° Facture</th>
-                  <th>Référence FNE</th>
-                  <th>NCC</th>
-                  <th>Client</th>
-                  <th>Établissement</th>
-                  <th>Mode paiement</th>
-                  <th>Montant</th>
-                  <th>Statut</th>
-                  <th>Détail</th>
-                  <th class="actions-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (f of filteredFactures; track trackByRow($index, f)) {
-                  <tr>
-                    <td>{{ f.dateCertification | date : 'dd/MM/yyyy HH:mm' }}</td>
-
-                    <td>
-                      <span class="facture-badge">{{ f.factureNumero || '—' }}</span>
-                      <div class="row-helper">Réservation #{{ f.idReservation || '—' }}</div>
-                    </td>
-
-                    <td>
-                      @if (f.certifiee) {
-                        <strong>{{ f.fneReference || '—' }}</strong>
-                        @if (f.fneVerificationUrl) {
-                          <div class="row-helper">
-                            <a [href]="f.fneVerificationUrl" target="_blank" rel="noopener">Vérifier</a>
-                          </div>
-                        }
-                      } @else {
-                        <span class="row-helper">—</span>
-                      }
-                    </td>
-
-                    <td>{{ f.fneNcc || '—' }}</td>
-
-                    <td>{{ f.clientNom || '—' }}</td>
-
-                    <td>
-                      <strong>{{ f.etablissement || '—' }}</strong>
-                      <div class="row-helper">{{ f.pointOfSale || '—' }}</div>
-                    </td>
-
-                    <td>{{ modePaiementLabel(f) }}</td>
-
-                    <td>{{ formatCurrency(f.montant) }}</td>
-
-                    <td>
-                      <span [class]="statusClass(f)">{{ statusLabel(f) }}</span>
-                      @if (f.certifiee && f.fneWarning) {
-                        <div class="row-helper text-warning">Alerte stock sticker</div>
-                      }
-                    </td>
-
-                    <td>
-                      @if (!f.certifiee) {
-                        <span class="row-helper text-danger">{{ f.messageErreur || 'Échec inconnu' }}</span>
-                      } @else {
-                        <span class="row-helper">Sticker restant : {{ f.fneBalanceSticker ?? '—' }}</span>
-                      }
-                    </td>
-
-                    <td class="actions-col">
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-primary"
-                        [disabled]="!canDownload(f) || isDownloading(f)"
-                        (click)="telechargerFacture(f)"
-                      >
-                        @if (isDownloading(f)) { Téléchargement… } @else { PDF }
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      }
-
     </div>
   </section>
+
+  <!-- Onglets : ne concernent que les tableaux ci-dessous -->
+  <div class="fne-tabs no-print">
+    <button
+      type="button"
+      class="fne-tab"
+      [class.fne-tab--active]="activeTab === 'VENTE'"
+      (click)="setActiveTab('VENTE')"
+    >
+      Ventes
+    </button>
+    <button
+      type="button"
+      class="fne-tab"
+      [class.fne-tab--active]="activeTab === 'AVOIR'"
+      (click)="setActiveTab('AVOIR')"
+    >
+      Avoirs
+    </button>
+  </div>
+
+  @if (activeTab === 'VENTE') {
+    <!-- Table Ventes -->
+    <section class="surface-card">
+      <div class="surface-card__body">
+
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Recapitulatif</span>
+            <h2>Detail des certifications</h2>
+            <p>Recherchez par numero de facture, reference FNE, NCC ou client.</p>
+          </div>
+          <span class="facture-count">{{ filteredFactures.length }} ligne(s)</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <label for="fneSearch">Recherche</label>
+            <input
+              id="fneSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="searchTerm"
+              placeholder="N° facture, référence FNE, NCC, client..."
+            />
+          </div>
+          <div class="toolbar-field">
+            <label for="fneStatutFiltre">Statut</label>
+            <select
+              id="fneStatutFiltre"
+              class="toolbar-select"
+              [value]="statutFiltre"
+              (change)="onStatutFiltreChange($event)"
+            >
+              <option value="TOUS">Tous</option>
+              <option value="CERTIFIEE">Certifiées uniquement</option>
+              <option value="ECHEC">Échecs uniquement</option>
+            </select>
+          </div>
+          <div class="toolbar-field">
+            <label for="fneModePaiementFiltre">Mode de paiement</label>
+            <select
+              id="fneModePaiementFiltre"
+              class="toolbar-select"
+              [value]="modePaiementFiltre"
+              (change)="onModePaiementFiltreChange($event)"
+            >
+              <option value="TOUS">Tous</option>
+              @for (mode of modesPaiementDisponibles; track mode.value) {
+                <option [value]="mode.value">{{ mode.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="toolbar-field toolbar-field--date">
+            <label for="fnePeriodeDebut">Du</label>
+            <input id="fnePeriodeDebut" type="date" class="form-control" [(ngModel)]="periodeDebut" />
+          </div>
+          <div class="toolbar-field toolbar-field--date">
+            <label for="fnePeriodeFin">Au</label>
+            <input id="fnePeriodeFin" type="date" class="form-control" [(ngModel)]="periodeFin" />
+          </div>
+          @if (hasFiltresFactures) {
+            <button type="button" class="btn btn-outline-secondary btn-reset-filtres" (click)="resetFiltresFactures()">
+              Réinitialiser
+            </button>
+          }
+        </div>
+
+        @if (isLoading) {
+          <div class="state-card">Chargement des certifications FNE…</div>
+        }
+
+        @if (!isLoading && factures.length === 0 && !errorMessage) {
+          <div class="state-card">Aucune facture n'a encore été soumise à la certification FNE.</div>
+        }
+
+        @if (!isLoading && factures.length > 0 && filteredFactures.length === 0) {
+          <div class="state-card">Aucune certification ne correspond à votre recherche.</div>
+        }
+
+        @if (!isLoading && filteredFactures.length > 0) {
+          <div class="table-shell">
+            <div class="table-responsive">
+              <table class="table align-middle fne-table">
+                <thead>
+                  <tr>
+                    <th>Date certification</th>
+                    <th>N° Facture</th>
+                    <th>Référence FNE</th>
+                    <th>NCC</th>
+                    <th>Client</th>
+                    <th>Établissement</th>
+                    <th>Mode paiement</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                    <th>Détail</th>
+                    <th class="actions-col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of filteredFactures; track trackByRow($index, f)) {
+                    <tr>
+                      <td>{{ f.dateCertification | date : 'dd/MM/yyyy HH:mm' }}</td>
+
+                      <td>
+                        <span class="facture-badge">{{ f.factureNumero || '—' }}</span>
+                        <div class="row-helper">Réservation #{{ f.idReservation || '—' }}</div>
+                      </td>
+
+                      <td>
+                        @if (f.certifiee && f.fneVerificationUrl) {
+                          <a [href]="f.fneVerificationUrl" target="_blank" rel="noopener">Voir la facture</a>
+                        } @else {
+                          <span class="row-helper">—</span>
+                        }
+                      </td>
+
+                      <td>{{ f.fneNcc || '—' }}</td>
+
+                      <td>{{ f.clientNom || '—' }}</td>
+
+                      <td>
+                        <strong>{{ f.etablissement || '—' }}</strong>
+                        <div class="row-helper">{{ f.pointOfSale || '—' }}</div>
+                      </td>
+
+                      <td>{{ modePaiementLabel(f) }}</td>
+
+                      <td>{{ formatCurrency(f.montant) }}</td>
+
+                      <td>
+                        <span [class]="statusClass(f)">{{ statusLabel(f) }}</span>
+                        @if (f.certifiee && f.fneWarning) {
+                          <div class="row-helper text-warning">Alerte stock sticker</div>
+                        }
+                      </td>
+
+                      <td>
+                        @if (!f.certifiee) {
+                          <span class="row-helper text-danger">{{ f.messageErreur || 'Échec inconnu' }}</span>
+                        } @else {
+                          <span class="row-helper">Sticker restant : {{ f.fneBalanceSticker ?? '—' }}</span>
+                        }
+                      </td>
+
+                      <td class="actions-col">
+                        <div class="actions-buttons">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            [disabled]="!canDownload(f) || isDownloading(f)"
+                            (click)="telechargerFacture(f)"
+                          >
+                            @if (isDownloading(f)) { Téléchargement… } @else { PDF }
+                          </button>
+                          @if (peutFaireAvoir(f)) {
+                            @if (hasExistingAvoirForFacture(f)) {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                (click)="ouvrirAvoir(f)"
+                              >
+                                Avoir existant
+                              </button>
+                            } @else {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="ouvrirAvoir(f)"
+                              >
+                                Avoir
+                              </button>
+                            }
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+      </div>
+    </section>
+  }
+
+  @if (activeTab === 'AVOIR') {
+    <!-- Table Avoirs -->
+    <section class="surface-card">
+      <div class="surface-card__body">
+
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">Remboursements</span>
+            <h2>Avoirs émis</h2>
+            <p>Historique des avoirs créés auprès de la DGI pour des factures certifiées.</p>
+          </div>
+          <span class="facture-count">{{ filteredAvoirs.length }} avoir(s)</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <label for="avoirSearch">Recherche</label>
+            <input
+              id="avoirSearch"
+              type="search"
+              class="form-control"
+              [(ngModel)]="avoirsSearchTerm"
+              placeholder="N° facture, référence FNE, NCC..."
+            />
+          </div>
+          <div class="toolbar-field">
+            <label for="avoirStatutFiltre">Statut</label>
+            <select
+              id="avoirStatutFiltre"
+              class="toolbar-select"
+              [value]="avoirsStatutFiltre"
+              (change)="onAvoirsStatutFiltreChange($event)"
+            >
+              <option value="TOUS">Tous</option>
+              <option value="AVEC_ALERTE">Avec alerte stock sticker</option>
+              <option value="SANS_ALERTE">Sans alerte</option>
+            </select>
+          </div>
+          <div class="toolbar-field toolbar-field--date">
+            <label for="avoirPeriodeDebut">Du</label>
+            <input id="avoirPeriodeDebut" type="date" class="form-control" [(ngModel)]="avoirsPeriodeDebut" />
+          </div>
+          <div class="toolbar-field toolbar-field--date">
+            <label for="avoirPeriodeFin">Au</label>
+            <input id="avoirPeriodeFin" type="date" class="form-control" [(ngModel)]="avoirsPeriodeFin" />
+          </div>
+          @if (hasFiltresAvoirs) {
+            <button type="button" class="btn btn-outline-secondary btn-reset-filtres" (click)="resetFiltresAvoirs()">
+              Réinitialiser
+            </button>
+          }
+        </div>
+
+        @if (avoirsLoading) {
+          <div class="state-card">Chargement des avoirs…</div>
+        }
+
+        @if (!avoirsLoading && avoirsErrorMessage) {
+          <div class="alert alert-danger page-alert">{{ avoirsErrorMessage }}</div>
+        }
+
+        @if (!avoirsLoading && !avoirsErrorMessage && avoirsListe.length === 0) {
+          <div class="state-card">Aucun avoir n'a encore été émis.</div>
+        }
+
+        @if (!avoirsLoading && avoirsListe.length > 0 && filteredAvoirs.length === 0) {
+          <div class="state-card">Aucun avoir ne correspond à votre recherche.</div>
+        }
+
+        @if (!avoirsLoading && filteredAvoirs.length > 0) {
+          <div class="table-shell">
+            <div class="table-responsive">
+              <table class="table align-middle fne-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>N° Facture liée</th>
+                    <th>Référence FNE</th>
+                    <th>NCC</th>
+                    <th>Statut</th>
+                    <th>Sticker restant</th>
+                    <th class="actions-col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (a of filteredAvoirs; track trackByAvoir($index, a)) {
+                    <tr>
+                      <td>{{ a.createdAt | date : 'dd/MM/yyyy HH:mm' }}</td>
+                      <td>
+                        <span class="facture-badge">{{ numeroFactureLiee(a) }}</span>
+                      </td>
+                      <td>{{ a.reference || '—' }}</td>
+                      <td>{{ a.ncc || '—' }}</td>
+                      <td>
+                        @if (a.warning) {
+                          <span class="badge badge--danger">Alerte stock sticker</span>
+                        } @else {
+                          <span class="badge badge--success">Avoir émis</span>
+                        }
+                      </td>
+                      <td>{{ a.balanceSticker ?? '—' }}</td>
+                      <td class="actions-col">
+                        <div class="actions-buttons">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            (click)="telechargerAvoir(a)"
+                          >
+                            Télécharger
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+      </div>
+    </section>
+  }
+
+  <!-- Modal Avoir -->
+  @if (avoirModalOpen) {
+    <div class="avoir-backdrop" (click)="fermerAvoir()">
+      <div class="avoir-modal" (click)="$event.stopPropagation()">
+        <div class="avoir-modal__header">
+          <div>
+            <span class="card-heading__eyebrow">Avoir FNE</span>
+            <h3>Facture {{ avoirFacture?.factureNumero || '—' }}</h3>
+          </div>
+          <button type="button" class="avoir-modal__close" (click)="fermerAvoir()" [disabled]="avoirSubmitting">
+            ✕
+          </button>
+        </div>
+
+        <div class="avoir-modal__body">
+          @if (avoirLoading) {
+            <div class="state-card">Chargement de la facture certifiée…</div>
+          }
+
+          @if (!avoirLoading && avoirErrorMessage) {
+            <div class="alert alert-danger page-alert">{{ avoirErrorMessage }}</div>
+          }
+
+          @if (!avoirLoading && avoirInvoice) {
+            <p class="avoir-hint">
+              L'avoir porte sur la totalité de la facture certifiée FNE ci-dessous.
+            </p>
+
+            <div class="avoir-invoice-id">
+              <span class="avoir-invoice-id__label">Facture certifiée FNE (ID)</span>
+              <code>{{ avoirInvoice.id }}</code>
+            </div>
+
+            <div class="table-shell">
+              <div class="table-responsive">
+                <table class="table align-middle fne-table">
+                  <thead>
+                    <tr>
+                      <th>Article</th>
+                      <th>Qté</th>
+                      <th>PU</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of avoirInvoice.items; track item.id) {
+                      <tr>
+                        <td>{{ item.description || item.reference || item.id }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ formatCurrency(item.amount || 0) }}</td>
+                        <td>{{ formatCurrency((item.amount || 0) * (item.quantity || 0)) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="avoir-modal__total">
+              Sous-total : <strong>{{ formatCurrency(avoirSousTotal) }}</strong>
+            </div>
+            @if (avoirReductionPourcentage > 0) {
+              <div class="avoir-modal__total">
+                Réduction ({{ avoirReductionPourcentage }}%) : <strong>− {{ formatCurrency(avoirReductionMontant) }}</strong>
+              </div>
+            }
+
+            @if (avoirHistorique.length) {
+              <div class="avoir-historique">
+                <p class="avoir-historique__label">Avoirs déjà émis sur cette facture</p>
+                <ul>
+                  @for (h of avoirHistorique; track h.id) {
+                    <li>
+                      Réf. {{ h.reference || '—' }}
+                      @if (h.createdAt) { — {{ h.createdAt | date : 'dd/MM/yyyy HH:mm' }} }
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            <div class="avoir-modal__total">
+              Montant total de l'avoir : <strong>{{ formatCurrency(avoirMontantTotal) }}</strong>
+            </div>
+          }
+        </div>
+
+        <div class="avoir-modal__footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="fermerAvoir()" [disabled]="avoirSubmitting">
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="!avoirInvoice?.items?.length || avoirSubmitting || avoirLoading"
+            (click)="confirmerAvoir()"
+          >
+            @if (avoirSubmitting) { Création… } @else { Confirmer l'avoir }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>

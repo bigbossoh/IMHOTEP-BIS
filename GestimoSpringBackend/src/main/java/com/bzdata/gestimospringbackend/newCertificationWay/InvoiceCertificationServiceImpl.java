@@ -91,6 +91,12 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveFromJsonToDataba(JsonNode json) {
+        saveFromJsonToDataba(json, null);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveFromJsonToDataba(JsonNode json, String numeroFacture) {
 
         // ===== 1) MAIN RESPONSE =====
         InvoiceMainResponse main = new InvoiceMainResponse();
@@ -112,6 +118,7 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
         InvoiceFneCertify invoice = new InvoiceFneCertify();
         invoice.setInvoiceType(text(invoiceNode, "invoiceType"));
         invoice.setId(text(invoiceNode, "id"));
+        invoice.setNumeroFacture(numeroFacture);
         invoice.setParentId(textOrNull(invoiceNode, "parentId"));
         invoice.setParentReference(textOrNull(invoiceNode, "parentReference"));
         invoice.setToken(text(invoiceNode, "token"));
@@ -446,6 +453,7 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
         dto.setTotalTaxes(safeAdd(invoice.getTotalTaxes(), customTaxes));
         dto.setToken(mainResp != null ? mainResp.getToken() : null);
         dto.setBalanceFunds(mainResp != null ? mainResp.getBalanceFunds() : null);
+        dto.setDiscount(invoice.getDiscount());
         return dto;
     }
 
@@ -509,6 +517,26 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
     private static String text(JsonNode node, String field) {
         JsonNode v = node.path(field);
         return (v.isMissingNode() || v.isNull()) ? null : v.asText();
+    }
+
+    private String extractFneErrorMessage(Exception e) {
+        String raw = e.getMessage();
+        if (raw == null || raw.isBlank()) {
+            return "Impossible de contacter l'API FNE (refund).";
+        }
+        try {
+            JsonNode node = objectMapper.readTree(raw);
+            String msg = text(node, "message");
+            if (msg == null || msg.isBlank()) {
+                msg = text(node, "error");
+            }
+            if (msg != null && !msg.isBlank()) {
+                return "Refus de la FNE : " + msg;
+            }
+        } catch (Exception parseError) {
+            // Le corps n'est pas du JSON exploitable, on retombe sur le texte brut.
+        }
+        return "Refus de la FNE : " + raw;
     }
 
     private static String textOrNull(JsonNode node, String field) {
@@ -595,11 +623,11 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
 
         } catch (Exception e) {
             log.error("Exception while calling FNE REFUND API", e);
-            throw new RuntimeException("Impossible de contacter l'API FNE (refund)", e);
+            throw new InvalidOperationException(extractFneErrorMessage(e), e);
         }
 
         if (response == null) {
-            throw new RuntimeException("Réponse FNE refund vide");
+            throw new InvalidOperationException("Réponse FNE refund vide");
         }
 
         // ===== 3) MAPPING DTO → ENTITY =====
@@ -628,8 +656,7 @@ public class InvoiceCertificationServiceImpl implements InvoiceCertificationServ
 
     @Override
     public List<VerificationRefundResponse> getAllRefundInvoiceList() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllRefundInvoiceList'");
+        return verificationRefundResponseRepo.findAllByOrderByCreatedAtDesc();
     }
 
     @Override

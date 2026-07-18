@@ -81,7 +81,20 @@ Le module résidence réutilise une partie du socle métier :
 3. création d'une réservation (`Reservation`) ;
 4. ajout de prestations additionnelles ;
 5. encaissement de la réservation ;
-6. impression des reçus.
+6. impression des reçus ;
+7. certification FNE (Facture Normalisée Électronique) - Voir `docs/fne-certification-guide.md`.
+
+### 6. Certification FNE (Facture Électronique DGI)
+
+La certification électronique des factures est disponible pour les résidences :
+
+- **Module `newCertificationWay`** : Utilise WebClient avec persistance en base de données
+- **Endpoints API** : `/api/v1/new-invoices/*`
+- **Fonctionnalités** :
+  - Certifier une facture auprès de la DGI
+  - Créer des avoirs/remboursements
+  - Lister les factures certifiées
+  - Vérifier l'environnement (TEST/PROD)
 
 ## Fonctionnalités déjà présentes
 
@@ -115,7 +128,7 @@ Les routes Angular montrent les écrans déjà exposés :
 - `/journal-caisse`, `/compte-client`, `/compte-agence`, `/grand-compte`, `/cloture-caisse`
 - `/categorie-appartement`, `/new-categorie-appartement`, `/new-prix-categorie-chambre`
 - `/reservation-residence`, `/paiement-residence`, `/paiement-residence-individuel`, `/disponibilite-residence`, `/client-residence`, `/dashboard-residence`
-- `/chat-ia`
+- `/factures-residence`, `/factures-certifiees`, `/avoir-residence`
 
 ## Démarrage local
 
@@ -187,6 +200,7 @@ Supervision (Prometheus / Grafana) : `docs/monitoring.md`.
 
 - documentation backend complète : `docs/backend-reference.md`
 - README backend mis à jour : `GestimoSpringBackend/README.md`
+- Guide FNE - Certification des factures : `docs/fne-certification-guide.md`
 
 ## Points d'attention immédiats
 

@@ -233,7 +233,7 @@
             <div class="col-4">
               <label class="form-label">Réduction (%)</label>
               <div class="input-group input-group-sm">
-                <input type="number" class="form-control" min="0" max="100" [(ngModel)]="reduction" />
+                <input type="number" class="form-control" min="0" max="100" [(ngModel)]="reduction" (ngModelChange)="onReductionChange()" />
                 <span class="input-group-text"><i class="fas fa-percent"></i></span>
               </div>
             </div>

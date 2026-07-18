@@ -300,6 +300,9 @@ export class PageReservationResidenceComponent implements OnInit, OnDestroy {
       PageReglementReservationIndividuelComponent,
       {
         data: { reservation: row },
+        width: '460px',
+        maxWidth: '95vw',
+        autoFocus: false,
       }
     );
 
@@ -692,7 +695,14 @@ export class PageReservationResidenceComponent implements OnInit, OnDestroy {
   }
 
   private needsClientCompletion(reservation: ReservationAfficheDto): boolean {
-    const guest = (reservation.utilisateurOperation || '').trim().toUpperCase();
+    const guest = (
+      reservation.utilisateurOperation ||
+      reservation.username ||
+      reservation.email ||
+      ''
+    )
+      .trim()
+      .toUpperCase();
     return !guest || guest === 'XXX XXXXX';
   }
 
