@@ -1389,17 +1389,13 @@ public class PrintServiceImpl implements PrintService {
     }
 
 try {
-        // Prix unitaire AVANT réduction = (montantTotal + montantReduction) / nombreNuits
-        // Le discount est envoyé au niveau de la facture (pourcentage)
-        double prixUnitaireAvantReduction = nombreNuits > 0 ? (montantTotal + reservation.getMontantReduction()) / nombreNuits : montantTotal;
-
         InvoiceItem item = InvoiceItem.builder()
           .taxes(List.of(taxe))
           .reference("RESA-" + reservation.getId())
           .description("Sejour - " + chambreNomLabel)
           .quantity(Math.max(nombreNuits, 1))
-          .amount(prixUnitaireAvantReduction)
-          .discount(0)
+          .amount(prixParNuit)
+          .discount((double) reservation.getPourcentageReduction())
           .measurementUnit("nuitee")
           .build();
 
@@ -1415,7 +1411,6 @@ try {
           .pointOfSale(pointOfSale)
           .establishment(etablissement)
           .items(List.of(item))
-          .discount(reservation.getPourcentageReduction())
           .build();
 
       JsonNode json = invoiceCertificationService.certifyInvoice(request);

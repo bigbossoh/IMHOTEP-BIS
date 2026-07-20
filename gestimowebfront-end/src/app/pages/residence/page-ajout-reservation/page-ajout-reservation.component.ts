@@ -4,8 +4,9 @@ import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { Observable, Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { finalize, map, take } from 'rxjs/operators';
 import { GetAllAppartementMeubleActions, GetAllAppartementLibreActions } from './../../../ngrx/appartement/appartement.actions';
 import {
   AppartementState,
@@ -31,7 +32,10 @@ import {
 } from 'src/gs-api/src/models';
 import { ApiService } from 'src/gs-api/src/services';
 import { ApiConfiguration } from 'src/gs-api/src/api-configuration';
-import { SaveReservationAction } from 'src/app/ngrx/reservation/reservation.actions';
+import {
+  ReservationActionTypes,
+  SaveReservationAction,
+} from 'src/app/ngrx/reservation/reservation.actions';
 import { DialogData } from '../../baux/page-baux/page-baux.component';
 import { PageNewUtilisateurComponent } from '../../utilisateurs/page-new-utilisateur/page-new-utilisateur.component';
 
@@ -93,6 +97,7 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   /** Disponibilités : toutes les chambres libres pour les dates sélectionnées */
   availableRooms: AppartementDto[] = [];
   roomsLoading = false;
+  saving = false;
 
   private reservationToEdit: ReservationAfficheDto | null = null;
   private appartementSubscription?: Subscription;
@@ -137,7 +142,8 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private apiConfig: ApiConfiguration,
     private fb: FormBuilder,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private actions$: Actions
   ) {}
 
   get dialogTitle(): string {
@@ -508,7 +514,7 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   }
 
   submitReservation(): void {
-    if (!this.canSubmit || !this.user || !this.residenceModel) {
+    if (!this.canSubmit || !this.user || !this.residenceModel || this.saving) {
       return;
     }
 
@@ -516,13 +522,31 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     const prestationIds = Array.from(this.selectedPrestationIds.values());
 
     this.encaissementform = this.fb.group(reservationPayload);
+    this.saving = true;
+
+    // On attend le résultat réel de l'enregistrement avant de fermer la
+    // fenêtre : sinon la liste des réservations se rafraîchit (au closing
+    // du dialog) avant que le backend ait fini de persister la nouvelle
+    // réservation, et la nouvelle ligne n'apparaît pas.
+    this.actions$
+      .pipe(
+        ofType(
+          ReservationActionTypes.SAVE_RESERVATION_SUCCES,
+          ReservationActionTypes.SAVE_RESERVATION_ERROR
+        ),
+        take(1)
+      )
+      .subscribe(() => {
+        this.saving = false;
+        this.dialogRef.close(true);
+      });
+
     this.store.dispatch(
       new SaveReservationAction({
         reservation: this.encaissementform.value,
         prestationIds,
       })
     );
-    this.dialogRef.close();
   }
 
   selectMontantLoyer(montant?: PrixParCategorieChambreDto[]): void {
