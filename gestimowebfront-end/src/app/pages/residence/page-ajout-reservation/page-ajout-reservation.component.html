@@ -38,39 +38,114 @@
       <!-- ════ Colonne gauche : formulaire ════ -->
       <div class="res-form">
 
-        <!-- Section 1 : Dates (toujours en premier) -->
+        <!-- Section 1 : Type de séjour + Dates (toujours en premier) -->
         <div class="form-section">
-          <p class="form-section__label"><i class="fas fa-calendar-range"></i> Période du séjour</p>
-          <div class="row g-1">
-            <div class="col-6">
-              <label class="form-label">Arrivée</label>
-              <input
-                type="date"
-                class="form-control"
-                [min]="minDate | date:'yyyy-MM-dd'"
-                [ngModel]="dateDebutSejour | date:'yyyy-MM-dd'"
-                (ngModelChange)="dateDebutSejour = $event ? toDatePublic($event) : null; onStayChange()"
-              />
-            </div>
-            <div class="col-6">
-              <label class="form-label">Départ</label>
-              <input
-                type="date"
-                class="form-control"
-                [min]="dateDebutSejour | date:'yyyy-MM-dd'"
-                [ngModel]="dateFinSejour | date:'yyyy-MM-dd'"
-                (ngModelChange)="dateFinSejour = $event ? toDatePublic($event) : null; onStayChange()"
-              />
-            </div>
+          <p class="form-section__label"><i class="fas fa-calendar-range"></i> Type de séjour</p>
+          <div class="res-header__modes mb-2">
+            <button
+              type="button"
+              class="mode-btn"
+              [class.mode-btn--active]="typeSejour === 'SEJOUR'"
+              (click)="onTypeSejourChange('SEJOUR')"
+            >
+              <i class="fas fa-moon"></i> Séjour classique (nuitées)
+            </button>
+            <button
+              type="button"
+              class="mode-btn"
+              [class.mode-btn--active]="typeSejour === 'PASSAGE'"
+              (click)="onTypeSejourChange('PASSAGE')"
+            >
+              <i class="fas fa-clock"></i> Passage (à l'heure)
+            </button>
           </div>
 
-          @if (stayNights > 0) {
-            <div class="stay-pill">
-              <i class="fas fa-moon"></i>
-              <strong>{{ stayNights }} nuit<span *ngIf="stayNights > 1">s</span></strong>
-              <span>·</span>
-              <span>{{ nightlyPrice | currency:'XOF':'symbol':'1.0-0' }} / nuit</span>
+          @if (typeSejour === 'SEJOUR') {
+            <div class="row g-1">
+              <div class="col-6">
+                <label class="form-label">Arrivée</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [min]="minDate | date:'yyyy-MM-dd'"
+                  [ngModel]="dateDebutSejour | date:'yyyy-MM-dd'"
+                  (ngModelChange)="dateDebutSejour = $event ? toDatePublic($event) : null; onStayChange()"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label">Départ</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [min]="dateDebutSejour | date:'yyyy-MM-dd'"
+                  [ngModel]="dateFinSejour | date:'yyyy-MM-dd'"
+                  (ngModelChange)="dateFinSejour = $event ? toDatePublic($event) : null; onStayChange()"
+                />
+              </div>
             </div>
+
+            @if (stayNights > 0) {
+              <div class="stay-pill">
+                <i class="fas fa-moon"></i>
+                <strong>{{ stayNights }} nuit<span *ngIf="stayNights > 1">s</span></strong>
+                <span>·</span>
+                <span>{{ nightlyPrice | currency:'XOF':'symbol':'1.0-0' }} / nuit</span>
+              </div>
+            }
+          } @else {
+            <div class="row g-1">
+              <div class="col-6">
+                <label class="form-label">Date du passage</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [min]="minDate | date:'yyyy-MM-dd'"
+                  [ngModel]="dateDebutSejour | date:'yyyy-MM-dd'"
+                  (ngModelChange)="onPassageDateChange($event ? toDatePublic($event) : null)"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label">Type de passage</label>
+                <select
+                  class="form-select"
+                  [(ngModel)]="typePassage"
+                  (ngModelChange)="onPassageDetailsChange()"
+                >
+                  <option value="JOUR">Jour</option>
+                  <option value="NUIT">Nuit</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-1">
+              <div class="col-6">
+                <label class="form-label">Heure d'arrivée</label>
+                <input
+                  type="time"
+                  class="form-control"
+                  [(ngModel)]="heureArrivee"
+                  (ngModelChange)="onPassageDetailsChange()"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label">Heure de départ</label>
+                <input
+                  type="time"
+                  class="form-control"
+                  [(ngModel)]="heureDepart"
+                  (ngModelChange)="onPassageDetailsChange()"
+                />
+              </div>
+            </div>
+
+            @if (passageHours > 0) {
+              <div class="stay-pill">
+                <i class="fas fa-clock"></i>
+                <strong>{{ passageHours }} h</strong>
+                <span>·</span>
+                <span>{{ passageHourlyRate | currency:'XOF':'symbol':'1.0-0' }} / h</span>
+              </div>
+            }
           }
         </div>
 
@@ -106,7 +181,14 @@
               <div class="room-badge">
                 <span class="room-badge__name">{{ selectedRoomName }}</span>
                 <span class="room-badge__cat">{{ selectedRoomCategory }}</span>
-                @if (selectedRoomRates.length) {
+                @if (isPassageMode) {
+                  <div class="room-rates">
+                    <span class="rate-pill">
+                      {{ passageHourlyRate | currency:'XOF':'symbol':'1.0-0' }}
+                      <small>/ h ({{ typePassage === 'NUIT' ? 'nuit' : 'jour' }})</small>
+                    </span>
+                  </div>
+                } @else if (selectedRoomRates.length) {
                   <div class="room-rates">
                     @for (prix of selectedRoomRates; track prix.id ?? prix.nombreDeJour) {
                       <span class="rate-pill">
@@ -316,22 +398,34 @@
               <small>{{ selectedRoomCategory }}</small>
             </div>
           </div>
-          @if (stayNights > 0) {
+          @if (!isPassageMode && stayNights > 0) {
             <div class="recap-hero__dates">
               <span>{{ dateDebutSejour | date:'dd MMM':undefined:'fr' }}</span>
               <i class="fas fa-arrow-right"></i>
               <span>{{ dateFinSejour | date:'dd MMM':undefined:'fr' }}</span>
               <span class="recap-nights">{{ stayNights }}n</span>
             </div>
+          } @else if (isPassageMode && passageHours > 0) {
+            <div class="recap-hero__dates">
+              <span>{{ dateDebutSejour | date:'dd MMM':undefined:'fr' }}</span>
+              <span class="recap-nights">{{ typePassage === 'NUIT' ? 'Nuit' : 'Jour' }} · {{ passageHours }}h</span>
+            </div>
           }
         </div>
 
         <!-- Lignes de calcul -->
         <div class="recap-lines">
-          <div class="recap-line">
-            <span>{{ stayNights }}n × {{ nightlyPrice | currency:'XOF':'symbol':'1.0-0' }}</span>
-            <strong>{{ subtotalAmount | currency:'XOF':'symbol':'1.0-0' }}</strong>
-          </div>
+          @if (isPassageMode) {
+            <div class="recap-line">
+              <span>{{ passageHours }}h × {{ passageHourlyRate | currency:'XOF':'symbol':'1.0-0' }}</span>
+              <strong>{{ subtotalAmount | currency:'XOF':'symbol':'1.0-0' }}</strong>
+            </div>
+          } @else {
+            <div class="recap-line">
+              <span>{{ stayNights }}n × {{ nightlyPrice | currency:'XOF':'symbol':'1.0-0' }}</span>
+              <strong>{{ subtotalAmount | currency:'XOF':'symbol':'1.0-0' }}</strong>
+            </div>
+          }
           @if (reductionPercent > 0) {
             <div class="recap-line recap-line--discount">
               <span>Réduction {{ reductionPercent }}%</span>
@@ -407,8 +501,10 @@
         @if (!canSubmit) {
           <p class="recap-hint">
             @if (!residenceModel) { Sélectionnez une chambre. }
-            @else if (!dateDebutSejour || !dateFinSejour) { Définissez les dates du séjour. }
-            @else if (stayNights === 0) { La date de départ doit être après l'arrivée. }
+            @else if (isPassageMode && (!heureArrivee || !heureDepart)) { Renseignez les heures d'arrivée et de départ du passage. }
+            @else if (isPassageMode && passageHours === 0) { L'heure de départ doit être différente de l'heure d'arrivée. }
+            @else if (!isPassageMode && (!dateDebutSejour || !dateFinSejour)) { Définissez les dates du séjour. }
+            @else if (!isPassageMode && stayNights === 0) { La date de départ doit être après l'arrivée. }
             @else if (!selectedClient) { Sélectionnez un client. }
             @else if (!resolvedEmail) { Un e-mail valide est requis (FNE). }
             @else if (!paymentMode) { Choisissez un mode de règlement. }

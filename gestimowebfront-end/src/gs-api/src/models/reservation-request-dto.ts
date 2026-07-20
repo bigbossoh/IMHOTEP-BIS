@@ -25,4 +25,8 @@ export interface ReservationRequestDto {
   paymentMode?: string;
   clientReservation?: string;
   taxes?: string;
+  typeSejour?: string;
+  typePassage?: string;
+  heureArrivee?: string;
+  heureDepart?: string;
 }

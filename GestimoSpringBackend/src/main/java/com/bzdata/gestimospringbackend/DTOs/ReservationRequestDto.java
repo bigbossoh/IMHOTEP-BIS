@@ -46,4 +46,9 @@ public class ReservationRequestDto {
   String clientReservation;
   String taxes;
   String statutReservation; // Pré-réservation, À confirmer, Acompte versé, Soldée, Ferme, Annule
+
+  String typeSejour; // "SEJOUR" (par défaut) ou "PASSAGE"
+  String typePassage; // "JOUR" ou "NUIT", si typeSejour = "PASSAGE"
+  String heureArrivee; // format "HH:mm"
+  String heureDepart; // format "HH:mm"
 }

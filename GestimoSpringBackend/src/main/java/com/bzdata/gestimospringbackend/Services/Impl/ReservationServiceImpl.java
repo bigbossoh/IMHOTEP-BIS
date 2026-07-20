@@ -29,6 +29,7 @@ import com.bzdata.gestimospringbackend.repository.PrestationAdditionnelReservati
 import com.bzdata.gestimospringbackend.repository.ReservationRepository;
 import com.bzdata.gestimospringbackend.user.repository.UtilisateurRepository;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -61,6 +62,13 @@ public class ReservationServiceImpl implements ReservationService {
   final PrestationAdditionnelReservationRepository prestationAdditionnelReservationRepository;
   final SaveEncaissementReservationAvecRetourDeListService saveEncaissementReservationAvecRetourDeListService;
   final FactureNumeroReservationService factureNumeroReservationService;
+
+  private LocalTime parseHeure(String heure) {
+    if (!StringUtils.hasText(heure)) {
+      return null;
+    }
+    return LocalTime.parse(heure, DateTimeFormatter.ofPattern("HH:mm"));
+  }
 
   @Override
   public Long save(ReservationSaveOrUpdateDto dto) {
@@ -333,6 +341,12 @@ public class ReservationServiceImpl implements ReservationService {
     reservation.setPaymentMode(dto.getPaymentMode());
     reservation.setClientReservation(dto.getClientReservation());
     reservation.setTaxes(dto.getTaxes());
+    reservation.setTypeSejour(
+      StringUtils.hasText(dto.getTypeSejour()) ? dto.getTypeSejour() : "SEJOUR"
+    );
+    reservation.setTypePassage(dto.getTypePassage());
+    reservation.setHeureArrivee(parseHeure(dto.getHeureArrivee()));
+    reservation.setHeureDepart(parseHeure(dto.getHeureDepart()));
     if (dto.getSoldReservation() == 0) {
       if (saveApp != null) {
         saveApp.setOccupied(false);

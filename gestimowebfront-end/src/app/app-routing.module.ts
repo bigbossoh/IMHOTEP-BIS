@@ -23,6 +23,7 @@ import { PageJournalCaisseComponent } from './pages/comptabilite/page-journal-ca
 import { PageCompteClientComponent } from './pages/comptabilite/page-compte-client/page-compte-client.component';
 import { PageCompteAgenceComponent } from './pages/comptabilite/page-compte-agence/page-compte-agence.component';
 import { PageGrandCompteComponent } from './pages/comptabilite/page-grand-compte/page-grand-compte.component';
+import { PageRegistreCaisseComponent } from './pages/comptabilite/page-registre-caisse/page-registre-caisse.component';
 import { PageListeUtilisateursComponent } from './pages/utilisateurs/page-liste-utilisateurs/page-liste-utilisateurs.component';
 import { PageBauxLoyersComponent } from './pages/baux/page-baux-loyers/page-baux-loyers.component';
 import { ApplicationGuardService } from './services/guard/application-guard.service';
@@ -213,6 +214,11 @@ const routes: Routes = [
       {
         path: 'grand-compte',
         component: PageGrandCompteComponent,
+        canActivate: [ApplicationGuardService],
+      },
+      {
+        path: 'registre-caisse',
+        component: PageRegistreCaisseComponent,
         canActivate: [ApplicationGuardService],
       },
       {

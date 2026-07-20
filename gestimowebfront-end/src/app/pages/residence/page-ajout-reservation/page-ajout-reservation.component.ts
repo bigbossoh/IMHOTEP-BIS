@@ -40,6 +40,8 @@ import { DialogData } from '../../baux/page-baux/page-baux.component';
 import { PageNewUtilisateurComponent } from '../../utilisateurs/page-new-utilisateur/page-new-utilisateur.component';
 
 type ReservationMode = 1 | 2;
+type TypeSejour = 'SEJOUR' | 'PASSAGE';
+type TypePassage = 'JOUR' | 'NUIT';
 
 @Component({
   standalone: false,
@@ -88,6 +90,11 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   dateFinSejour: Date | null = null;
   dateDiff = 0;
   laNuiteMontant = 0;
+
+  typeSejour: TypeSejour = 'SEJOUR';
+  typePassage: TypePassage = 'JOUR';
+  heureArrivee = '';
+  heureDepart = '';
   listMontant: PrixParCategorieChambreDto[] = [];
   residenceModel: AppartementDto | null = null;
   selectedClient: UtilisateurRequestDto | null = null;
@@ -229,7 +236,43 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       : 'Le client peut être ajouté plus tard.';
   }
 
+  get isPassageMode(): boolean {
+    return this.typeSejour === 'PASSAGE';
+  }
+
+  get passageHours(): number {
+    const arrivee = this.toMinutes(this.heureArrivee);
+    const depart = this.toMinutes(this.heureDepart);
+    if (arrivee === null || depart === null) {
+      return 0;
+    }
+
+    let diff = depart - arrivee;
+    if (diff <= 0) {
+      diff += 24 * 60;
+    }
+
+    return diff / 60;
+  }
+
+  get passageHourlyRate(): number {
+    const categorie = this.residenceModel?.idCategorieChambre;
+    return this.toNumber(
+      this.typePassage === 'NUIT'
+        ? categorie?.prixParHeureNuit
+        : categorie?.prixParHeureJour
+    );
+  }
+
+  get passageAmount(): number {
+    return this.passageHours * this.passageHourlyRate;
+  }
+
   get subtotalAmount(): number {
+    if (this.isPassageMode) {
+      return this.passageAmount;
+    }
+
     return this.stayNights * this.nightlyPrice;
   }
 
@@ -302,6 +345,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   }
 
   get datesSelected(): boolean {
+    if (this.isPassageMode) {
+      return !!this.dateDebutSejour && this.passageHours > 0;
+    }
+
     return !!this.dateDebutSejour && !!this.dateFinSejour && this.stayNights > 0;
   }
 
@@ -317,9 +364,11 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
   }
 
   get canSubmit(): boolean {
-    const hasDates = !!this.dateDebutSejour && !!this.dateFinSejour && this.stayNights > 0;
+    const hasDates = this.datesSelected;
     const hasRoom = !!this.residenceModel;
-    const hasPrice = this.nightlyPrice > 0 || this.totalAmountPreview > 0;
+    const hasPrice = this.isPassageMode
+      ? this.passageHourlyRate > 0 || this.totalAmountPreview > 0
+      : this.nightlyPrice > 0 || this.totalAmountPreview > 0;
 
     if (this.isCheckInMode) {
       // Mode "Entrée en chambre" : toutes les infos sont obligatoires
@@ -395,6 +444,61 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   onModeChange(mode: ReservationMode): void {
     this.client = Number(mode) as ReservationMode;
+  }
+
+  onTypeSejourChange(type: TypeSejour): void {
+    this.typeSejour = type;
+    this.dateDebutSejour = null;
+    this.dateFinSejour = null;
+    this.dateDiff = 0;
+    this.availableRooms = [];
+    this.residenceModel = null;
+    this.laNuiteMontant = 0;
+    this.listMontant = [];
+    this.heureArrivee = '';
+    this.heureDepart = '';
+  }
+
+  onPassageDateChange(value: Date | null): void {
+    this.dateDebutSejour = value;
+    this.residenceModel = null;
+    this.updatePassageDatesAndRooms();
+  }
+
+  onPassageDetailsChange(): void {
+    this.residenceModel = null;
+    this.updatePassageDatesAndRooms();
+  }
+
+  private updatePassageDatesAndRooms(): void {
+    if (!this.dateDebutSejour) {
+      this.dateFinSejour = null;
+      this.availableRooms = [];
+      return;
+    }
+
+    const base = new Date(this.dateDebutSejour);
+    base.setHours(0, 0, 0, 0);
+
+    const traverseMinuit =
+      this.typePassage === 'NUIT' &&
+      !!this.heureArrivee &&
+      !!this.heureDepart &&
+      this.heureDepart <= this.heureArrivee;
+
+    if (traverseMinuit) {
+      const next = new Date(base);
+      next.setDate(next.getDate() + 1);
+      this.dateFinSejour = next;
+    } else {
+      this.dateFinSejour = base;
+    }
+
+    if (this.passageHours > 0 && this.user?.idAgence) {
+      this.loadAvailableRooms();
+    } else {
+      this.availableRooms = [];
+    }
   }
 
   onReductionChange(): void {
@@ -627,6 +731,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
       nmbreAdulte: this.toNumber(this.nbrAdult),
       nmbrEnfant: this.toNumber(this.nbrEnfant),
       montantDeReservation: this.totalAmountPreview,
+      typeSejour: this.typeSejour,
+      typePassage: this.isPassageMode ? this.typePassage : null,
+      heureArrivee: this.isPassageMode ? this.heureArrivee : null,
+      heureDepart: this.isPassageMode ? this.heureDepart : null,
     };
   }
 
@@ -696,11 +804,19 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.vatType = this.reservationToEdit.vatType ?? '';
     this.paymentMode = this.reservationToEdit.paymentMode ?? '';
     this.emailManuel = this.reservationToEdit.email ?? '';
+    this.typeSejour = (this.reservationToEdit.typeSejour as TypeSejour) || 'SEJOUR';
+    this.typePassage = (this.reservationToEdit.typePassage as TypePassage) || 'JOUR';
+    this.heureArrivee = (this.reservationToEdit.heureArrivee ?? '').slice(0, 5);
+    this.heureDepart = (this.reservationToEdit.heureDepart ?? '').slice(0, 5);
 
     if (this.dateDebutSejour && this.dateFinSejour) {
       this.getDiffDays(this.dateDebutSejour, this.dateFinSejour);
       // Charger les chambres disponibles après hydratation
-      if (this.stayNights > 0 && this.user?.idAgence) {
+      if (this.isPassageMode) {
+        if (this.passageHours > 0 && this.user?.idAgence) {
+          this.loadAvailableRooms();
+        }
+      } else if (this.stayNights > 0 && this.user?.idAgence) {
         this.loadAvailableRooms();
       }
     }
@@ -781,6 +897,10 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
     this.paymentMode = '';
     this.vatType = '';
     this.availableRooms = [];
+    this.typeSejour = 'SEJOUR';
+    this.typePassage = 'JOUR';
+    this.heureArrivee = '';
+    this.heureDepart = '';
   }
 
   private toApiDate(value: Date | null): string {
@@ -816,6 +936,19 @@ export class PageAjoutReservationComponent implements OnInit, OnDestroy {
 
   private toNumber(value: unknown): number {
     return Number(value ?? 0);
+  }
+
+  private toMinutes(value: string | null | undefined): number | null {
+    if (!value) {
+      return null;
+    }
+
+    const [hours, minutes] = value.split(':').map((part) => Number(part));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      return null;
+    }
+
+    return hours * 60 + minutes;
   }
 
   onPrestationSearch(value: string): void {

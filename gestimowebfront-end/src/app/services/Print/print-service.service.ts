@@ -127,6 +127,15 @@ export class PrintServiceService {
     );
   }
 
+  registreRecettesDepenses(siteId: number, debut: string, fin: string): Observable<Blob> {
+    return this.requestBlobWithFallback(
+      'api/v1/exports/registre-caisse',
+      siteId,
+      debut,
+      fin
+    );
+  }
+
   savelogo(body: any): Observable<unknown> {
     // console.log('');
     // ABJECT WHICH PASS BODY PARAMETERS
