@@ -28,6 +28,9 @@ public class CategorieChambre extends AbstractEntity {
   int nbrDiffJour;
   double pourcentReduc;
 
+  double prixParHeureJour;
+  double prixParHeureNuit;
+
   @OneToMany
   @JoinColumn(name = "categorieChambreAppartement")
   List<Appartement> appartements;

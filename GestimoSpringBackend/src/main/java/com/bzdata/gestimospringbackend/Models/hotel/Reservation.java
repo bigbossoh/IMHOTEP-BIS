@@ -2,6 +2,7 @@ package com.bzdata.gestimospringbackend.Models.hotel;
 
 import com.bzdata.gestimospringbackend.Models.EncaissementPrincipal;
 import com.bzdata.gestimospringbackend.Models.Operation;
+import java.time.LocalTime;
 import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -38,6 +39,14 @@ public class Reservation extends Operation {
   String numeroFacture;
   String clientReservation;
   String taxes;
+
+  // "SEJOUR" (classique, par nuitée, par défaut) ou "PASSAGE" (facturé à l'heure)
+  String typeSejour;
+  // "JOUR" ou "NUIT" ; renseigné uniquement quand typeSejour = "PASSAGE"
+  String typePassage;
+  LocalTime heureArrivee;
+  LocalTime heureDepart;
+
   @OneToMany(mappedBy = "reservation")
   List<PrestationAdditionnelReservation> serviceAdditionnelreservations;
 

@@ -7,6 +7,8 @@ export interface CategoryChambreSaveOrUpdateDto {
   idCreateur?: number;
   name: string;
   description: string;
+  prixParHeureJour?: number;
+  prixParHeureNuit?: number;
   prixGategorieDto?: Array<PrixParCategorieChambreDto>;
   appartements?: Array<AppartementDto>;
 }

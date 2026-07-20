@@ -1,0 +1,45 @@
+<div class="rc-page container-fluid">
+  <div class="rc-page-header">
+    <div>
+      <span class="rc-eyebrow">Comptabilite</span>
+      <h1>Registre recettes et depenses</h1>
+      <p>Genere le classeur Excel du registre de caisse d'un site pour une periode donnee.</p>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="rc-inline-alert">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <div class="rc-form-panel">
+    <div class="rc-form-grid">
+      <label class="rc-field">
+        <span>Site</span>
+        <select class="form-control" [(ngModel)]="siteId">
+          <option [ngValue]="null" disabled>-- Selectionnez un site --</option>
+          <option *ngFor="let site of sites" [ngValue]="site.id">
+            {{ site.nomSite || site.abrSite || ('Site #' + site.id) }}
+          </option>
+        </select>
+      </label>
+
+      <label class="rc-field">
+        <span>Debut de periode</span>
+        <input type="date" class="form-control" [(ngModel)]="dateDebut" />
+      </label>
+
+      <label class="rc-field">
+        <span>Fin de periode</span>
+        <input type="date" class="form-control" [(ngModel)]="dateFin" />
+      </label>
+    </div>
+
+    <div class="rc-form-actions">
+      <button type="button" class="rc-btn rc-btn--primary" (click)="genererRegistre()" [disabled]="isLoading">
+        {{ isLoading ? 'Generation en cours...' : 'Generer et telecharger' }}
+      </button>
+    </div>
+  </div>
+</div>

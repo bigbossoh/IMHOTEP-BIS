@@ -173,6 +173,18 @@
               <p>{{ selectedCategorie.description || 'Aucune description' }}</p>
             </div>
           </div>
+          <button type="button" class="ca-btn ca-btn--outline ca-btn--sm" (click)="openDialogModifierCategorie()">
+            Modifier
+          </button>
+        </div>
+
+        <!-- Tarifs des passages (jour/nuit, à l'heure) -->
+        <div class="ca-tab-toolbar">
+          <span class="ca-tab-section-title">
+            Tarifs passage — Jour : <strong>{{ formatCurrency(selectedCategorie.prixParHeureJour) }}/h</strong>
+            &nbsp;·&nbsp;
+            Nuit : <strong>{{ formatCurrency(selectedCategorie.prixParHeureNuit) }}/h</strong>
+          </span>
         </div>
 
         <!-- Onglets -->

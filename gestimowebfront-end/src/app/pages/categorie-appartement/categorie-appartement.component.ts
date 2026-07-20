@@ -147,6 +147,14 @@ export class CategorieAppartementComponent implements OnInit {
     ref.afterClosed().subscribe(() => this.loadCategories());
   }
 
+  public openDialogModifierCategorie(): void {
+    if (!this.selectedCategorie) return;
+    const ref = this.dialog.open(NewCategorieChambreComponent, {
+      data: { categorie: this.selectedCategorie },
+    });
+    ref.afterClosed().subscribe(() => this.loadCategories());
+  }
+
   public openDialogPrix(): void {
     if (!this.selectedCategorie) return;
     const ref = this.dialog.open(NewPrixCategorieChambreComponent, {

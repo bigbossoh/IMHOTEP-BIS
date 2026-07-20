@@ -37,10 +37,21 @@ export class NewPrixCategorieChambreComponent implements OnInit {
   ngOnInit(): void {
     this.user = this.userService.getUserFromLocalCache();
     this.varData = this.data;
-    console.log('***THE DATA CALL IS ****');
-    console.log(this.varData.cate.id);
   }
+
+  get isFormValid(): boolean {
+    return (
+      !!String(this.nombreDeJour ?? '').trim() &&
+      Number(this.nbrDiffJour) > 0 &&
+      Number(this.prix) > 0
+    );
+  }
+
   onSaveForm() {
+    if (!this.isFormValid) {
+      return;
+    }
+
 
     this.formGroup = this.fb.group({
       id: [0],

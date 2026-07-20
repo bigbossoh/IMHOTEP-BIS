@@ -159,12 +159,18 @@ export class MenuComponent implements OnInit {
           icon: 'fas fa-bed',
           url: 'reservation-residence',
         },
-        // {
-        //   id: '77',
-        //   titre: 'Catégories de chambre',
-        //   icon: 'fas fa-layer-group',
-        //   url: 'categorie-appartement',
-        // },
+        {
+          id: '76',
+          titre: 'Résidences',
+          icon: 'fas fa-door-closed',
+          url: 'residences',
+        },
+        {
+          id: '77',
+          titre: 'Catégories de chambre',
+          icon: 'fas fa-layer-group',
+          url: 'categorie-appartement',
+        },
         {
           id: '78',
           titre: 'Prestations & services',
@@ -260,6 +266,12 @@ export class MenuComponent implements OnInit {
           titre: 'Consultation reglement des loyers',
           icon: 'fas fa-users-cog',
           url: 'reglement-periode-loyer',
+        },
+        {
+          id: '94',
+          titre: 'Registre recettes et depenses',
+          icon: 'fas fa-file-excel',
+          url: 'registre-caisse',
         },
       ],
     },

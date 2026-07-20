@@ -81,6 +81,8 @@ public class CategoryChambreServiceImpl implements CategoryChambreService {
 
       categorieChambre.setIdAgence(dto.getIdAgence());
       categorieChambre.setIdCreateur(dto.getIdCreateur());
+      categorieChambre.setPrixParHeureJour(dto.getPrixParHeureJour());
+      categorieChambre.setPrixParHeureNuit(dto.getPrixParHeureNuit());
 
       CategorieChambre savCategorieChambre = categoryChambreRepository.save(
         categorieChambre
@@ -93,6 +95,8 @@ public class CategoryChambreServiceImpl implements CategoryChambreService {
 
       newCategorieChambre.setIdCreateur(dto.getIdCreateur());
       newCategorieChambre.setIdAgence(dto.getIdAgence());
+      newCategorieChambre.setPrixParHeureJour(dto.getPrixParHeureJour());
+      newCategorieChambre.setPrixParHeureNuit(dto.getPrixParHeureNuit());
 
       CategorieChambre savCategorieChambre = categoryChambreRepository.save(
         newCategorieChambre
@@ -115,6 +119,8 @@ public class CategoryChambreServiceImpl implements CategoryChambreService {
 categorieChambre.setPourcentReduc(0L);
     categorieChambre.setPrice(0L);
     categorieChambre.setNbrDiffJour(0);
+    categorieChambre.setPrixParHeureJour(dto.getPrixParHeureJour());
+    categorieChambre.setPrixParHeureNuit(dto.getPrixParHeureNuit());
       categoryChambreRepository.save(categorieChambre);
       return gestimoWebMapperImpl.fromCategoryChambre(categorieChambre);
     }
@@ -126,6 +132,8 @@ categorieChambre.setPourcentReduc(0L);
     newCategite.setPourcentReduc(0L);
     newCategite.setPrice(0L);
     newCategite.setNbrDiffJour(0);
+    newCategite.setPrixParHeureJour(dto.getPrixParHeureJour());
+    newCategite.setPrixParHeureNuit(dto.getPrixParHeureNuit());
     categoryChambreRepository.save(newCategite);
     return gestimoWebMapperImpl.fromCategoryChambre(newCategite);
   }

@@ -44,6 +44,7 @@ import { PageJournalCaisseComponent } from './pages/comptabilite/page-journal-ca
 import { PageCompteClientComponent } from './pages/comptabilite/page-compte-client/page-compte-client.component';
 import { PageCompteAgenceComponent } from './pages/comptabilite/page-compte-agence/page-compte-agence.component';
 import { PageGrandCompteComponent } from './pages/comptabilite/page-grand-compte/page-grand-compte.component';
+import { PageRegistreCaisseComponent } from './pages/comptabilite/page-registre-caisse/page-registre-caisse.component';
 import { PageListeUtilisateursComponent } from './pages/utilisateurs/page-liste-utilisateurs/page-liste-utilisateurs.component';
 import { PaginationComponent } from './composants/pagination/pagination.component';
 import { AppDetailBiensSiteComponent } from './composants/app-detail-biens-site/app-detail-biens-site.component';
@@ -242,6 +243,7 @@ import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/pa
     PageJournalCaisseComponent,
     PageCompteClientComponent,
     PageCompteAgenceComponent,
+    PageRegistreCaisseComponent,
     PageGrandCompteComponent,
     PageListeUtilisateursComponent,
     PageFonctionnalitesUtilisateursComponent,

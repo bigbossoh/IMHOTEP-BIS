@@ -42,4 +42,8 @@ export interface ReservationAfficheDto {
   numeroFacture?: string;
   clientReservation?: string;
   taxes?: string;
+  typeSejour?: string;
+  typePassage?: string;
+  heureArrivee?: string;
+  heureDepart?: string;
 }

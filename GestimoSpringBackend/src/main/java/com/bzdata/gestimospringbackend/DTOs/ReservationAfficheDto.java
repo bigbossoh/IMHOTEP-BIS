@@ -2,6 +2,7 @@ package com.bzdata.gestimospringbackend.DTOs;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -62,4 +63,9 @@ public class ReservationAfficheDto {
   String numeroFacture;
   String clientReservation;
   String taxes;
+
+  String typeSejour;
+  String typePassage;
+  LocalTime heureArrivee;
+  LocalTime heureDepart;
 }

@@ -1,13 +1,191 @@
-.example-form {
-  min-width: 150px;
-  max-width: 1500px;
-  width: 100%;
+/* ══════════════════════════════════════════════════════════════
+   DIALOG WRAPPER
+══════════════════════════════════════════════════════════════ */
+.npc-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  font-family: inherit;
+
+  --npc-primary:      #0f9d68;
+  --npc-primary-soft: rgba(15, 157, 104, 0.1);
+  --npc-border:       #cbd5e1;
+  --npc-muted:        #64748b;
+  --npc-danger:       #b91c1c;
 }
 
-.example-full-width {
-  width: 100%;
+/* ── En-tête ── */
+.npc-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.4rem 1.5rem 1.1rem;
+  background: linear-gradient(135deg, rgba(15,157,104,0.08), rgba(255,255,255,0));
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-td {
-  padding-right: 8px;
+.npc-dialog__icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0b6e4a, #0f9d68);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(15, 157, 104, 0.28);
+}
+
+.npc-dialog__title {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.npc-dialog__subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--npc-muted);
+}
+
+.npc-dialog__subtitle strong {
+  color: #0f172a;
+}
+
+.npc-dialog__close {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.npc-dialog__close:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+}
+
+/* ── Corps ── */
+.npc-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.4rem 1.5rem;
+}
+
+.npc-form-row {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.npc-form-row .npc-form-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.npc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.npc-form-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.npc-required {
+  color: var(--npc-danger);
+  margin-left: 2px;
+}
+
+.npc-form-control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--npc-border);
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  font-family: inherit;
+}
+
+.npc-form-control::placeholder { color: #94a3b8; }
+
+.npc-form-control:focus {
+  border-color: var(--npc-primary);
+  box-shadow: 0 0 0 3px var(--npc-primary-soft);
+}
+
+.npc-form-control--textarea {
+  min-height: unset;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+/* ── Pied ── */
+.npc-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem 1.4rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.07);
+  background: #fafbfd;
+}
+
+.npc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.npc-btn:active { transform: scale(0.97); }
+
+.npc-btn--ghost {
+  background: transparent;
+  border-color: var(--npc-border);
+  color: #475569;
+}
+.npc-btn--ghost:hover { background: rgba(15, 23, 42, 0.04); }
+
+.npc-btn--primary {
+  background: var(--npc-primary);
+  color: #fff;
+}
+.npc-btn--primary:hover:not(:disabled) {
+  background: #0b6e4a;
+  box-shadow: 0 4px 14px rgba(15, 157, 104, 0.3);
+}
+.npc-btn--primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

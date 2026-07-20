@@ -36,6 +36,9 @@ public class CategoryChambreSaveOrUpdateDto {
   @NotBlank(message = "Le Nom ne doit pas etre vide")
  String description;
 
+   double prixParHeureJour;
+   double prixParHeureNuit;
+
    List<PrixParCategorieChambreDto> prixGategorieDto;
    List<AppartementDto> appartements;
 }
