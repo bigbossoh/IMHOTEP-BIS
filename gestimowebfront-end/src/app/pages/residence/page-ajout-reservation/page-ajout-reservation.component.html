@@ -397,11 +397,11 @@
         <button
           type="button"
           class="btn btn-primary btn-submit"
-          [disabled]="!canSubmit"
+          [disabled]="!canSubmit || saving"
           (click)="submitReservation()"
         >
-          <i class="fas" [class.fa-key]="isCheckInMode" [class.fa-bookmark]="!isCheckInMode"></i>
-          {{ submitButtonLabel }}
+          <i class="fas" [class.fa-spinner]="saving" [class.fa-spin]="saving" [class.fa-key]="!saving && isCheckInMode" [class.fa-bookmark]="!saving && !isCheckInMode"></i>
+          {{ saving ? 'Enregistrement...' : submitButtonLabel }}
         </button>
 
         @if (!canSubmit) {
