@@ -694,6 +694,10 @@ public class GestimoWebMapperImpl {
     bienImmobilierAffiheDto.setChapitre(
       bienimmobilier.getChapitre().getLibelleChapitre()
     );
+    if (bienimmobilier.getSite() != null) {
+      bienImmobilierAffiheDto.setIdSite(bienimmobilier.getSite().getId());
+      bienImmobilierAffiheDto.setNomSite(bienimmobilier.getSite().getNomSite());
+    }
     return bienImmobilierAffiheDto;
   }
 

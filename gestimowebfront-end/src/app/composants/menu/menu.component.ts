@@ -133,11 +133,17 @@ export class MenuComponent implements OnInit {
           icon: 'fas fa-file-signature',
           url: 'baux',
         },
+        {
+          id: '62',
+          titre: 'Réassigner un bien',
+          icon: 'fas fa-exchange-alt',
+          url: 'reassignation-biens',
+        },
       ],
     },
     {
       id: '7',
-      titre: 'gestion des residences',
+      titre: 'Gestion des résidences',
       icon: 'fas fa-home',
       url: '',
       sousMenu: [
@@ -201,6 +207,12 @@ export class MenuComponent implements OnInit {
           titre: 'Certifications FNE',
           icon: 'fas fa-file-invoice-dollar',
           url: 'certifications-fne',
+        },
+        {
+          id: '80',
+          titre: 'Réservation FNE',
+          icon: 'fas fa-bolt',
+          url: 'reservation-fne',
         },
       ],
     },
@@ -303,7 +315,7 @@ export class MenuComponent implements OnInit {
     },
     {
       id: '11',
-      titre: 'Paramétratge',
+      titre: 'Paramétrage',
       icon: 'fas fa-cogs',
       url: '',
       sousMenu: [

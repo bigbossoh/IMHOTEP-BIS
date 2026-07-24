@@ -24,4 +24,6 @@ public class BienImmobilierAffiheDto {
 
     String nomPrenomProprio;
     String chapitre;
+    Long idSite;
+    String nomSite;
 }

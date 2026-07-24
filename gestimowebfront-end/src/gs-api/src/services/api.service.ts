@@ -25,6 +25,7 @@ import { LocataireEncaisDTO } from '../models/locataire-encais-dto';
 import { OperationDto } from '../models/operation-dto';
 import { BailExtensionRequestDto } from '../models/bail-extension-request-dto';
 import { BailModifDto } from '../models/bail-modif-dto';
+import { ChangerBienBailDto } from '../models/changer-bien-bail-dto';
 import { BailAppartementDto } from '../models/bail-appartement-dto';
 import { BailMagasinDto } from '../models/bail-magasin-dto';
 import { BailVillaDto } from '../models/bail-villa-dto';
@@ -117,6 +118,7 @@ class ApiService extends __BaseService {
   static readonly verifyAccountPath = 'api/v1/auth/accountVerification/{token}';
   static readonly loginPath = 'api/v1/auth/login';
   static readonly bailByLocataireEtBienPath = 'api/v1/bail/bailLocataireetbien/{locataire}/{bien}';
+  static readonly changerBienBailPath = 'api/v1/bail/changerBien';
   static readonly clotureBailPath = 'api/v1/bail/clotureBail/{id}';
   static readonly findOperationByIdPath = 'api/v1/bail/findoperationbyid/{id}';
   static readonly listDesBauxPourUnBienImmobilierPath = 'api/v1/bail/getallbailbybien/{id}';
@@ -2426,6 +2428,42 @@ class ApiService extends __BaseService {
    */
   modifierUnBail(body?: BailModifDto): __Observable<OperationDto> {
     return this.modifierUnBailResponse(body).pipe(
+      __map(_r => _r.body as OperationDto)
+    );
+  }
+
+  /**
+   * @param body undefined
+   * @return successful operation
+   */
+  changerBienBailResponse(body?: ChangerBienBailDto): __Observable<__StrictHttpResponse<OperationDto>> {
+    let __params = this.newParams();
+    let __headers = new HttpHeaders();
+    let __body: any = null;
+    __body = body;
+    let req = new HttpRequest<any>(
+      'POST',
+      this.rootUrl + `api/v1/bail/changerBien`,
+      __body,
+      {
+        headers: __headers,
+        params: __params,
+        responseType: 'json'
+      });
+
+    return this.http.request<any>(req).pipe(
+      __filter(_r => _r instanceof HttpResponse),
+      __map((_r) => {
+        return _r as __StrictHttpResponse<OperationDto>;
+      })
+    );
+  }
+  /**
+   * @param body undefined
+   * @return successful operation
+   */
+  changerBienBail(body?: ChangerBienBailDto): __Observable<OperationDto> {
+    return this.changerBienBailResponse(body).pipe(
       __map(_r => _r.body as OperationDto)
     );
   }

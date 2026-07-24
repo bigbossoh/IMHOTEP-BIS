@@ -11,6 +11,7 @@ import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailModifDto;
+import com.bzdata.gestimospringbackend.DTOs.ChangerBienBailDto;
 import com.bzdata.gestimospringbackend.DTOs.EncaissementPrincipalDTO;
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.DTOs.OperationDto;
@@ -345,6 +346,60 @@ public class BailServiceImpl implements BailService {
             }
         }
         return bailMapperImpl.fromOperation(bailSave);
+    }
+
+    @Override
+    public OperationDto changerBienBail(ChangerBienBailDto dto) {
+        if (dto == null || dto.getIdBail() == null) {
+            throw new EntityNotFoundException("Aucune Operation avec l'ID = " + (dto != null ? dto.getIdBail() : null),
+                    ErrorCodes.BAILLOCATION_NOT_FOUND);
+        }
+
+        BailLocation bail = bailLocationRepository.findById(dto.getIdBail())
+                .orElseThrow(() -> new EntityNotFoundException("Aucune Operation avec l'ID = " + dto.getIdBail(),
+                        ErrorCodes.BAILLOCATION_NOT_FOUND));
+
+        if (!bail.isEnCoursBail()) {
+            throw new InvalidEntityException("Impossible de changer le bien d'un bail cloture.",
+                    ErrorCodes.BAILLOCATION_NOT_VALID);
+        }
+
+        Bienimmobilier nouveauBien = bienImmobilierRepository.findById(dto.getIdNouveauBien())
+                .orElseThrow(() -> new InvalidEntityException(
+                        "Aucun bien immobilier trouve avec l'ID = " + dto.getIdNouveauBien(),
+                        ErrorCodes.BIEN_IMMOBILIER_NOT_FOUND));
+
+        Bienimmobilier ancienBien = bail.getBienImmobilierOperation();
+        if (ancienBien != null && Objects.equals(ancienBien.getId(), nouveauBien.getId())) {
+            throw new InvalidEntityException("Ce bail est deja associe a ce bien.",
+                    ErrorCodes.BAILLOCATION_NOT_VALID);
+        }
+
+        if (ancienBien != null) {
+            boolean encoreUtiliseParAutreBail = bailLocationRepository.findAll().stream()
+                    .anyMatch(autreBail -> !Objects.equals(autreBail.getId(), bail.getId())
+                            && autreBail.isEnCoursBail()
+                            && autreBail.getBienImmobilierOperation() != null
+                            && Objects.equals(autreBail.getBienImmobilierOperation().getId(), ancienBien.getId()));
+            if (!encoreUtiliseParAutreBail) {
+                ancienBien.setOccupied(false);
+                bienImmobilierRepository.save(ancienBien);
+            }
+        }
+
+        bail.setBienImmobilierOperation(nouveauBien);
+        // Ces libelles sont figes en base au moment de la creation du bail et ne se
+        // recalculent jamais tout seuls : on les vide pour qu'ils soient regeneres a
+        // partir du nouveau bien (cf. BailDisplayUtils.resolveBailCode), sinon ils
+        // continuent d'afficher l'ancien bien apres la reassignation.
+        bail.setDesignationBail(null);
+        bail.setAbrvCodeBail(null);
+        BailLocation bailSauvegarde = bailLocationRepository.save(bail);
+
+        nouveauBien.setOccupied(true);
+        bienImmobilierRepository.save(nouveauBien);
+
+        return bailMapperImpl.fromOperation(bailSauvegarde);
     }
 
     @Override

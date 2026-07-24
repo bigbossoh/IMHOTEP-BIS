@@ -1,0 +1,335 @@
+:host { display: block; }
+
+.reservation-fne-page {
+  --accent: #1d4ed8;
+  --accent-soft: rgba(29, 78, 216, 0.12);
+  --success: #047857;
+  --success-soft: rgba(4, 120, 87, 0.1);
+  --danger: #b91c1c;
+  --danger-soft: rgba(185, 28, 28, 0.1);
+  --warning: #b45309;
+  --border: rgba(15, 23, 42, 0.08);
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  --surface: rgba(255, 255, 255, 0.94);
+  --muted: #64748b;
+  --text: #0f172a;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, #f4f7fb 0%, #eef3f8 100%);
+  min-height: 100%;
+  color: var(--text);
+}
+
+/* Hero */
+.hero-panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.6rem 1.75rem;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background:
+    radial-gradient(circle at top right, rgba(29,78,216,0.10), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
+  margin-bottom: 1.25rem;
+}
+
+.hero-panel__copy { max-width: 720px; }
+.hero-panel__eyebrow {
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.hero-panel h1 {
+  margin: 0.5rem 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.hero-panel p { margin: 0.75rem 0 0; color: var(--muted); line-height: 1.65; }
+.hero-panel__actions { display: flex; gap: 0.75rem; align-items: center; }
+
+.page-alert { margin-bottom: 1rem; border-radius: 18px; }
+
+/* Layout */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Card */
+.surface-card {
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+}
+.surface-card__body { padding: 1.4rem; }
+
+.card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+.card-heading__eyebrow {
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.card-heading h2 { margin: 0.4rem 0 0; font-size: 1.2rem; font-weight: 800; }
+.card-heading p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.9rem; }
+
+.facture-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.05);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Search */
+.search-box { margin-bottom: 1rem; }
+.search-box label {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+/* State */
+.state-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: 1rem;
+  border: 1px dashed rgba(148,163,184,0.48);
+  border-radius: 22px;
+  background: rgba(248,250,252,0.9);
+  color: var(--muted);
+  text-align: center;
+}
+.state-card--tall { min-height: 260px; }
+
+/* Reservation list */
+.reservation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+.reservation-item {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: border-color 160ms, background 160ms, transform 160ms;
+  background: #fff;
+}
+.reservation-item:hover { border-color: rgba(29,78,216,0.35); transform: translateY(-1px); }
+.reservation-item.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.reservation-item__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.reservation-item__meta { margin-top: 0.3rem; font-size: 0.85rem; color: var(--muted); }
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.badge--info { background: rgba(29,78,216,0.12); color: var(--accent); }
+.badge--success { background: var(--success-soft); color: var(--success); }
+
+/* Form */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.form-field { margin-bottom: 1.1rem; }
+.form-field label {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #334155;
+}
+.form-field__row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+.form-field__row .form-control { flex: 1; }
+
+/*
+ * Champ calendrier (période du séjour).
+ *
+ * L'app a une feuille de style globale (src/styles.css) qui force en !important
+ * la hauteur/le rayon/le fond/l'ombre de TOUS les champs Material MDC
+ * (.mat-mdc-text-field-wrapper, .mdc-text-field--outlined) pour les aligner sur
+ * le design global. Ces règles gagnent forcément face aux custom properties
+ * (--mdc-outlined-text-field-*) posées ici : une valeur !important sur la
+ * propriété finale l'emporte toujours sur un token qui alimente cette même
+ * propriété. Plutôt que de dupliquer/contourner ces règles globales, on dessine
+ * la bordure/le fond/l'ombre nous-mêmes sur le <mat-form-field> (élément que
+ * l'on possède, donc atteignable en CSS scopé classique) et on rend le contour
+ * interne de Material invisible pour éviter un double-liseré.
+ */
+.date-range-field {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  border: 1.5px solid var(--neutral-200, #e2e8f0);
+  border-radius: var(--radius-sm, 8px);
+  background: #fff;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+  transition: border-color 180ms var(--ease-out, ease), box-shadow 180ms var(--ease-out, ease);
+
+  /* Rend le contour MDC interne transparent : c'est notre bordure ci-dessus qui fait le travail visuel. */
+  --mdc-outlined-text-field-outline-color: transparent;
+  --mdc-outlined-text-field-hover-outline-color: transparent;
+  --mdc-outlined-text-field-focus-outline-color: transparent;
+  --mdc-outlined-text-field-label-text-color: #64748b;
+  --mdc-outlined-text-field-hover-label-text-color: #475569;
+  --mdc-outlined-text-field-focus-label-text-color: var(--accent);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-input-text-placeholder-color: #94a3b8;
+  --mat-form-field-container-text-size: 0.92rem;
+  --mat-form-field-container-text-font: inherit;
+  --mat-datepicker-toggle-icon-color: #64748b;
+  --mat-datepicker-toggle-active-state-icon-color: var(--accent);
+}
+.date-range-field:hover {
+  border-color: var(--neutral-300, #cbd5e1);
+}
+.date-range-field:focus-within {
+  border-color: var(--primary-500, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.06));
+}
+.date-range-field input[matStartDate],
+.date-range-field input[matEndDate] {
+  font-family: inherit;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.field-error {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+.section-title {
+  margin: 1.4rem 0 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #334155;
+}
+.section-title:first-of-type { margin-top: 0; }
+
+.article-card {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(248,250,252,0.7);
+  margin-bottom: 1.1rem;
+}
+.article-card .form-row:last-child { margin-bottom: 0; }
+.article-card .form-field:last-child { margin-bottom: 0; }
+
+/* Résumé de la facture */
+.summary-table {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+}
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row--total {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+/* Result banner */
+.result-banner {
+  margin-top: 1.1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid transparent;
+}
+.result-banner p { margin: 0; }
+.result-banner__ref { margin-top: 0.4rem !important; font-size: 0.85rem; color: var(--muted); }
+.result-banner--success {
+  background: var(--success-soft);
+  border-color: rgba(4,120,87,0.25);
+  color: var(--success);
+}
+.result-banner--error {
+  background: var(--danger-soft);
+  border-color: rgba(185,28,28,0.25);
+  color: var(--danger);
+}
+
+@media (max-width: 991.98px) {
+  .reservation-fne-page { padding: 1rem; }
+  .hero-panel, .card-heading { flex-direction: column; }
+  .hero-panel__actions { width: 100%; }
+  .workspace { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}

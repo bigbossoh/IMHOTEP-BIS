@@ -1,0 +1,282 @@
+<div class="reservation-fne-page container-fluid">
+
+  <!-- Hero -->
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Résidence meublée</span>
+      <h1>Réservation FNE</h1>
+      <p>
+        Finalisez l'entrée en chambre d'un client en quelques clics : la facture
+        est ensuite certifiée automatiquement auprès de la FNE si tout s'est bien passé.
+      </p>
+    </div>
+    <div class="hero-panel__actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="loadEntries()" [disabled]="loading">
+        Actualiser
+      </button>
+    </div>
+  </section>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger page-alert">{{ errorMessage }}</div>
+  }
+
+  <div class="workspace">
+
+    <!-- Liste des réservations en attente + chambres disponibles -->
+    <section class="surface-card pending-card">
+      <div class="surface-card__body">
+        <div class="card-heading">
+          <div>
+            <span class="card-heading__eyebrow">À faire entrer en chambre</span>
+            <h2>Réservations en attente</h2>
+            <p>Chambres déjà bloquées sans client, ou chambres disponibles à attribuer directement.</p>
+          </div>
+          <span class="facture-count">{{ filteredEntries.length }} disponible(s)</span>
+        </div>
+
+        <div class="search-box">
+          <label for="pendingSearch">Recherche</label>
+          <input
+            id="pendingSearch"
+            type="search"
+            class="form-control"
+            [(ngModel)]="searchTerm"
+            placeholder="Chambre, date..."
+          />
+        </div>
+
+        @if (loading) {
+          <div class="state-card">Chargement des réservations et des chambres…</div>
+        }
+
+        @if (!loading && pendingEntries.length === 0 && !errorMessage) {
+          <div class="state-card">Aucune réservation en attente et aucune chambre disponible.</div>
+        }
+
+        @if (!loading && pendingEntries.length > 0 && filteredEntries.length === 0) {
+          <div class="state-card">Aucun résultat ne correspond à votre recherche.</div>
+        }
+
+        @if (!loading && filteredEntries.length > 0) {
+          <ul class="reservation-list">
+            @for (entry of filteredEntries; track trackByEntry($index, entry)) {
+              <li
+                class="reservation-item"
+                [class.is-selected]="selected?.kind === entry.kind && selected?.id === entry.id"
+                (click)="selectEntry(entry)"
+              >
+                <div class="reservation-item__main">
+                  <strong>{{ entryRoomName(entry) }}</strong>
+                  @if (entry.kind === 'room') {
+                    <span class="badge badge--success">Disponible</span>
+                  } @else {
+                    <span class="badge badge--info">Pré-réservation</span>
+                  }
+                </div>
+                @if (entry.kind === 'room') {
+                  <div class="reservation-item__meta">{{ entryMeta(entry) }}</div>
+                } @else {
+                  <div class="reservation-item__meta">
+                    {{ entry.reservation.dateDebut | date : 'dd/MM/yyyy' }} au {{ entry.reservation.dateFin | date : 'dd/MM/yyyy' }}
+                  </div>
+                  <div class="reservation-item__meta">
+                    Total {{ formatCurrency(entry.reservation.montantReservation) }} · Solde {{ formatCurrency(entry.reservation.soldReservation) }}
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
+    <!-- Formulaire d'entrée en chambre + certification -->
+    <section class="surface-card form-card">
+      <div class="surface-card__body">
+        @if (!selected) {
+          <div class="state-card state-card--tall">
+            Sélectionnez une réservation ou une chambre disponible dans la liste pour lancer l'entrée en chambre.
+          </div>
+        } @else {
+          <div class="card-heading">
+            <div>
+              <span class="card-heading__eyebrow">Entrée en chambre</span>
+              <h2>{{ entryRoomName(selected) }}</h2>
+              @if (selected.kind === 'reservation') {
+                <p>Arrivée le {{ selected.reservation.dateDebut | date : 'dd/MM/yyyy' }}</p>
+              } @else {
+                <p>Chambre disponible — entrée en chambre immédiate</p>
+              }
+            </div>
+          </div>
+
+          <!-- Informations du client -->
+          <h3 class="section-title">Informations du client</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="nomClientInput">Nom du client *</label>
+              <input
+                id="nomClientInput"
+                type="text"
+                class="form-control"
+                [(ngModel)]="nomClient"
+                placeholder="Nom complet du client"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="telephoneInput">Téléphone du client</label>
+              <input
+                id="telephoneInput"
+                type="tel"
+                class="form-control"
+                [(ngModel)]="telephoneClient"
+                placeholder="Ex : 0102030405 (facultatif)"
+              />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="emailInput">Email du client</label>
+            <input
+              id="emailInput"
+              type="email"
+              class="form-control"
+              [(ngModel)]="emailClient"
+              placeholder="client@exemple.com (facultatif)"
+            />
+            @if (emailClient.trim() && !isEmailValid(emailClient.trim())) {
+              <span class="field-error">Email invalide.</span>
+            }
+          </div>
+
+          <!-- Séjour (article de la facture) -->
+          <h3 class="section-title">Séjour</h3>
+          <div class="article-card">
+            <div class="form-field">
+              <label>Période du séjour</label>
+              <mat-form-field appearance="outline" class="date-range-field" subscriptSizing="dynamic">
+                <mat-date-range-input [formGroup]="sejourRange" [rangePicker]="sejourPicker" [min]="minDate">
+                  <input matStartDate formControlName="start" placeholder="Arrivée">
+                  <input matEndDate formControlName="end" placeholder="Départ">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matSuffix [for]="sejourPicker"></mat-datepicker-toggle>
+                <mat-date-range-picker #sejourPicker></mat-date-range-picker>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="nuiteesInput">Nombre de nuitées</label>
+                <input
+                  id="nuiteesInput"
+                  type="number"
+                  min="1"
+                  class="form-control"
+                  [(ngModel)]="nombreNuitees"
+                  (change)="onNombreNuiteesChange()"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="puInput">PU HT / nuitée (FCFA)</label>
+                <input
+                  id="puInput"
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  [(ngModel)]="prixUnitaireHT"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="remiseInput">Remise (%)</label>
+                <input
+                  id="remiseInput"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="form-control"
+                  [(ngModel)]="remisePercent"
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="vatSelect">Taux d'imposition</label>
+                <select id="vatSelect" class="form-control" [(ngModel)]="vatType">
+                  @for (vat of vatTypes; track vat.value) {
+                    <option [value]="vat.value">{{ vat.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="paymentSelect">Mode de paiement</label>
+            <select id="paymentSelect" class="form-control" [(ngModel)]="paymentMode">
+              <option value="">Sélectionner…</option>
+              @for (mode of paymentModes; track mode.value) {
+                <option [value]="mode.value">{{ mode.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Résumé de la facture -->
+          <h3 class="section-title">Résumé de la facture</h3>
+          <div class="summary-table">
+            <div class="summary-row">
+              <span>Total HT</span>
+              <strong>{{ formatCurrency(totalHT) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Remise ({{ remisePercent }}%)</span>
+              <strong>- {{ formatCurrency(montantRemise) }}</strong>
+            </div>
+            <div class="summary-row summary-row--total">
+              <span>Net à payer</span>
+              <strong>{{ formatCurrency(totalApresRemise) }}</strong>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary btn-submit"
+            [disabled]="!canValidate"
+            (click)="validerEtCertifier()"
+          >
+            @if (processingStep === 'client') {
+              Création du client…
+            } @else if (processingStep === 'saving') {
+              Enregistrement de l'entrée en chambre…
+            } @else if (processingStep === 'certifying') {
+              Certification FNE en cours…
+            } @else {
+              Valider l'entrée en chambre et certifier
+            }
+          </button>
+
+          @if (lastResult) {
+            <div class="result-banner" [class.result-banner--success]="lastResult.success" [class.result-banner--error]="!lastResult.success">
+              <p>{{ lastResult.message }}</p>
+              @if (lastResult.certification?.fneReference) {
+                <p class="result-banner__ref">Référence FNE : {{ lastResult.certification?.fneReference }}</p>
+              }
+              @if (lastResult.certification?.fneVerificationUrl) {
+                <p class="result-banner__ref">
+                  <a [href]="lastResult.certification?.fneVerificationUrl" target="_blank" rel="noopener">
+                    Ouvrir la facture certifiée
+                  </a>
+                </p>
+              }
+            </div>
+          }
+        }
+      </div>
+    </section>
+
+  </div>
+</div>
