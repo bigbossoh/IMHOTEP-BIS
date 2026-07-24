@@ -6,6 +6,7 @@ import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailModifDto;
+import com.bzdata.gestimospringbackend.DTOs.ChangerBienBailDto;
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.DTOs.OperationDto;
 
@@ -13,6 +14,8 @@ public interface BailService {
     List<OperationDto>  closeBail(Long id, Boolean compteSolde, BailClotureRequestDto requestDto);
 
     OperationDto modifierUnBail(BailModifDto dto);
+
+    OperationDto changerBienBail(ChangerBienBailDto dto);
 
     OperationDto prolongerBail(Long id, BailExtensionRequestDto requestDto);
 

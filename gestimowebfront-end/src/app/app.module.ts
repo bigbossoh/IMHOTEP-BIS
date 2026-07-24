@@ -37,6 +37,7 @@ import { AppelsLoyersComponent } from './pages/appel-loyer/appels-loyers/appels-
 import { RelanceAppelsComponent } from './pages/appel-loyer/relance-appels/relance-appels.component';
 import { PageBienImmobilierComponent } from './pages/bien-immobilier/page-bien-immobilier/page-bien-immobilier.component';
 import { PageBauxComponent } from './pages/baux/page-baux/page-baux.component';
+import { PageReassignationBienComponent } from './pages/baux/page-reassignation-bien/page-reassignation-bien.component';
 import { PageBienSiteGeographiqueComponent } from './pages/bien-immobilier/page-bien-site-geographique/page-bien-site-geographique.component';
 import { PageReglementIndividuelComponent } from './pages/reglement/page-reglement-individuel/page-reglement-individuel.component';
 import { PageReglementGroupeComponent } from './pages/reglement/page-reglement-groupe/page-reglement-groupe.component';
@@ -108,6 +109,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ModifLoyerBailComponent } from './pages/baux/modif-loyer-bail/modif-loyer-bail.component';
 import { quartierReducer } from './ngrx/quartier/quartier.reducer';
@@ -195,6 +197,7 @@ import { PageParametreDepenseComponent } from './pages/depense/page-parametre-de
 import { PageCategoriesDepenseComponent } from './pages/depense/page-categories-depense/page-categories-depense.component';
 import { PageFacturesReservationComponent } from './pages/residence/page-factures-reservation/page-factures-reservation.component';
 import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/page-fne-factures.component';
+import { PageReservationFneComponent } from './pages/residence/page-reservation-fne/page-reservation-fne.component';
 
 @NgModule({
   declarations: [
@@ -237,6 +240,7 @@ import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/pa
     PageBienImmobilierComponent,
     PageRapportBiensDisponiblesComponent,
     PageBauxComponent,
+    PageReassignationBienComponent,
     PageBienSiteGeographiqueComponent,
     PageReglementIndividuelComponent,
     PageReglementGroupeComponent,
@@ -287,6 +291,7 @@ import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/pa
     PageAideComponent,
     PageFacturesReservationComponent,
     PageFneFacturesComponent,
+    PageReservationFneComponent,
   ],
   imports: [
     CanvasJSAngularChartsModule,
@@ -301,6 +306,7 @@ import { PageFneFacturesComponent } from './pages/residence/page-fne-factures/pa
     MatProgressSpinnerModule,
     MatPaginatorModule,
     MatFormFieldModule,
+    MatAutocompleteModule,
     ReactiveFormsModule,
     MatInputModule,
     BrowserAnimationsModule,

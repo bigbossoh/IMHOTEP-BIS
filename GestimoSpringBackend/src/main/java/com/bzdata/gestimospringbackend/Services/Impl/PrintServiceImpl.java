@@ -52,6 +52,8 @@ import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -598,7 +600,7 @@ public class PrintServiceImpl implements PrintService {
         .hasPrestations(!lignesPrestations.isEmpty())
         .fneCertifiee(fneResponse != null)
         .fneReference(fneResponse != null ? fneResponse.getReference() : null)
-        .fneVerificationUrl(fneResponse != null ? fneResponse.getToken() : null)
+        .fneVerificationUrl(fneResponse != null ? buildFneVerificationUrl(fneResponse.getToken()) : null)
         .build();
 
       Context context = new Context(FRENCH_LOCALE);
@@ -1287,6 +1289,36 @@ public class PrintServiceImpl implements PrintService {
     return agence != null ? fallback(agence.getNomAgence(), "GESTIMO") : "GESTIMO";
   }
 
+  /**
+   * Construit le lien public de vérification d'une facture certifiée FNE à partir du
+   * jeton renvoyé par la DGI. En pratique, la DGI renvoie déjà l'URL complète dans le
+   * champ "token" (ex: http://54.247.95.108/fr/verification/{uuid}) : dans ce cas on la
+   * retourne telle quelle. Si un jour la DGI ne renvoie qu'un jeton nu, on reconstruit
+   * l'URL a partir du meme hote que l'API de certification (fne.base-url).
+   */
+  private String buildFneVerificationUrl(String token) {
+    if (!StringUtils.hasText(token)) {
+      return token;
+    }
+    if (token.startsWith("http://") || token.startsWith("https://")) {
+      return token;
+    }
+    String baseUrl = fneProperties.getBaseUrl();
+    if (!StringUtils.hasText(baseUrl)) {
+      return token;
+    }
+    try {
+      URI uri = new URI(baseUrl);
+      String origin = uri.getPort() > 0
+        ? String.format("%s://%s:%d", uri.getScheme(), uri.getHost(), uri.getPort())
+        : String.format("%s://%s", uri.getScheme(), uri.getHost());
+      return origin + "/fr/verification/" + token;
+    } catch (URISyntaxException e) {
+      log.warn("Impossible de construire le lien de verification FNE a partir de {}", baseUrl, e);
+      return token;
+    }
+  }
+
   private String fallback(String value) {
     return fallback(value, "Non renseigne");
   }
@@ -1360,9 +1392,6 @@ public class PrintServiceImpl implements PrintService {
     String taxe = StringUtils.hasText(reservation.getTaxes())
       ? reservation.getTaxes()
       : fneProperties.getDefaultTaxe();
-    String clientEmail = client != null && StringUtils.hasText(client.getEmail())
-      ? client.getEmail()
-      : fallback(reservation.getEmail(), "");
 
     if (!fneProperties.isEnabled()) {
       log.info(
@@ -1405,8 +1434,11 @@ try {
           .template("B2C")
           .numeroFacture(factureNumero)
           .clientCompanyName(clientNom)
-          .clientPhone(client != null ? fallback(client.getMobile(), client.getEmail()) : "")
-          .clientEmail(clientEmail)
+          .clientPhone(client != null ? fallback(client.getMobile(), "") : "")
+          // La DGI exige que la cle "clientEmail" soit presente et de type string
+          // (erreur 400 "clientEmail must be a string" si le champ est absent),
+          // mais on ne veut pas y faire figurer une adresse email : chaine vide.
+          .clientEmail("")
           .clientSellerName(agence != null ? agence.getNomAgence() : "GESTIMO")
           .pointOfSale(pointOfSale)
           .establishment(etablissement)
@@ -1443,7 +1475,7 @@ try {
           .certifiee(true)
           .fneReference(response.getReference())
           .fneNcc(response.getNcc())
-          .fneVerificationUrl(response.getToken())
+          .fneVerificationUrl(buildFneVerificationUrl(response.getToken()))
           .fneBalanceSticker(response.getBalanceSticker())
           .fneWarning(response.isWarning())
           .build()

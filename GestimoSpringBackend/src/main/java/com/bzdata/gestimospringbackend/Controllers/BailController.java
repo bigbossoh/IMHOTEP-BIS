@@ -8,6 +8,7 @@ import com.bzdata.gestimospringbackend.DTOs.AppelLoyersFactureDto;
 import com.bzdata.gestimospringbackend.DTOs.BailClotureRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailExtensionRequestDto;
 import com.bzdata.gestimospringbackend.DTOs.BailModifDto;
+import com.bzdata.gestimospringbackend.DTOs.ChangerBienBailDto;
 import com.bzdata.gestimospringbackend.DTOs.LocataireEncaisDTO;
 import com.bzdata.gestimospringbackend.DTOs.OperationDto;
 import com.bzdata.gestimospringbackend.Services.BailService;
@@ -106,6 +107,12 @@ public class BailController {
     public ResponseEntity<OperationDto> modifierUnBail(@RequestBody BailModifDto dto) {
         // log.info("We are going to save a new Bail Appartement {}", dto);
         return ResponseEntity.ok(bailService.modifierUnBail(dto));
+    }
+
+    @PostMapping("/changerBien")
+    @Operation(summary = "Changer le bien immobilier associe a un bail", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<OperationDto> changerBienBail(@RequestBody ChangerBienBailDto dto) {
+        return ResponseEntity.ok(bailService.changerBienBail(dto));
     }
 
     @PostMapping("/prolongerBail/{id}")

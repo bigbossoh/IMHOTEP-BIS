@@ -59,7 +59,7 @@ export class PageAideComponent {
           description:
             'Créez et gérez les emplacements géographiques (sites) où se trouvent vos biens. Chaque site regroupe un ou plusieurs immeubles.',
           etapes: [
-            'Accédez à Biens immobiliers > Gestion des sites',
+            'Accédez à Gestion des biens immobiliers > Gestion des sites',
             'Cliquez sur "Nouveau site" pour créer un emplacement',
             'Renseignez le nom, la ville, la commune et le quartier',
             'Enregistrez et le site apparaît dans la liste',
@@ -70,7 +70,7 @@ export class PageAideComponent {
           description:
             "Associez des immeubles à des sites. Un immeuble peut contenir plusieurs étages, eux-mêmes contenant des appartements.",
           etapes: [
-            'Accédez à Biens immobiliers > Gestion des immeubles',
+            'Accédez à Gestion des biens immobiliers > Gestion des immeubles',
             'Créez un immeuble en lui associant un site existant',
             'Ajoutez les étages depuis la fiche de l\'immeuble',
           ],
@@ -80,7 +80,7 @@ export class PageAideComponent {
           description:
             "Définissez des catégories de biens (Studio, F2, F3, etc.) avec leurs caractéristiques tarifaires pour les résidences hôtelières.",
           etapes: [
-            "Accédez à Biens immobiliers > Catégories d'appartement",
+            "Accédez à Gestion des biens immobiliers > Catégories d'appartement",
             'Créez les catégories (ex : Chambre Standard, Suite)',
             'Associez des grilles tarifaires à chaque catégorie',
           ],
@@ -90,7 +90,7 @@ export class PageAideComponent {
           description:
             "Liste complète de tous les biens de l'agence. Filtrez par type (appartement, magasin, villa), statut (libre, loué) ou site géographique.",
           etapes: [
-            'Accédez à Biens immobiliers > Biens immobiliers',
+            'Accédez à Gestion des biens immobiliers > Biens immobiliers',
             'Utilisez les filtres pour affiner la recherche',
             'Cliquez sur un bien pour consulter sa fiche détaillée',
             'La fiche affiche l\'historique des baux et l\'état actuel',
@@ -114,7 +114,7 @@ export class PageAideComponent {
           description:
             "Générez les appels de loyer mensuels pour l'ensemble des locataires ou pour un locataire spécifique. L'appel liste les montants dus avec les éventuelles pénalités de retard.",
           etapes: [
-            'Accédez à Loyers > Appel de loyer',
+            'Accédez à Gestion des Loyers > Appel de loyer',
             'Sélectionnez la période (mois / année)',
             'Cliquez sur "Générer les appels" pour créer les appels de la période',
             'Consultez ou imprimez les appels générés',
@@ -125,7 +125,7 @@ export class PageAideComponent {
           description:
             "Identifiez les locataires en retard de paiement et envoyez des relances. Le système affiche automatiquement les impayés classés par ancienneté.",
           etapes: [
-            'Accédez à Loyers > Gestion des relances',
+            'Accédez à Gestion des Loyers > Gestion des relances',
             'La liste des locataires en retard apparaît automatiquement',
             'Sélectionnez un locataire et cliquez sur "Relancer"',
             'Un email de relance est envoyé et l\'action est tracée dans l\'audit',
@@ -136,7 +136,7 @@ export class PageAideComponent {
           description:
             "Enregistrez le paiement d'un loyer pour un locataire précis. Choisissez le mode de règlement (espèces, virement, chèque) et le montant exact.",
           etapes: [
-            'Accédez à Loyers > Règlement individuel',
+            'Accédez à Gestion des Loyers > Règlement individuel',
             'Recherchez le locataire par nom ou numéro de bail',
             'Sélectionnez l\'appel de loyer à régler',
             'Saisissez le montant et le mode de paiement, puis validez',
@@ -147,7 +147,7 @@ export class PageAideComponent {
           description:
             "Enregistrez plusieurs paiements en une seule opération. Idéal pour traiter les virements groupés reçus en fin de mois.",
           etapes: [
-            'Accédez à Loyers > Règlement groupé',
+            'Accédez à Gestion des Loyers > Règlement groupé',
             'Sélectionnez la période et les locataires concernés',
             'Cochez les appels de loyer à solder',
             'Validez le règlement groupé',
@@ -166,7 +166,7 @@ export class PageAideComponent {
           description:
             "Créez des contrats de bail associant un locataire à un bien immobilier avec une date de début, une durée, un loyer mensuel et un dépôt de garantie.",
           etapes: [
-            'Accédez à Baux > Contrat de bail',
+            'Accédez à Gestion des baux > Contrat de bail',
             'Cliquez sur "Nouveau bail"',
             'Sélectionnez le locataire, le bien, la date de début et le loyer',
             'Ajoutez le montant du dépôt de garantie si applicable',
@@ -177,6 +177,19 @@ export class PageAideComponent {
           titre: 'Bail-Loyers',
           description:
             "Consultez la synthèse des loyers attachés à chaque bail : montants attendus, réglés et restant dus.",
+        },
+        {
+          titre: 'Réassigner un bien',
+          description:
+            "Changez le bien immobilier associé à un bail en cours, par exemple lorsqu'un locataire déménage vers un autre logement de l'agence sans résilier son contrat.",
+          etapes: [
+            'Accédez à Gestion des baux > Réassigner un bien',
+            'Recherchez le bail concerné dans la liste des baux en cours',
+            'Filtrez éventuellement les biens disponibles par site',
+            'Sélectionnez le nouveau bien à associer au bail',
+            "Une confirmation est demandée si le bien choisi est déjà marqué comme occupé par un autre bail",
+            'Validez : le bien du bail est mis à jour immédiatement',
+          ],
         },
       ],
     },
@@ -191,7 +204,7 @@ export class PageAideComponent {
           description:
             "Vue synthétique du taux d'occupation des chambres, des réservations en cours, des revenus générés par la résidence et du suivi de la certification FNE.",
           etapes: [
-            'Accédez à Résidences > Tableau de bord',
+            'Accédez à Gestion des résidences > Tableau de bord',
             'Les indicateurs en haut de page couvrent le mois en cours : taux d\'occupation, séjours en cours, montant encaissé, soldes restants',
             'Filtrez sur une période précise (dates de début/fin) pour recalculer tous les indicateurs sur cette plage plutôt que sur le mois en cours',
             'Des alertes signalent les départs du jour, les arrivées du jour, les départs dans les 3 prochains jours et les certifications FNE en échec récentes',
@@ -205,10 +218,58 @@ export class PageAideComponent {
           description:
             "Gérez le fichier clients de la résidence : créez et modifiez les fiches clients avec coordonnées et historique des séjours.",
           etapes: [
-            'Accédez à Résidences > Client résidence',
+            'Accédez à Gestion des résidences > Client résidence',
             'Cliquez sur "Nouveau client" pour créer une fiche',
             'Renseignez les informations personnelles et la pièce d\'identité',
             'Le client est prêt pour une réservation',
+          ],
+        },
+        {
+          titre: 'Résidences (chambres)',
+          description:
+            "Gérez le parc de chambres de la résidence : consultez la liste complète, filtrez par statut (libre, occupée), par catégorie ou par fourchette de prix, et créez de nouvelles chambres.",
+          etapes: [
+            'Accédez à Gestion des résidences > Résidences',
+            'Consultez la liste des chambres avec leur statut et leur catégorie',
+            'Utilisez les filtres (recherche, statut, catégorie, prix min/max) pour affiner la liste',
+            'Cliquez sur "Nouvelle chambre" pour ajouter une chambre au parc',
+          ],
+        },
+        {
+          titre: 'Catégories de chambre',
+          description:
+            "Définissez les catégories de chambres de la résidence (Standard, Suite, etc.) avec leurs caractéristiques tarifaires, au même titre que les catégories d'appartement.",
+          etapes: [
+            'Accédez à Gestion des résidences > Catégories de chambre',
+            'Créez ou modifiez une catégorie et sa grille tarifaire',
+            'La catégorie devient disponible lors de la création d\'une chambre ou d\'une réservation',
+          ],
+        },
+        {
+          titre: 'Prestations & services',
+          description:
+            "Gérez le catalogue des prestations additionnelles facturables lors d'un séjour (petit-déjeuner, blanchisserie, navette, etc.), chacune avec un libellé et un montant.",
+          etapes: [
+            'Accédez à Gestion des résidences > Prestations & services',
+            'Cliquez sur "Nouvelle prestation"',
+            'Renseignez le libellé et le montant de la prestation',
+            'Enregistrez : la prestation est disponible pour être ajoutée à une réservation ou une facture',
+          ],
+        },
+        {
+          titre: 'Réservation FNE',
+          description:
+            "Page simplifiée pour attribuer directement une chambre disponible (ou finaliser une pré-réservation) à un client : la facture est générée et certifiée automatiquement auprès de la FNE, puis ouverte dans un nouvel onglet si tout s'est bien passé.",
+          etapes: [
+            'Accédez à Gestion des résidences > Réservation FNE',
+            'Sélectionnez, dans la liste "Réservations en attente", soit une chambre disponible (badge "Disponible"), soit une pré-réservation à finaliser (badge "Pré-réservation")',
+            'Renseignez le nom du client (seul champ obligatoire) ainsi que, si disponibles, son téléphone et son email',
+            'Complétez le séjour : cliquez sur le champ "Période du séjour" pour ouvrir un calendrier unique et sélectionner la plage d\'arrivée et de départ en un seul geste, puis ajustez si besoin le nombre de nuitées, le prix unitaire HT par nuitée, la remise (%) et le taux d\'imposition (pré-remplis, modifiables) — la période et le nombre de nuitées se recalculent automatiquement l\'un par rapport à l\'autre',
+            'Choisissez le mode de paiement',
+            'Vérifiez le résumé de la facture (total HT, remise, net à payer) qui se recalcule automatiquement',
+            'Cliquez sur "Valider l\'entrée en chambre et certifier"',
+            "Le client est créé, l'entrée en chambre est enregistrée, puis la facture est générée et certifiée automatiquement auprès de la FNE",
+            'Un message indique le résultat : en cas de succès, le lien officiel de la facture certifiée (plateforme de vérification de la DGI) s\'ouvre automatiquement dans un nouvel onglet ; en cas d\'échec, le motif est affiché',
           ],
         },
         {
@@ -216,7 +277,7 @@ export class PageAideComponent {
           description:
             "Créez et gérez les réservations de chambres. Vérifiez la disponibilité avant de confirmer un séjour.",
           etapes: [
-            'Accédez à Résidences > Réservation',
+            'Accédez à Gestion des résidences > Réservation',
             'Cliquez sur "Nouvelle réservation" ou "Ajout réservation"',
             'Sélectionnez le client, la chambre, les dates d\'arrivée et de départ',
             'Le système calcule automatiquement le montant selon la grille tarifaire',
@@ -242,7 +303,7 @@ export class PageAideComponent {
           description:
             "Visualisez l'occupation des chambres sur un planning type Gantt (une ligne par chambre, une colonne par jour) et vérifiez la disponibilité sur une période précise avant de confirmer un séjour.",
           etapes: [
-            'Accédez à Résidences > Disponibilité',
+            'Accédez à Gestion des résidences > Disponibilité',
             'Consultez les compteurs "Total chambres / Disponibles / Occupées" en haut de page',
             'Filtrez la liste des chambres par recherche, par statut (Toutes, Libres, Occupées) ou par catégorie',
             'Saisissez une date d\'arrivée et une date de départ puis cliquez sur "Vérifier" pour surligner la période et compter les chambres disponibles ; "Réinitialiser" efface la recherche',
@@ -256,7 +317,7 @@ export class PageAideComponent {
           description:
             "Enregistrez les paiements liés aux séjours en résidence. Recherchez une réservation dans la liste, encaissez un acompte ou un solde et suivez l'historique des paiements.",
           etapes: [
-            'Accédez à Résidences > Paiement (ou cliquez sur "Encaisser" depuis la liste des réservations)',
+            'Accédez à Gestion des résidences > Paiement (ou cliquez sur "Encaisser" depuis la liste des réservations)',
             'Utilisez la barre de recherche pour retrouver une réservation par client, chambre ou code, ou parcourez la liste des réservations ouvertes',
             'La fenêtre de règlement affiche le reste à payer, le mode de règlement (espèces, mobile money, chèque, virement bancaire) et le montant encaissé',
             'Le nouveau solde se recalcule automatiquement au fur et à mesure de la saisie du montant, et passe en vert avec le badge « Soldé » dès que le règlement couvre le solde restant',
@@ -277,7 +338,7 @@ export class PageAideComponent {
           description:
             "Saisissez les dépenses de fonctionnement (entretien, réparations, charges) et consultez l'historique détaillé avec filtres par période et catégorie.",
           etapes: [
-            'Accédez à Dépenses > Consultation des dépenses',
+            'Accédez à Gestion des dépenses > Consultation des dépenses',
             'Cliquez sur "Nouvelle dépense"',
             'Sélectionnez la catégorie, saisissez le montant et la description',
             'Associez la dépense à un bien ou un site si nécessaire',
@@ -305,7 +366,7 @@ export class PageAideComponent {
           description:
             "Effectuez la clôture journalière de la caisse : vérifiez les encaissements du jour, saisissez le solde physique et générez le rapport de clôture.",
           etapes: [
-            'Accédez à Dépenses > Clôture de caisse',
+            'Accédez à Gestion des dépenses > Clôture de caisse',
             'Vérifiez le solde théorique calculé par le système',
             'Saisissez le solde physique de la caisse',
             'Validez la clôture — elle devient définitive et tracée dans l\'audit',
@@ -324,7 +385,7 @@ export class PageAideComponent {
           description:
             "Consultez le solde et l'historique des transactions de chaque locataire : loyers dus, règlements effectués et solde restant.",
           etapes: [
-            'Accédez à Comptabilité > Compte client',
+            'Accédez à Gestion comptable > Compte client',
             'Recherchez le locataire par nom',
             'Visualisez le relevé de compte avec toutes les opérations',
             'Exportez le relevé au format Excel si besoin',
@@ -345,10 +406,21 @@ export class PageAideComponent {
           description:
             "Filtrez et analysez les règlements de loyers sur une plage de dates précise. Exportez les données pour votre comptable ou votre logiciel de gestion.",
           etapes: [
-            'Accédez à Comptabilité > Consultation règlement des loyers',
+            'Accédez à Gestion comptable > Consultation reglement des loyers',
             'Sélectionnez la période de début et de fin',
             'Cliquez sur "Rechercher"',
             'Exportez les résultats en Excel',
+          ],
+        },
+        {
+          titre: 'Registre recettes et dépenses',
+          description:
+            "Générez, pour un site et une période donnés, le registre consolidé des recettes et des dépenses de la caisse, prêt à être imprimé ou remis à votre comptable.",
+          etapes: [
+            'Accédez à Gestion comptable > Registre recettes et depenses',
+            'Sélectionnez le site concerné',
+            'Choisissez la période (date de début et date de fin)',
+            'Cliquez sur "Générer" pour produire le registre',
           ],
         },
       ],
@@ -364,7 +436,7 @@ export class PageAideComponent {
           description:
             "Créez, modifiez et désactivez les comptes des utilisateurs de l'application : locataires, propriétaires, gérants et superviseurs.",
           etapes: [
-            'Accédez à Utilisateurs > Gestion des utilisateurs',
+            'Accédez à Gestion des utilisateurs > Gestion des utilisateurs',
             'Cliquez sur "Nouvel utilisateur"',
             'Renseignez les informations personnelles et le rôle',
             'Un email de bienvenue avec les identifiants est envoyé automatiquement',
@@ -375,7 +447,7 @@ export class PageAideComponent {
           description:
             "Affectez des rôles et des permissions granulaires à chaque utilisateur. Contrôlez l'accès à chaque module de l'application.",
           etapes: [
-            'Accédez à Utilisateurs > Attribution des droits',
+            'Accédez à Gestion des utilisateurs > Attribution des droits',
             'Sélectionnez l\'utilisateur à configurer',
             'Cochez/décochez les fonctionnalités auxquelles il doit avoir accès',
             'Enregistrez — les changements prennent effet immédiatement',
@@ -399,7 +471,7 @@ export class PageAideComponent {
           description:
             "Liste des factures générées pour les réservations de résidence. Chaque facture affiche son statut de paiement et son statut de certification FNE.",
           etapes: [
-            'Accédez à Résidences > Factures via le menu principal',
+            'Accédez à Gestion des résidences > Factures',
             'La liste montre chaque facture avec son numéro, le client, le montant et son statut (soldée, partiellement payée)',
             'Cliquez sur "Télécharger PDF" pour récupérer le document de la facture',
             'Le bouton "Certifier" (ou "À certifier") permet de lancer la certification FNE directement depuis cette liste',
@@ -430,7 +502,7 @@ export class PageAideComponent {
           description:
             "Créez un avoir auprès de la DGI pour rembourser tout ou partie d'une facture déjà certifiée (annulation, erreur de facturation, remboursement client).",
           etapes: [
-            'Accédez à Résidences > Certifications FNE, onglet « Avoirs »',
+            'Accédez à Gestion des résidences > Certifications FNE, onglet « Avoirs »',
             'Le bouton "Avoir" apparaît sur les lignes déjà certifiées FNE (onglet « Ventes »)',
             "Cochez les articles concernés et indiquez la quantité à rembourser pour chacun (jusqu'à la quantité facturée)",
             "La fenêtre affiche le sous-total, la réduction éventuellement appliquée sur la facture d'origine puis le montant total de l'avoir, recalculés automatiquement",
@@ -444,7 +516,7 @@ export class PageAideComponent {
           description:
             "Tableau de suivi de toutes les certifications FNE réalisées : réussites, échecs et statistiques globales.",
           etapes: [
-            "Accédez à Résidences > Certifications FNE",
+            "Accédez à Gestion des résidences > Certifications FNE",
             "Les indicateurs et la carte « Gestion des stickers » en haut de page sont communs aux deux onglets Ventes/Avoirs : tentatives de certification, factures certifiées, échecs, montant total certifié",
             "Les boutons « Ventes » et « Avoirs » juste en dessous ne changent que le tableau affiché",
             "Dans l'onglet « Ventes », filtrez par recherche (facture, référence, NCC, client), par statut (Toutes / Certifiées uniquement / Échecs uniquement), par mode de paiement ou par période (date de certification)",
@@ -456,7 +528,7 @@ export class PageAideComponent {
           description:
             "Chaque certification FNE réussie consomme un sticker auprès de la DGI (1 sticker = 200 FCFA). Cette carte permet de suivre le solde restant et sa valeur.",
           etapes: [
-            "Accédez à Résidences > Certifications FNE : la carte « Gestion des stickers » se trouve juste sous les indicateurs, avant les onglets Ventes/Avoirs",
+            "Accédez à Gestion des résidences > Certifications FNE : la carte « Gestion des stickers » se trouve juste sous les indicateurs, avant les onglets Ventes/Avoirs",
             "« Solde restant » indique le nombre de stickers encore disponibles auprès de la DGI, avec un badge d'alerte (stock suffisant / faible / critique)",
             "« Stickers consommés » indique le nombre de certifications réussies, converti en FCFA",
             "« Valeur de sticker restant » convertit le solde restant en FCFA (solde × 200 FCFA) pour estimer le budget de certifications encore disponible",

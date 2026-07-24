@@ -15,6 +15,7 @@ export { BailLocation } from './models/bail-location';
 export { BailMagasinDto } from './models/bail-magasin-dto';
 export { BailModifDto } from './models/bail-modif-dto';
 export { BailVillaDto } from './models/bail-villa-dto';
+export { ChangerBienBailDto } from './models/changer-bien-bail-dto';
 export { BienImmobilierAffiheDto } from './models/bien-immobilier-affihe-dto';
 export { Bienimmobilier } from './models/bienimmobilier';
 export { CategoryChambreSaveOrUpdateDto } from './models/category-chambre-save-or-update-dto';

@@ -12,4 +12,6 @@ export interface BienImmobilierAffiheDto {
   nomPrenomProprio?: string;
   chapitre?: string;
   occupied?: boolean;
+  idSite?: number;
+  nomSite?: string;
 }

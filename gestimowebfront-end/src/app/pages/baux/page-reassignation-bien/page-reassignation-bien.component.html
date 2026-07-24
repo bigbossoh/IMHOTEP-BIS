@@ -1,0 +1,154 @@
+<div class="reassign-page container-fluid">
+  <section class="hero-panel">
+    <div class="hero-panel__copy">
+      <span class="hero-panel__eyebrow">Correction de donnees</span>
+      <h1>Reassignation des biens sur les baux</h1>
+      <p>
+        Certains locataires sont rattaches au mauvais bien immobilier dans
+        leur bail. Choisissez le bon bien pour chaque contrat concerne et
+        enregistrez la correction ligne par ligne.
+      </p>
+    </div>
+
+    <div class="hero-panel__actions">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="reloadData()"
+        [disabled]="isLoading"
+      >
+        Actualiser
+      </button>
+    </div>
+  </section>
+
+  @if (pageErrorMessage) {
+    <div class="alert alert-danger page-alert">
+      {{ pageErrorMessage }}
+    </div>
+  }
+
+  <section class="surface-card">
+    <div class="surface-card__body">
+      <div class="card-heading">
+        <div>
+          <span class="card-heading__eyebrow">Baux actifs</span>
+          <h2>Liste des baux en cours</h2>
+          <p>Recherchez un locataire ou un bien, puis choisissez le bien correct.</p>
+        </div>
+        <span class="baux-count">{{ filteredBaux.length }} bail(x)</span>
+      </div>
+
+      <div class="reassign-toolbar">
+        <div class="search-box">
+          <label for="reassignSearch">Recherche</label>
+          <input
+            id="reassignSearch"
+            type="search"
+            class="form-control"
+            [value]="searchTerm"
+            (input)="onSearch($event)"
+            placeholder="Locataire, bien, code, designation..."
+          />
+        </div>
+
+        <div class="search-box search-box--site">
+          <label for="reassignSiteFilter">Site</label>
+          <select
+            id="reassignSiteFilter"
+            class="form-control"
+            [value]="siteFilter ?? ''"
+            (change)="onSiteFilterChange($event)"
+          >
+            <option value="">Tous les sites</option>
+            @for (site of sites; track trackBySite($index, site)) {
+              <option [value]="site.id">{{ site.nomSite }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="state-card">Chargement des baux et des biens...</div>
+      }
+
+      @if (!isLoading && baux.length === 0 && !pageErrorMessage) {
+        <div class="state-card">
+          Aucun bail en cours n'est enregistre pour cette agence.
+        </div>
+      }
+
+      @if (!isLoading && baux.length > 0 && filteredBaux.length === 0) {
+        <div class="state-card">
+          Aucun bail ne correspond a votre recherche.
+        </div>
+      }
+
+      @if (!isLoading && filteredBaux.length > 0) {
+        <div class="table-shell">
+          <div class="table-responsive">
+            <table class="table align-middle reassign-table">
+              <thead>
+                <tr>
+                  <th>Locataire</th>
+                  <th>Bien actuel</th>
+                  <th>Nouveau bien</th>
+                  <th class="actions-column">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (bail of filteredBaux; track trackByBail($index, bail)) {
+                  <tr>
+                    <td>
+                      <strong>{{ bail.utilisateurOperation || '-' }}</strong>
+                      <div class="row-helper">
+                        {{ bail.designationBail || bail.abrvCodeBail || 'Sans designation' }}
+                      </div>
+                    </td>
+
+                    <td>{{ getCurrentBienLabel(bail) }}</td>
+
+                    <td>
+                      <input
+                        #bienInput
+                        type="text"
+                        class="form-control"
+                        [value]="getRowInputValue(bail)"
+                        (input)="onBienSearchInput(bail, $event)"
+                        [matAutocomplete]="bienAuto"
+                        [disabled]="isSaving(bail)"
+                        placeholder="Rechercher par code, nom..."
+                        autocomplete="off"
+                      />
+                      <mat-autocomplete
+                        #bienAuto="matAutocomplete"
+                        (optionSelected)="onBienOptionSelected(bail, $event); bienInput.blur()"
+                      >
+                        @for (bien of getFilteredBiens(bail); track trackByBien($index, bien)) {
+                          <mat-option [value]="bien.id">
+                            {{ getBienLabel(bien) }}
+                          </mat-option>
+                        }
+                      </mat-autocomplete>
+                    </td>
+
+                    <td class="actions-column">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-primary"
+                        [disabled]="isSaveDisabled(bail)"
+                        (click)="saveBienChange(bail)"
+                      >
+                        {{ isSaving(bail) ? 'Enregistrement...' : 'Enregistrer' }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</div>
